@@ -186,7 +186,7 @@ Download
 --------
 
 Download the repository from:
-<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0b1>
+<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0b2>
 
 
 Installation
@@ -198,7 +198,7 @@ also want to install the manual page.
 
 You can do this by::
 
-    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0b1 | tar -xz
+    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0b2 | tar -xz
     # Check the source!
     more lpassh-add-1.0.0b1/lpassh-add
     # If -- and only if -- you like what you see, continue by:

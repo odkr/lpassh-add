@@ -1,0 +1,361 @@
+#!/bin/sh
+# lpass-ssh-add v1.0.0b1 - Get SSh private key passphrases from LastPass
+#
+# Copyright 2018 Odin Kroeger
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+# See <https://github.com/okroeger/lpassh-add/> for more information.
+#
+#
+# Remarks on Portability
+# ======================
+#
+# In order of appearance:
+#
+# onexit():
+# * I do not use ``unset``, because some shells abort when
+#   a variable that hasn't been set is unset.
+#
+# onexit(), main script:
+# * I use:
+#       command || { ... }
+#
+#   Instead of:
+#       if ! command; then ...
+#
+#   Because ``if ! command`` doesn't work in all shells.
+#
+# register_onexit(), main script:
+# * I use:
+#       for ...
+#       do
+#
+#   Instead of:
+#       for ...; do
+#
+#   Because the former is the only construct all shells support,
+#   including old ones.
+#
+# regex():
+# * I use:
+#       foo=`sed 'regex' <<EOF
+#       $bar
+#       EOF`
+#
+#   Instead of:
+#       foo="${bar#pattern}"
+#
+#   Because old shells don't support that construct.
+#
+# main script:
+# * I use:
+#       cat <<EOF
+#       $var
+#       EOF
+#
+#   Instead of:
+#       echo "$var"
+#
+#   Or:
+#       printf -- '%s\n' "$var"
+#
+#   Because neither ``echo`` nor ``printf`` are safe with arbitrary input.
+#   Also, in some shells ``echo`` and ``printf`` are not builtins, to the
+#   effect that they, and "$var", would show up in the output of ``ps``.
+#   This would allow any user on a system to snoop passwords passed via this
+#   mechanism.
+#
+# * I use:
+#       `...`
+#
+#   Instead of:
+#       $(...)
+#
+#   Because old shells only support the former.
+#
+# * I sometimes call ``register_onexit`` with arguments, even though it doesn't
+#   take any, because, in old shells, ``$@`` and ``$*`` are *not* reset to the
+#   arguments of the caller upon return. That is, they always contain the
+#   arguments to the last function call, regardless of context or scope.
+#
+# * I test whether the argument to ``printf`` starts with a dash ('-') before
+#   passing it on, because the ``printf`` builtin of some shells doesn't
+#   treat '--' as seperating options from arguments.
+#
+# * I test whether any arguments have been passed before referencing ``$@``
+#   because some shells, when ``set -u`` is in effect, will abort if ``$@``
+#   is referenced but no arguments have been passed.
+
+[ "$BASH_VERSION" ] && set -o posix
+[ "$ZSH_VERSION" ] && emulate sh 2>/dev/null
+# shellcheck disable=2034
+BIN_SH=xpg4 NULLCMD=:
+export BIN_SH
+
+set -Cefu
+umask 077
+
+: "${LPASSH_ADD_LASTPASS_FOLDER:=SSh keys}"
+[ "${LPASS_AGENT_DISABLE-0}" -eq 1 ] || LPASS_AGENT_DISABLE=1
+[ "${LPASS_DISABLE_PINENTRY-0}" -eq 1 ] || LPASS_DISABLE_PINENTRY=1
+[ "${LPASS_AGENT_PINENTRY-}" ] && LPASS_PINENTRY=''
+LPASS_AUTO_SYNC_TIME=30
+export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
+    LPASS_PINENTRY LPASS_AUTO_SYNC_TIME
+
+
+# Takes a signal as argument, runs $EX, propagates the signal, and exits.
+onexit() {
+    __ONEXIT_STATUS=$?
+    trap '' 0 "${1:?'onexit: missing SIGNAL.'}" || :
+    set +e
+    eval "${EX-}"
+    EX=''
+    kill "-$1" $$ 2>/dev/null
+    exit "$__ONEXIT_STATUS"
+}
+
+# Registers onexit to catch signals 0, 1, 2, 3, 6, and 15.
+# shellcheck disable=2064
+register_onexit() {
+    for __REGISTER_ONEXIT_SIGNO in 0 1 2 3 6 13 15
+    do
+        trap "onexit $__REGISTER_ONEXIT_SIGNO" $__REGISTER_ONEXIT_SIGNO
+    done
+}
+
+# Takes an exit STATUS, a FORMAT, and arguments as arguments,
+# prints the MESSAGE to STDERR and exits with STATUS.
+# shellcheck disable=2059
+panic() {
+    set +e
+    (
+        status="${1:?'panic: missing STATUS.'}"
+        format="${2:?'panic: missing FORMAT.'}"
+        shift 2
+        case $# in
+            0) printf "lpassh-add: $format\\n" >&2 ;;
+            *) printf "lpassh-add: $format\\n" "$@" >&2 ;;
+        esac
+        exit "$status"
+    )
+    exit
+}
+
+# Takes a REGEX and a STRING as arguments,
+# applies REGEX to STRING, and prints the result.
+regex() {
+    sed "${1:?'regex: missing REGEX.'}" <<EOF
+$2
+EOF
+}
+
+# Takes a NEEDLE and a HAYSTACK as arguments,
+# returns true if NEEDLE is in HAYSTACK.
+inlist() (
+    needle="${1:?'inlist: missing NEEDLE.'}"; shift
+    for straw; do [ "$needle" = "$straw" ] && return; done
+)
+
+# Takes a prompt as argument and asks for a password.
+# shellcheck disable=2006
+askpass() (
+    register_onexit
+    # shellcheck disable=2046
+    case $* in
+        -*) printf %s `regex 's/^-\{1,\}//' "$*"` ;;
+        *) printf %s "$*" ;;
+    esac >&2
+    # shellcheck disable=2016
+    EX='stty echo 2>/dev/null; [ "$1" = 0 ] && echo >&2'
+    stty -echo
+    pass=''
+    read -r pass
+    cat <<EOF
+$pass
+EOF
+)
+
+# Takes a PASSWORD and ARGUMENTS for ``lpass``
+# and runs ``lpass`` with ARGUMENTS, authenticating with PASSWORD.
+auth_lpass() (
+    password="${1:?'auth_lpass: missing PASSWORD.'}"; shift
+    exec lpass "$@" <<EOF
+$password
+EOF
+)
+
+
+if [ "${__LPASSH_ADD_TTY-}" ]; then
+    PROMPT="$*" PASSWORD='' LPASS_PROMT='LastPass master password: '
+    # shellcheck disable=2006
+    PRIVKEY_NEEDLE_FILE=`regex 's/^[^\/]\{1,\}//; s/: $//' "$PROMPT"`
+    IFS=:
+    [ "${LPASSH_ADD_KEYS-}" ] && \
+        { inlist "$PRIVKEY_NEEDLE_FILE" "$LPASSH_ADD_KEYS" || exit 1; }
+    [ "${LPASSH_ADD_IGNORE_KEYS-}" ] &&
+        inlist "$PRIVKEY_NEEDLE_FILE" "$LPASSH_ADD_IGNORE_KEYS" && exit 1
+    unset IFS
+    [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ] || \
+        panic 64 "no tty, can't ask for LastPass master password."
+    if [ "${__LPASSH_ADD_ASKPASS-}" ]
+        then PASSWORD=$("$__LPASSH_ADD_ASKPASS" $LPASS_PROMT)
+        else PASSWORD=$(askpass $LPASS_PROMT <"$__LPASSH_ADD_TTY")
+    fi
+    readonly PASSWORD
+    [ "$PASSWORD" ] || panic 64 'no password, aborting.'
+    lpass status --quiet || {
+        register_onexit
+        auth_lpass "$PASSWORD" login --color=never "$LPASSH_ADD_USERNAME" \
+            2>/dev/null 1>&2 || panic 69 'login to LastPass failed.'
+        # shellcheck disable=2016
+        EX='auth_lpass "$PASSWORD" logout --force 2>/dev/null 1>&2'
+    }
+    read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || \
+        { [ "$?" -gt 1 ] && exit 66; }
+    {
+        KEY_IDS="$LPASSH_ADD_TMP/key_ids"
+        cat "$KEY_IDS" 2>/dev/null || {
+            auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
+            sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'         |
+            tee "$KEY_IDS" 2>/dev/null || :
+        }
+    } | {
+        while read -r ID; do
+            PUBKEY_STRAW_FILE="$LPASSH_ADD_TMP/$ID"
+            read -r PUBKEY_STRAW 2>/dev/null <"$PUBKEY_STRAW_FILE" || {
+                # shellcheck disable=2006
+                PUBKEY_STRAW=`auth_lpass "$PASSWORD" show \
+                    --field='Public Key' "$ID"`
+                [ "$PUBKEY_STRAW" ] || continue
+                [ -d "$LPASSH_ADD_TMP" ] && cat <<EOF >"$PUBKEY_STRAW_FILE"
+$PUBKEY_STRAW
+EOF
+            }
+            if [ "$PUBKEY_STRAW" = "$PUBKEY_NEEDLE" ]; then
+                  auth_lpass "$PASSWORD" show --field=Passphrase "$ID"
+                  exit
+            fi
+        done
+        echo "$PRIVKEY_NEEDLE_FILE not found in LastPass." >&2
+        if [ "${__LPASSH_ADD_ASKPASS-}" ]
+            then "$__LPASSH_ADD_ASKPASS" "$PROMPT"
+            else askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
+        fi
+    }
+else
+    # shellcheck disable=2006
+    PATH=/bin:/usr/bin:/usr/local/bin
+    PATH="$PATH:"`getconf PATH`
+    unset IFS
+    export PATH IFS
+    : "${TMPDIR:=${HOME:?}}"
+    readonly LPASSH_ADD_TMP="${TMPDIR%/}/lpassh-add"
+    export LPASSH_ADD_TMP
+    register_onexit "$@"
+    EX="[ -d \"\$LPASSH_ADD_TMP\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
+    mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
+    export TMPDIR="$LPASSH_ADD_TMP"
+    mkdir -m 0700 "$TMPDIR/lpass"   || exit 69
+    if ! [ "${LPASS_HOME-}" ]; then
+        if [ "${XDG_RUNTIME_DIR-}" ]; then
+            for DIR in \
+                "${XDG_CONFIG_HOME-}" "${XDG_DATA_HOME-}" "$XDG_RUNTIME_DIR"
+            do
+                # shellcheck disable=2015
+                [ "$DIR" ] && [ -d "$DIR/lpass" ] || continue
+                LPASS_HOME="${DIR%/}/lpass"
+                break
+            done
+        fi
+        ! [ "${LPASS_HOME-}" ] && [ -d "${HOME:?}/.lpass" ] && \
+            LPASS_HOME="$HOME/.lpass"
+    fi
+    [ -d "$LPASS_HOME" ] || [ -s "$LPASS_HOME" ] && \
+        { set +f; cp -a "$LPASS_HOME/"* "$TMPDIR/lpass"; set -f; }
+    rm -f "$TMPDIR/lpass/env" || exit 69
+    HOME="$TMPDIR" LPASS_HOME="$TMPDIR/lpass" XDG_RUNTIME_DIR="$TMPDIR" \
+        XDG_CONFIG_HOME="$TMPDIR" XDG_DATA_HOME="$TMPDIR"
+    export HOME LPASS_HOME XDG_RUNTIME_DIR XDG_CONFIG_HOME XDG_DATA_HOME
+    lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
+        panic 69 'not logged into LastPass.'
+    # shellcheck disable=2006
+    __LPASSH_ADD_TTY=`tty` || :
+    [ "$__LPASSH_ADD_TTY" ] || panic 69 'cannot determine tty.'
+    export __LPASSH_ADD_TTY
+    if [ "${SSH_ASKPASS-}" ]; then
+        # shellcheck disable=2006,2046
+        if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
+            export __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+        else
+            (
+                IFS=/
+                for i in $SSH_ASKPASS; do
+                    unset IFS
+                    [ "$i" ] || continue
+                    path="${path-}/$i"
+                    # shellcheck disable=2006,2046
+                    set -- `ls -l -d "${path:?}" | awk '{print $1, $3, $4}'`
+                    [ $# -eq 3 ] || exit 1
+                    case ${????%1} in *w*) exit 1;; esac
+                    [ "$2" = root ] || exit 1
+                    case $3 in root|admin|wheel) continue;; esac
+                    exit 1
+                done
+                exit 0
+            ) || panic 69 '%s: not safe.' "$SSH_ASKPASS"
+            export __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+        fi
+    fi
+    case $# in
+        0) SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add ;;
+        *)
+            for ARG
+            do
+                case $ARG in
+                    -h|--help)
+                        cat <<EOF
+usage: lpassh-add [options] [file ...]
+lpassh-add accepts the same arguments as ssh-add.
+EOF
+                        exit
+                        ;;
+                    --version)
+                        cat <<EOF
+lpassh-add v1.0.0b1
+(c) 2018 Odin Kroeger
+EOF
+                        exit
+                        ;;
+                    --)
+                        break
+                        ;;
+                    -*)
+                        :
+                        ;;
+                    *)
+                        break
+                        ;;
+                esac
+            done
+            SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add "$@"
+            ;;
+    esac </dev/null
+fi

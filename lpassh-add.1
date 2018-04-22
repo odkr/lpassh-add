@@ -1,0 +1,173 @@
+.
+.TH LPASSH-ADD 1 "April 11, 2018" "0.9.23" ""
+.SH NAME
+lpassh-add \- Unlocks SSh keys using LastPass
+.
+.nr rst2man-indent-level 0
+.
+.de1 rstReportMargin
+\\$1 \\n[an-margin]
+level \\n[rst2man-indent-level]
+level margin: \\n[rst2man-indent\\n[rst2man-indent-level]]
+-
+\\n[rst2man-indent0]
+\\n[rst2man-indent1]
+\\n[rst2man-indent2]
+..
+.de1 INDENT
+.\" .rstReportMargin pre:
+. RS \\$1
+. nr rst2man-indent\\n[rst2man-indent-level] \\n[an-margin]
+. nr rst2man-indent-level +1
+.\" .rstReportMargin post:
+..
+.de UNINDENT
+. RE
+.\" indent \\n[an-margin]
+.\" old: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.nr rst2man-indent-level -1
+.\" new: \\n[rst2man-indent\\n[rst2man-indent-level]]
+.in \\n[rst2man-indent\\n[rst2man-indent-level]]u
+..
+.SH SYNOPSIS
+.sp
+\fBlpassh\-add\fP accepts the same arguments as \fBssh\-add\fP\&.
+.SH DESCRIPTION
+.sp
+\fBlpassh\-add\fP will add all SSh keys that you have stored passphrases for
+in LastPass to the SSh agent and query you for the remaining ones.
+.sp
+It works just like \fI\%OpenSSh\fP\(aqs \fBssh\-add\fP,
+that is, it unlocks your SSh private keys, but it retrieves the passphrases
+for those keys from LastPass, if possible; otherwise, it asks for the
+passphrase, just as \fBssh\-add\fP would do.
+.sp
+It does so by calling \fBssh\-add\fP, but setting itself as \fBSSH_ASKPASS\fP
+utility. Hence, \fBssh\-add\fP calls \fBlpassh\-add\fP, which then extracts the
+filename of the private key from the passphrase prompt, uses that filename to
+locate the corresponding public key file, reads that key from that file,
+searches LastPass for a Secure Note that lists that key, and, if it finds it,
+passes the passphrase stored in that note on to \fBssh\-add\fP\&. If it doesn\(aqt
+find the passphrase, it asks you for it.
+.sp
+If you\(aqre not logged into LastPass, but \fBLPASSH_ADD_USERNAME\fP is set,
+\fBlpassh\-add\fP logs you into LastPass. Once \fBlpassh\-add\fP is done, if it
+has logged you in, it logs you out again.
+.SH WHERE TO STORE SSH KEYS
+.SS Filesystem
+.sp
+\fBlpassh\-add\fP expects that you store public and private keys in the same
+directory, with the filename of the public key being the same as that
+of the private key save for also ending in \(aq.pub\(aq. This is what OpenSSh
+does by default.
+.SS LastPass
+.sp
+\fBlpassh\-add\fP expects that:
+.INDENT 0.0
+.IP 1. 3
+You have a folder named "SSh keys" in your LastPass account (you can set a
+different folder by setting the environment variable \fBLPASSH_ADD_FOLDER\fP);
+that folder contains all \-\- and only \-\- your SSh key pairs as Secure Notes;
+and those notes are of the Note Type "SSH Key" .
+.IP 2. 3
+You store, for each key pair:
+(a) the passphrase for the private key under "Passphrase" and
+(b) the corresponding public key, that is, the contents of the
+corresponding \fB~/.ssh/id_*.pub\fP file, under "Public Key".
+.UNINDENT
+.SH SECURITY
+.sp
+\fBlpassh\-add\fP trusts your system (i.e., your terminal emulator, \fB/bin/sh\fP,
+the utilities it calls, etc.), the LastPass command line client, and your
+environment (safe for \fBPATH\fP, \fBIFS\fP, \fBHOME\fP, \fBLPASS_AGENT_DISABLE\fP,
+\fBLPASS_DISABLE_PINENTRY\fP, \fBLPASS_PINENTRY\fP, \fBLPASS_AUTO_SYNC_TIME\fP,
+\fBLPASS_HOME\fP, \fBXDG_RUNTIME_DIR\fP, \fBXDG_CONFIG_HOME\fP, \fBXDG_DATA_HOME\fP,
+all of which it overrides, and \fBSSH_ASKPASS\fP which it checks).
+.sp
+If you do \fInot\fP set \fBSSH_ASKPASS\fP, \fBlpassh_add\fP will prompt you for
+passphrases and read them from the TTY of the process. However, it does \fInot\fP
+have exclusive access to that TTY, so any other process that runs under your
+user (or as the superuser) can also read that TTY. (Any given byte can only be
+read by \fIone\fP process. The kernel decides which process receives any given
+byte. How kernels make that decision varies. Typically, whatever process opens
+the TTY first gets the input.) So set \fBSSH_ASKPASS\fP if at all possible.
+(Note: The same holds for \fBssh\-add\fP\&.)
+.sp
+\fBlpassh\-add\fP does \fInot\fP use the LastPass agent. This is because, while the
+LastPass agent is running, every programme that runs under your user (or as
+the superuser) can get a copy of your password database by simply running
+\fBlpass export\fP\&. Moreover, \fBlpassh\-add\fP ignores your LastPass configuration
+(i.e., \fB$LPASS_HOME/env\fP), so that an attacker cannot trick it into using
+the LastPass agent.
+.sp
+As a consequence of \fInot\fP using the LastPass agent, you have to enter your
+LastPass master password once for every SSh key that you want to add to the
+SSh agent. However, \fBssh\-add\fP re\-tries the last passphrase you entered for
+all subsequent keys. So if you use the same passphrase for all your SSh keys
+and store that passphrase in LastPass, you only have to enter your LastPass
+master password once.
+.sp
+Also, \fBlpassh\-add\fP is but a short\-ish shell script (it\(aqs about 235 lines of
+code). So you can easily check that it doesn\(aqt do anything fishy.
+.SH ENVIRONMENT
+.INDENT 0.0
+.TP
+.B LPASSH_ADD_LASTPASS_FOLDER
+LastPass folder you store your SSh keys in.
+(Default: "SSh keys")
+.TP
+.B LPASSH_ADD_USERNAME
+A LastPass username. If set, \fBlpassh\-add\fP uses this username to log
+you into LastPass if you are not logged in already. If \fBlpassh\-add\fP
+logs you in, it will also log you out once it\(aqs done.
+.TP
+.B LPASSH_ADD_KEYS
+A list of absolute paths to OpenSSh private keys, separated by
+colons (\(aq:\(aq); for example: "$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa".
+If set to a non\-empty value, \fBlpassh\-add\fP will ignore other keys.
+.TP
+.B LPASSH_ADD_IGNORE_KEYS
+A list of absolute paths to OpenSSh private keys, separated by
+colons (\(aq:\(aq); for example: "$HOME/.ssh/id_rsa". If set to a non\-empty
+value, \fBlpassh\-add\fP will ignore those keys.
+.TP
+.B SSH_ASKPASS
+Utility to ask for passphrases you didn\(aqt store in LastPass
+if STDIN is not a terminal.
+.UNINDENT
+.SH CAVEATS
+.sp
+Using \fBSSH_ASKPASS\fP should be mandatory. \fBlpassh\-add\fP ignores your
+\fBPATH\fP and \fBIFS\fP as well as your LastPass configuration
+(see \fISECURITY\fP above for why).
+.SH LICENSE
+.sp
+Copyright 2018 Odin Kroeger
+.sp
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+.sp
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+.sp
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+.SH FURTHER INFORMATION
+.sp
+<\fI\%https://github.com/odkr/lpassh\-add\fP>
+.SH SEE ALSO
+.sp
+ssh\-add(1)
+.SH AUTHOR
+Odin Kroeger
+.\" Generated by docutils manpage writer.
+.

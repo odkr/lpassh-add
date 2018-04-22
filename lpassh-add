@@ -172,6 +172,7 @@ EOF
 inlist() (
     needle="${1:?'inlist: missing NEEDLE.'}"; shift
     for straw; do [ "$needle" = "$straw" ] && return; done
+    return 1
 )
 
 # Takes a prompt as argument and asks for a password.

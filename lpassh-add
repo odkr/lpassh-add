@@ -326,7 +326,7 @@ else
         fi
     fi
     case $# in
-        0) SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add ;;
+        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
         *)
             for ARG
             do
@@ -356,7 +356,7 @@ EOF
                         ;;
                 esac
             done
-            SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add "$@"
+            SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@"
             ;;
     esac </dev/null
 fi

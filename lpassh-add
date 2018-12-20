@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.0.0b3 - Get SSh private key passphrases from LastPass
+# lpass-ssh-add v1.0.0b2 - Get SSh private key passphrases from LastPass
 #
 # Copyright 2018 Odin Kroeger
 #
@@ -95,10 +95,6 @@
 #   arguments of the caller upon return. That is, they always contain the
 #   arguments to the last function call, regardless of context or scope.
 #
-# * I test whether the argument to ``printf`` starts with a dash ('-') before
-#   passing it on, because the ``printf`` builtin of some shells doesn't
-#   treat '--' as seperating options from arguments.
-#
 # * I test whether any arguments have been passed before referencing ``$@``
 #   because some shells, when ``set -u`` is in effect, will abort if ``$@``
 #   is referenced but no arguments have been passed.
@@ -145,15 +141,12 @@ register_onexit() {
 # prints the MESSAGE to STDERR and exits with STATUS.
 # shellcheck disable=2059
 panic() {
-    set +e
+    set +eu
     (
         status="${1:?'panic: missing STATUS.'}"
         format="${2:?'panic: missing FORMAT.'}"
         shift 2
-        case $# in
-            0) printf "lpassh-add: $format\\n" >&2 ;;
-            *) printf "lpassh-add: $format\\n" "$@" >&2 ;;
-        esac
+        printf "lpassh-add: $format\\n" "$@" >&2
         exit "$status"
     )
     exit
@@ -171,7 +164,9 @@ EOF
 # returns true if NEEDLE is in HAYSTACK.
 inlist() (
     needle="${1:?'inlist: missing NEEDLE.'}"; shift
-    for straw; do [ "$needle" = "$straw" ] && return; done
+    for straw
+    do [ "$needle" = "$straw" ] && return
+    done
     return 1
 )
 
@@ -180,10 +175,9 @@ inlist() (
 askpass() (
     register_onexit
     # shellcheck disable=2046
-    case $* in
-        -*) printf %s `regex 's/^-\{1,\}//' "$*"` ;;
-        *) printf %s "$*" ;;
-    esac >&2
+    cat <<EOF | tr -d '\n' >&2
+$*
+EOF
     # shellcheck disable=2016
     EX='stty echo 2>/dev/null; [ "$1" = 0 ] && echo >&2'
     stty -echo
@@ -274,7 +268,7 @@ else
     EX="[ -d \"\$LPASSH_ADD_TMP\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
     mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
     export TMPDIR="$LPASSH_ADD_TMP"
-    mkdir -m 0700 "$TMPDIR/lpass"   || exit 69
+    mkdir -m 0700 "$TMPDIR/lpass" || exit 69
     if ! [ "${LPASS_HOME-}" ]; then
         if [ "${XDG_RUNTIME_DIR-}" ]; then
             for DIR in \
@@ -314,14 +308,16 @@ else
                     path="${path-}/$i"
                     # shellcheck disable=2006,2046
                     set -- `ls -l -d "${path:?}" | awk '{print $1, $3, $4}'`
-                    [ $# -eq 3 ] || exit 1
-                    case ${????%1} in *w*) exit 1;; esac
-                    [ "$2" = root ] || exit 1
+                    [ $# -eq 3 ] || panic 79 '%s: cannot parse.' "$path"
+                    case ${????%1} in
+                         *w*) panic 69 '%s: non-owner writeable.' "$path";;
+                    esac
+                    [ "$2" = root ] || panic 69 '%s: not owned by root.' "$path"
                     case $3 in root|admin|wheel) continue;; esac
-                    exit 1
+                    panic 69 '%s: owned by non-privileged group.' "$path"
                 done
                 exit 0
-            ) || panic 69 '%s: not safe.' "$SSH_ASKPASS"
+            ) || panic $? '%s: not safe.' "$SSH_ASKPASS"
             export __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
         fi
     fi

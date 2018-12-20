@@ -336,7 +336,7 @@ EOF
                         ;;
                     --version)
                         cat <<EOF
-lpassh-add v1.0.0b3
+lpassh-add v1.0.0
 (c) 2018 Odin Kroeger
 EOF
                         exit

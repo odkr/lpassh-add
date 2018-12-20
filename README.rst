@@ -21,12 +21,17 @@ Description
 and query you for the remaining ones.
 
 It does so by calling ``ssh-add``, but setting itself as ``SSH_ASKPASS``
-utility. Hence, ``ssh-add`` calls ``lpassh-add``, which then extracts the
-filename of the private key from the passphrase prompt, uses that filename to
-locate the corresponding public key file, reads that key from that file,
-searches LastPass for a Secure Note that lists that key, and, if it finds it,
-passes the passphrase stored in that note on to ``ssh-add``. If it doesn't
-find the passphrase, it asks you for it.
+utility. Therefore, ``ssh-add`` will call ``lpassh-add`` again. 
+
+``lpassh-add`` then:
+
+1. extracts the filename of the private key from the passphrase prompt,
+2. uses that filename to locate the corresponding public key file,
+3. reads that key from that file,
+4. searches LastPass for a Secure Note that lists that key, and, if it finds it,
+5. passes the passphrase stored in that note on to ``ssh-add``.
+
+If it doesn't find the passphrase, it asks you for it.
 
 If you're not logged into LastPass, but ``LPASSH_ADD_USERNAME`` is set,
 ``lpassh-add`` logs you into LastPass. Once ``lpassh-add`` is done, if it
@@ -40,9 +45,9 @@ Filesystem
 ----------
 
 ``lpassh-add`` expects that you store public and private keys in the same
-directory, with the filename of the public key being the same as that
-of the private key save for also ending in '.pub'. This is what OpenSSh
-does by default.
+directory, whichever it is, with the filename of the public key being the 
+same as that of the private key save for also ending in '.pub'. This is 
+what OpenSSh does by default.
 
 For example:
 
@@ -81,20 +86,19 @@ the utilities it calls, etc.), the LastPass command line client, and your
 environment (safe for ``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``,
 ``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, ``LPASS_AUTO_SYNC_TIME``,
 ``LPASS_HOME``, ``XDG_RUNTIME_DIR``, ``XDG_CONFIG_HOME``, ``XDG_DATA_HOME``,
-all of which it overrides, and ``SSH_ASKPASS`` which it checks).
+all of which it overrides, and ``SSH_ASKPASS`` the content of which it
+verifies).
 
 If you do *not* set ``SSH_ASKPASS``, ``lpassh_add`` will prompt you for
 passphrases and read them from the TTY of the process. However, it does *not*
 have exclusive access to that TTY, so any other process that runs under your
-user (or as the superuser) can also read that TTY. (Any given byte can only be
-read by *one* process. The kernel decides which process receives any given
-byte. How kernels make that decision varies. Typically, whatever process opens
-the TTY first gets the input.) So set ``SSH_ASKPASS`` if at all possible.
-(Note: The same holds for ``ssh-add``.)
+user (or as the superuser) can also read that TTY. (This is true for *any*
+programme that prompts you for a password and reads the answer from a TTY,
+including ``ssh-add``.) So set ``SSH_ASKPASS``.
 
 ``lpassh-add`` does *not* use the LastPass agent. This is because, while the
 LastPass agent is running, every programme that runs under your user (or as
-the superuser) can get a copy of your password database by simply running
+the superuser) can get a copy of your password database,  simply by calling
 ``lpass export``. Moreover, ``lpassh-add`` ignores your LastPass configuration
 (i.e., ``$LPASS_HOME/env``), so that an attacker cannot trick it into using
 the LastPass agent.

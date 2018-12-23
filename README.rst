@@ -157,7 +157,7 @@ Environment
 Caveats
 =======
 
-``lpassh-add`` ignores your``PATH`` and ``IFS`` as well as your LastPass
+``lpassh-add`` ignores your ``PATH`` and ``IFS`` as well as your LastPass
 configuration (see *Security* above for why).
 
 

@@ -27,7 +27,8 @@ utility. Therefore, ``ssh-add`` will call ``lpassh-add`` again.
 1. extracts the filename of the private key from the passphrase prompt,
 2. uses that filename to locate the corresponding public key file,
 3. reads that key from that file,
-4. searches LastPass for a Secure Note that lists that key, and, if it finds it,
+4. searches LastPass for a Secure Note that lists that key, and, 
+   if it finds one,
 5. passes the passphrase stored in that note on to ``ssh-add``.
 
 If it doesn't find the passphrase, it asks you for it.
@@ -61,9 +62,9 @@ LastPass
 
 ``lpassh-add`` expects that:
 
-1. You have a folder named "SSh keys" in your LastPass account (you can set a
+1. You have a folder named "SSh keys" in your LastPass account (you can pick a
    different folder by setting the environment variable ``LPASSH_ADD_FOLDER``);
-   that folder contains all -- and only -- your SSh key pairs as Secure Notes;
+   that folder contain all your SSh key pairs as Secure Notes;
    and those notes are of the Note Type "SSH Key" .
 2. You store, for each key pair:
    (a) the passphrase for the private key under "Passphrase" and
@@ -156,9 +157,8 @@ Environment
 Caveats
 =======
 
-Using ``SSH_ASKPASS`` should be mandatory. ``lpassh-add`` ignores your
-``PATH`` and ``IFS`` as well as your LastPass configuration
-(see *Security* above for why).
+``lpassh-add`` ignores your``PATH`` and ``IFS`` as well as your LastPass
+configuration (see *Security* above for why).
 
 
 Getting ``lpassh-add``
@@ -189,7 +189,7 @@ Download
 --------
 
 Download the repository from:
-<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0>
+<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.1>
 
 
 Installation
@@ -201,18 +201,18 @@ also want to install the manual page.
 
 You can do this by::
 
-    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.0 | tar -xz
+    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.1 | tar -xz
     # Check the source!
-    more lpassh-add-1.0.0/lpassh-add
+    more lpassh-add-1.0.1/lpassh-add
     # If -- and only if -- you like what you see, continue by:
     sudo mkdir -pm 0755 /usr/local/bin
-    sudo cp lpassh-add-1.0.0/lpassh-add /usr/local/bin
+    sudo cp lpassh-add-1.0.1/lpassh-add /usr/local/bin
     sudo cp lpassh-add.1.man /usr/local/share/man/man1
 
 There isn't much of a point in keeping the repository around,
 so you may then wish to delete it by saying::
 
-    rm -rf lpassh-add-1.0.0
+    rm -rf lpassh-add-1.0.1
 
 
 Documentation

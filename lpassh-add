@@ -342,5 +342,4 @@ EOF
             else askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
         fi
     }
-
 fi

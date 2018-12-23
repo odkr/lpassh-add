@@ -254,10 +254,11 @@ EOF
     __LPASSH_ADD_TTY=`tty` || :
     [ "$__LPASSH_ADD_TTY" ] || panic 69 'cannot determine tty.'
     export __LPASSH_ADD_TTY
+    __LPASSH_ADD_ASKPASS=''
     if [ "${SSH_ASKPASS-}" ]; then
         # shellcheck disable=2006,2046
         if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
-            export __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
         else
             (
                 IFS=/
@@ -271,14 +272,16 @@ EOF
                     case ${????%1} in
                          *w*) panic 69 '%s: non-owner writeable.' "$path";;
                     esac
-                    [ "$2" = root ] || panic 69 '%s: not owned by root.' "$path"
+                    [ "$2" = root ] || \
+                        panic 69 '%s: not owned by root.' "$path"
                     case $3 in root|admin|wheel) continue;; esac
                     panic 69 '%s: owned by non-privileged group.' "$path"
                 done
                 exit 0
             ) || panic $? '%s: not safe.' "$SSH_ASKPASS"
-            export __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
         fi
+        export __LPASSH_ADD_ASKPASS
     fi
     case $# in
         0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;

@@ -40,8 +40,6 @@
 #   Instead of:
 #       if ! command; then ...
 #
-#   Because ``if ! command`` doesn't work in all shells.
-#
 # register_onexit(), main script:
 # * I use:
 #       for ...
@@ -49,9 +47,6 @@
 #
 #   Instead of:
 #       for ...; do
-#
-#   Because the former is the only construct all shells support,
-#   including old ones.
 #
 # regex():
 # * I use:
@@ -61,8 +56,6 @@
 #
 #   Instead of:
 #       foo="${bar#pattern}"
-#
-#   Because old shells don't support that construct.
 #
 # main script:
 # * I use:
@@ -76,19 +69,16 @@
 #   Or:
 #       printf -- '%s\n' "$var"
 #
-#   Because neither ``echo`` nor ``printf`` are safe with arbitrary input.
+#   Neither ``echo`` nor ``printf`` are safe with arbitrary input.
 #   Also, in some shells ``echo`` and ``printf`` are not builtins, to the
 #   effect that they, and "$var", would show up in the output of ``ps``.
-#   This would allow any user on a system to snoop passwords passed via this
-#   mechanism.
+#   This would allow any user on a system to snoop passwords.
 #
 # * I use:
 #       `...`
 #
 #   Instead of:
 #       $(...)
-#
-#   Because old shells only support the former.
 #
 # * I sometimes call ``register_onexit`` with arguments, even though it doesn't
 #   take any, because, in old shells, ``$@`` and ``$*`` are *not* reset to the

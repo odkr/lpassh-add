@@ -132,14 +132,11 @@ register_onexit() {
 # shellcheck disable=2059
 panic() {
     set +eu
-    (
-        status="${1:?'panic: missing STATUS.'}"
-        format="${2:?'panic: missing FORMAT.'}"
-        shift 2
-        printf "lpassh-add: $format\\n" "$@" >&2
-        exit "$status"
-    )
-    exit
+    __PANIC_STATUS="${1:?'panic: missing STATUS.'}"
+    __PANIC_FORMAT="${2:?'panic: missing FORMAT.'}"
+    shift 2
+    printf "lpassh-add: $__PANIC_FORMAT\\n" "$@" >&2
+    exit "$__PANIC_STATUS"
 }
 
 # Takes a REGEX and a STRING as arguments,

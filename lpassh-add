@@ -298,11 +298,11 @@ else
         inlist "$PRIVKEY_NEEDLE_FILE" "$LPASSH_ADD_IGNORE_KEYS" && exit 1
     unset IFS
     if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
-        PASSWORD=`"$__LPASSH_ADD_ASKPASS" $LPASS_PROMT`
+        PASSWORD=`"$__LPASSH_ADD_ASKPASS" "$LPASS_PROMT"`
     else
         [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ] \
             || panic 64 "no tty, can't ask for LastPass master password."
-        PASSWORD=`askpass $LPASS_PROMT <"$__LPASSH_ADD_TTY"`
+        PASSWORD=`askpass "$LPASS_PROMT" <"$__LPASSH_ADD_TTY"`
     fi
     readonly PASSWORD
     [ "$PASSWORD" ] || panic 64 'no password, aborting.'
@@ -340,9 +340,13 @@ EOF
             fi
         done
         echo "$PRIVKEY_NEEDLE_FILE not found in LastPass." >&2
-        if [ "${__LPASSH_ADD_ASKPASS-}" ]
-            then "$__LPASSH_ADD_ASKPASS" "$PROMPT"
-            else askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
+        if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
+            "$__LPASSH_ADD_ASKPASS" "$PROMPT"
+        else
+            [ "$__LPASSH_ADD_TTY" != "not a tty" ] && \
+            [ -c "$__LPASSH_ADD_TTY" ] || \
+                panic 64 "no tty, can't ask for passphrase."
+            askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
         fi
     }
 fi

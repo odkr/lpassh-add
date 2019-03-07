@@ -5,7 +5,9 @@ lpassh-add
 ``lpassh-add`` works just like `OpenSSh <https://www.openssh.com>`_'s
 ``ssh-add``, that is, it unlocks your SSh private keys, but it retrieves
 the passphrases for those keys from LastPass, if possible; otherwise, it
-asks for the passphrase, just as ``ssh-add`` would do.
+asks for the passphrase, just as ``ssh-add`` would do. It is a *dumb*
+wrapper around ``ssh-add`` and the `LastPass command line client
+<https://github.com/lastpass/lastpass-cli>`_.
 
 
 Synopsis
@@ -81,27 +83,34 @@ LastPass
 Security
 ========
 
-``lpassh-add`` trusts your system (i.e., your terminal emulator, ``/bin/sh``,
-the utilities it calls, etc.), the LastPass command line client, and your
-environment (safe for ``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``,
-``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, ``LPASS_AUTO_SYNC_TIME``,
-``LPASS_HOME``, ``XDG_RUNTIME_DIR``, ``XDG_CONFIG_HOME``, ``XDG_DATA_HOME``,
-all of which it overrides, and ``SSH_ASKPASS`` the content of which it
-verifies).
+``lpassh-add`` is but a shell script. You should read the source code and
+evaluate the security risks yourself. Above all, since ``lpass-add`` is
+but a wrapper around OpenSSh and the LastPass command line client, their
+threat models apply.
 
-If you do *not* set ``SSH_ASKPASS``, ``lpassh_add`` will prompt you for
-passphrases and read them from the TTY of the process. However, it does *not*
-have exclusive access to that TTY, so any other process that runs under your
-user (or as the superuser) can also read that TTY. (This is true for *any*
-programme that prompts you for a password and reads the answer from a TTY,
-including ``ssh-add``.) So set ``SSH_ASKPASS``.
+``lpass-add`` itself trusts your system (i.e., your terminal emulator, 
+the shell, the utilities it calls, etc.), the LastPass command line client,
+and your environment. That said, it overrides the environment variables
+``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``,
+``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, ``LPASS_AUTO_SYNC_TIME``,
+``LPASS_HOME``, ``XDG_RUNTIME_DIR``, ``XDG_CONFIG_HOME``, and 
+``XDG_DATA_HOME``. Moreover, it checks the permissions of the utility
+``SSH_ASKPASS`` points to, but only cursorily.
+
+You should be aware that if you do *not* set ``SSH_ASKPASS``, ``lpassh_add``
+will prompt you for passphrases and read them from the TTY of the process.
+However, it does *not* have exclusive access to that TTY, so any other process
+that runs under your user (or as the superuser) can also read that TTY.
+(This is true for *any* programme that prompts you for a password and reads
+the answer from a TTY, including ``ssh-add``.) So set ``SSH_ASKPASS``.
 
 ``lpassh-add`` does *not* use the LastPass agent. This is because, while the
 LastPass agent is running, every programme that runs under your user (or as
-the superuser) can get a copy of your password database,  simply by calling
-``lpass export``. Moreover, ``lpassh-add`` ignores your LastPass configuration
-(i.e., ``$LPASS_HOME/env``), so that an attacker cannot trick it into using
-the LastPass agent.
+the superuser) can get a copy of your password database, simply by calling
+``lpass export``. This conforms to their threat model, but it may still make
+you feel uneasy. Moreover, ``lpassh-add`` ignores your LastPass configuration
+(i.e., ``$LPASS_HOME/env``), so that it is harder for an attacker to trick it
+into using the LastPass agent.
 
 As a consequence of *not* using the LastPass agent, you have to enter your
 LastPass master password once for every SSh key that you want to add to the
@@ -177,7 +186,7 @@ You need:
    <https://github.com/lastpass/lastpass-cli>`_
 
 Apart from OpenSSh and the LastPass command line client, ``lpassh_add`` is
-`POSIX <http://pubs.opengroup.org/onlinepubs/9699919799/>`_ compliant.
+`POSIX.1-2017 <http://pubs.opengroup.org/onlinepubs/9699919799/>`_ compliant.
 So it should work on any modern Unix system (e.g., macOS, FreeBSD, NetBSD,
 OpenBSD, Linux). ``lpassh-add`` also aims to be `System V Release 4
 <https://www.in-ulm.de/~mascheck/bourne/>`_ compatible. So it should also

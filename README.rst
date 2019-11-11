@@ -91,11 +91,13 @@ threat models apply.
 ``lpass-add`` itself trusts your system (i.e., your terminal emulator, 
 the shell, the utilities it calls, etc.), the LastPass command line client,
 and your environment. That said, it overrides the environment variables
-``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``,
-``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, ``LPASS_AUTO_SYNC_TIME``,
-``LPASS_HOME``, ``XDG_RUNTIME_DIR``, ``XDG_CONFIG_HOME``, and 
-``XDG_DATA_HOME``. Moreover, it checks the permissions of the utility
+``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``, 
+``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, and ``LPASS_AUTO_SYNC_TIME``,
+all of which it overrides. Moreover, it checks the permissions of the utility
 ``SSH_ASKPASS`` points to, but only cursorily.
+
+Note, ``lpass`` reads environment settings from ``$HOME/.lpass/env``,
+so you can still override these settings.
 
 You should be aware that if you do *not* set ``SSH_ASKPASS``, ``lpassh_add``
 will prompt you for passphrases and read them from the TTY of the process.
@@ -166,8 +168,8 @@ Environment
 Caveats
 =======
 
-``lpassh-add`` ignores your ``PATH`` and ``IFS`` as well as your LastPass
-configuration (see *Security* above for why).
+``lpassh-add`` ignores your ``PATH`` and ``IFS`` as well as some LastPass
+environment variables (see *Security* above for details).
 
 
 Getting ``lpassh-add``
@@ -191,14 +193,14 @@ So it should work on any modern Unix system (e.g., macOS, FreeBSD, NetBSD,
 OpenBSD, Linux). ``lpassh-add`` also aims to be `System V Release 4
 <https://www.in-ulm.de/~mascheck/bourne/>`_ compatible. So it should also
 work on many older Unix systems (you may need to change the shebang line
-to point to a POSIX compliant shell though).
+though).
 
 
 Download
 --------
 
 Download the repository from:
-<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.2>
+<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.3>
 
 
 Installation
@@ -210,18 +212,18 @@ also want to install the manual page.
 
 You can do this by::
 
-    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.2 | tar -xz
+    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.3 | tar -xz
     # Check the source!
-    more lpassh-add-1.0.2/lpassh-add
+    more lpassh-add-1.0.3/lpassh-add
     # If -- and only if -- you like what you see, continue by:
     sudo mkdir -pm 0755 /usr/local/bin
-    sudo cp lpassh-add-1.0.2/lpassh-add /usr/local/bin
+    sudo cp lpassh-add-1.0.3/lpassh-add /usr/local/bin
     sudo cp lpassh-add.1.man /usr/local/share/man/man1
 
 There isn't much of a point in keeping the repository around,
 so you may then wish to delete it by saying::
 
-    rm -rf lpassh-add-1.0.2
+    rm -rf lpassh-add-1.0.3
 
 
 Documentation
@@ -240,7 +242,7 @@ If there's something wrong with ``lpassh-add``, `open an issue
 License
 =======
 
-Copyright 2018 Odin Kroeger
+Copyright 2018, 2019 Odin Kroeger
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

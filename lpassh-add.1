@@ -1,5 +1,5 @@
 .
-.TH LPASSH-ADD 1 "December 27, 2018" "v1.0.2" ""
+.TH LPASSH-ADD 1 "December 27, 2018" "v1.0.3" ""
 .SH NAME
 lpassh-add \- Unlocks SSh keys using LastPass
 .
@@ -79,9 +79,8 @@ corresponding \fB~/.ssh/id_*.pub\fP file, under "Public Key".
 .sp
 \fBlpassh\-add\fP trusts your system (i.e., your terminal emulator, \fB/bin/sh\fP,
 the utilities it calls, etc.), the LastPass command line client, and your
-environment (safe for \fBPATH\fP, \fBIFS\fP, \fBHOME\fP, \fBLPASS_AGENT_DISABLE\fP,
-\fBLPASS_DISABLE_PINENTRY\fP, \fBLPASS_PINENTRY\fP, \fBLPASS_AUTO_SYNC_TIME\fP,
-\fBLPASS_HOME\fP, \fBXDG_RUNTIME_DIR\fP, \fBXDG_CONFIG_HOME\fP, \fBXDG_DATA_HOME\fP,
+environment (safe for \fBPATH\fP, \fBIFS\fP, \fBPWD\fP, \fBLPASS_AGENT_DISABLE\fP,
+\fBLPASS_PINENTRY\fP, \fBLPASS_PINENTRY_DISABLE\fP, and \fBLPASS_AUTO_SYNC_TIME\fP,
 all of which it overrides, and \fBSSH_ASKPASS\fP which it checks).
 .sp
 If you do \fInot\fP set \fBSSH_ASKPASS\fP, \fBlpassh_add\fP will prompt you for
@@ -89,16 +88,13 @@ passphrases and read them from the TTY of the process. However, it does \fInot\f
 have exclusive access to that TTY, so any other process that runs under your
 user (or as the superuser) can also read that TTY. (Any given byte can only be
 read by \fIone\fP process. The kernel decides which process receives any given
-byte. How kernels make that decision varies. Typically, whatever process opens
-the TTY first gets the input.) So set \fBSSH_ASKPASS\fP if at all possible.
+byte. How kernels make that decision varies. So set \fBSSH_ASKPASS\fP if possible.
 (Note: The same holds for \fBssh\-add\fP\&.)
 .sp
-\fBlpassh\-add\fP does \fInot\fP use the LastPass agent. This is because, while the
-LastPass agent is running, every programme that runs under your user (or as
-the superuser) can get a copy of your password database by simply running
-\fBlpass export\fP\&. Moreover, \fBlpassh\-add\fP ignores your LastPass configuration
-(i.e., \fB$LPASS_HOME/env\fP), so that an attacker cannot trick it into using
-the LastPass agent.
+\fBlpassh\-add\fP does \fInot\fP use the LastPass agent. This is because,
+while the LastPass agent is running, every programme that runs under your user 
+(or as the superuser) can get a copy of your password database by simply running
+\fBlpass export\fP\&.
 .sp
 As a consequence of \fInot\fP using the LastPass agent, you have to enter your
 LastPass master password once for every SSh key that you want to add to the
@@ -138,11 +134,10 @@ if STDIN is not a terminal.
 .SH CAVEATS
 .sp
 Using \fBSSH_ASKPASS\fP should be mandatory. \fBlpassh\-add\fP ignores your
-\fBPATH\fP and \fBIFS\fP as well as your LastPass configuration
-(see \fISECURITY\fP above for why).
+\fBPATH\fP and \fBIFS\fP (see \fISECURITY\fP for details).
 .SH LICENSE
 .sp
-Copyright 2018 Odin Kroeger
+Copyright 2018, 2019 Odin Kroeger
 .sp
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

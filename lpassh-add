@@ -215,10 +215,6 @@ export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
     # shellcheck disable=2006
     PATH="$PATH:"`getconf PATH`
     unset IFS
-    # `$PWD` is where the shell thinks you are, not where you are.
-    cd -P . || exit 69
-    # shellcheck disable=2006
-    PWD=`pwd`
     export PATH IFS PWD
     : "${TMPDIR:=${HOME:?}}"
     if [ $# -gt 0 ]; then
@@ -294,8 +290,8 @@ EOF
         export __LPASSH_ADD_ASKPASS
     fi
     case $# in
-        0) SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
-        *) SSH_ASKPASS="$PWD/$0" DISPLAY='' LC_ALL=C ssh-add ;;
+        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
+        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
     esac </dev/null
     exit
 }

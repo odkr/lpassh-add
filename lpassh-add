@@ -44,14 +44,6 @@
 #   Instead of:
 #       if ! command; then ...
 #
-# register_onexit(), main script:
-# * I use:
-#       for ...
-#       do
-#
-#   Instead of:
-#       for ...; do
-#
 # regex():
 # * I use:
 #       foo=`sed 'pattern' <<EOF
@@ -83,11 +75,6 @@
 #
 #   Instead of:
 #       $(...)
-#
-# * I sometimes call `register_onexit` with arguments, even though it doesn't
-#   take any, because, in old shells, `$@` and `$*` are *not* reset to the
-#   arguments of the caller upon return. That is, they always contain the
-#   arguments to the last function call, regardless of context or scope.
 #
 # * I test whether any arguments have been passed before referencing `$@`
 #   because some shells will abort if `$@` is referenced but no arguments

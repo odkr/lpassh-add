@@ -119,7 +119,7 @@ all subsequent keys. So if you use the same passphrase for all your SSh keys
 and store that passphrase in LastPass, you only have to enter your LastPass
 master password once.
 
-Also, ``lpassh-add`` is but a short-ish shell script (it's about 235 lines of
+Also, ``lpassh-add`` is but a short-ish shell script (it's about 220 lines of
 code). So you can easily check that it doesn't do anything fishy.
 
 

@@ -92,7 +92,7 @@
 #   have and `set -u` is in effect.
 
 
-# Functions
+# FUNCTIONS
 # =========
 
 # Takes a SIGNAL as argument, runs `$EX`, propagates the signal, and exits.
@@ -107,10 +107,10 @@ onexit() {
 }
 
 # Registers `onexit` to catch signals 0, 1, 2, 3, and 15.
-# shellcheck disable=2064
 register_onexit() {
     for __REGISTER_ONEXIT_SIGNO in 0 1 2 3 15
     do
+        # shellcheck disable=2064
         trap "onexit $__REGISTER_ONEXIT_SIGNO" $__REGISTER_ONEXIT_SIGNO
     done
 }
@@ -118,10 +118,10 @@ register_onexit() {
 # Takes a MESSAGE and ARGUMENTS (think `printf`) and
 # prints the formated MESSAGE to STDERR.
 warn() (
-    msg="${1:?'warn: missing MESSAGE.'}"
+    message="${1:?'warn: missing MESSAGE.'}"
     shift
     # shellcheck disable=2059
-    printf -- "lpassh-add: $msg\\n" "$@" >&2
+    printf -- "lpassh-add: $message\\n" "$@" >&2
 )
 
 # Takes an exit STATUS, a MESSAGE, and ARGUMENTS,
@@ -182,12 +182,12 @@ EOF
 )
 
 
-# Init
-# ====
+# INITIALISATION
+# ==============
 
 # shellcheck disable=2039
 [ "$BASH_VERSION" ] && set -o posix
-[ "$ZSH_VERSION" ] && emulate sh 2>/dev/null
+[ "$ZSH_VERSION" ]  && emulate sh 2>/dev/null
 # shellcheck disable=2034
 BIN_SH=xpg4 NULLCMD=:
 export BIN_SH
@@ -196,24 +196,61 @@ set -Cefu
 umask 077
 
 : "${LPASSH_ADD_LASTPASS_FOLDER:=SSh keys}"
-[ "${LPASS_AGENT_DISABLE-0}" -eq 1 ] || LPASS_AGENT_DISABLE=1
+[ "${LPASS_AGENT_DISABLE-0}"    -eq 1 ] || LPASS_AGENT_DISABLE=1
 [ "${LPASS_DISABLE_PINENTRY-0}" -eq 1 ] || LPASS_DISABLE_PINENTRY=1
-[ "${LPASS_AGENT_PINENTRY-}" ] && LPASS_PINENTRY=''
+[ "${LPASS_AGENT_PINENTRY-}" ]          && LPASS_PINENTRY=''
 LPASS_AUTO_SYNC_TIME=30
 export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
     LPASS_PINENTRY LPASS_AUTO_SYNC_TIME
 
 
-# Main
-# ====
+# PREPARATION
+# ===========
 
-[ "${__LPASSH_ADD_TTY-}" ] || {
+if [ -z "${__LPASSH_ADD_TTY-}" ]; then
+
+    # Secure the environment
+    # ----------------------
     PATH=/bin:/usr/bin:/usr/local/bin
     # shellcheck disable=2006
     PATH="$PATH:"`getconf PATH`
     unset IFS
     export PATH IFS PWD
     : "${TMPDIR:=${HOME:?}}"
+
+    __LPASSH_ADD_ASKPASS=''
+    if [ "${SSH_ASKPASS-}" ]; then
+        # shellcheck disable=2006,2046
+        if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
+            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+        else
+            (
+                IFS=/
+                for elem in $SSH_ASKPASS; do
+                    unset IFS
+                    [ "$elem" ] || continue
+                    path="${path-}/$elem"
+                    # shellcheck disable=2006,2012
+                    set -- `ls -d -l -n "${path:?}" | awk '{print $1, $3, $4}'`
+                    [ $# -eq 3 ]      \
+                        || panic 79 '%s: cannot parse path.' "$path"
+                    [ "$2" -eq 0 ]    \
+                        || panic 69 '%s: not owned by root.' "$path"
+                    [ "$3" -lt 1000 ] \
+                        || panic 69 '%s: not owned by a system group.' "$path"
+                    case ${1#????} in
+                         *w*) panic 69 '%s: non-owner writeable.' "$path";;
+                    esac
+                done
+                exit 0
+            ) || panic $? '%s: insecure.' "$SSH_ASKPASS"
+            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
+        fi
+        export __LPASSH_ADD_ASKPASS
+    fi
+
+    # Parse arguments
+    # ---------------
     if [ $# -gt 0 ]; then
         for ARG
         do
@@ -242,53 +279,32 @@ EOF
             esac
         done
     fi
+
+    # Prepare temporary directory
+    # ---------------------------
     register_onexit "$@"
     readonly LPASSH_ADD_TMP="${TMPDIR%/}/lpassh-add"
     export LPASSH_ADD_TMP
     EX="[ -d \"\$LPASSH_ADD_TMP\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
     mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
     export TMPDIR="$LPASSH_ADD_TMP"
+
+    # Log into LastPass
+    # -----------------
     lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
         panic 69 'not logged into LastPass.'
+
     # shellcheck disable=2006
     __LPASSH_ADD_TTY=`tty` || :
     [ "$__LPASSH_ADD_TTY" ] || panic 69 'could not get TTY.'
     export __LPASSH_ADD_TTY
-    __LPASSH_ADD_ASKPASS=''
-    if [ "${SSH_ASKPASS-}" ]; then
-        # shellcheck disable=2006,2046
-        if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
-            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
-        else
-            (
-                IFS=/
-                for i in $SSH_ASKPASS; do
-                    unset IFS
-                    [ "$i" ] || continue
-                    path="${path-}/$i"
-                    # shellcheck disable=2006,2012
-                    set -- `ls -l -d "${path:?}" | awk '{print $1, $3, $4}'`
-                    [ $# -eq 3 ] || panic 79 '%s: cannot parse.' "$path"
-                    case ${????%1} in
-                         *w*) panic 69 '%s: non-owner writeable.' "$path";;
-                    esac
-                    [ "$2" = root ] || \
-                        panic 69 '%s: not owned by root.' "$path"
-                    case $3 in root|admin|wheel) continue;; esac
-                    panic 69 '%s: not owned by system group.' "$path"
-                done
-                exit 0
-            ) || panic $? '%s: not secure.' "$SSH_ASKPASS"
-            __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
-        fi
-        export __LPASSH_ADD_ASKPASS
-    fi
+
     case $# in
         0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
         *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
     esac </dev/null
     exit
-}
+fi
 
 PROMPT="$*" PASSWORD='' LPASS_PROMT='LastPass master password: '
 # shellcheck disable=2006

@@ -218,6 +218,9 @@ You can do this by::
     sudo cp lpassh-add-1.0.4/lpassh-add /usr/local/bin
     sudo cp lpassh-add.1.man /usr/local/share/man/man1
 
+Note, ``lpassh-add`` *must* reside in a directory that's in the ``PATH``,
+or else ``ssh-add`` can't find it.
+
 There isn't much of a point in keeping the repository around,
 so you may then wish to delete it by saying::
 

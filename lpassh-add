@@ -37,6 +37,8 @@
 #
 # onexit(), main script:
 # * I use:
+#       command || ...
+#   Or
 #       command || { ... }
 #
 #   Instead of:
@@ -182,8 +184,8 @@ EOF
 )
 
 
-# INITIALISATION
-# ==============
+# SETTINGS
+# ========
 
 # shellcheck disable=2039
 [ "$BASH_VERSION" ] && set -o posix
@@ -204,8 +206,8 @@ export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
     LPASS_PINENTRY LPASS_AUTO_SYNC_TIME
 
 
-# PREPARATION
-# ===========
+# INITIALISATION
+# ==============
 
 if [ -z "${__LPASSH_ADD_TTY-}" ]; then
     # Set a secure path.
@@ -213,13 +215,13 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
     # shellcheck disable=2006
     PATH="$PATH:"`getconf PATH`
 
-    # Make sure not fancy input field separator is set.
+    # Make sure no fancy input field separator is set.
     unset IFS
 
     # Make sure the temporary directory is set.
-    : "${TMPDIR:=${HOME:?}}"
+    : "${TMPDIR:=${HOME:?"not set or empty."}}"
 
-    # Make sure SSH_ASKPASS points to system programme.
+    # Make sure SSH_ASKPASS points to a system programme.
     if [ "${SSH_ASKPASS-}" ]; then
         # shellcheck disable=2006,2046
         if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
@@ -240,7 +242,7 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
                     [ "$3" -lt 1000 ] \
                         || panic 69 '%s: not owned by a system group.' "$path"
                     case ${1#????} in
-                         *w*) panic 69 '%s: non-owner writeable.' "$path";;
+                        *w*) panic 69 '%s: non-owner writeable.' "$path";;
                     esac
                 done
                 exit 0
@@ -329,13 +331,13 @@ if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
     warn 'ID of process asking for passphrase: %d.' "$$"
     # shellcheck disable=2006
     PASSWORD=`"$__LPASSH_ADD_ASKPASS" "$LPASS_PROMT"`
-else
-    [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ] \
-        || panic 64 "no tty, can't ask for LastPass master password."
+elif [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ]; then
     # shellcheck disable=2006
     PASSWORD=`askpass "$LPASS_PROMT" <"$__LPASSH_ADD_TTY"`
+else
+    panic 64 "no tty, can't ask for LastPass master password."
 fi
-[ "${PASSWORD-}" ] || panic 64 'no password, aborting.'
+[ "${PASSWORD-}" ] || panic 64 'no password given, aborting.'
 readonly PASSWORD
 
 # Log into LastPass if necessary.

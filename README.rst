@@ -110,9 +110,7 @@ the answer from a TTY, including ``ssh-add``.) So set ``SSH_ASKPASS``.
 LastPass agent is running, every programme that runs under your user (or as
 the superuser) can get a copy of your password database, simply by calling
 ``lpass export``. This conforms to their threat model, but it may still make
-you feel uneasy. Moreover, ``lpassh-add`` ignores your LastPass configuration
-(i.e., ``$LPASS_HOME/env``), so that it is harder for an attacker to trick it
-into using the LastPass agent.
+you feel uneasy.
 
 As a consequence of *not* using the LastPass agent, you have to enter your
 LastPass master password once for every SSh key that you want to add to the

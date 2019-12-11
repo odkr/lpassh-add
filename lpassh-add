@@ -363,22 +363,33 @@ read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
     }
 } | 
 
-# Search the given key by its public key and print the passphrase to STDOUT.
-while read -r ID; do
-    # shellcheck disable=2006
-    PUBKEY_STRAW=`auth_lpass "$PASSWORD" show --field='Public Key' "$ID"`
-    if [ "$PUBKEY_STRAW" ] && [ "$PUBKEY_STRAW" = "$PUBKEY_NEEDLE" ]; then
-        auth_lpass "$PASSWORD" show --field=Passphrase "$ID"
-        exit
-    fi
-done && exit
+# Search the given key by its public key, caching the results,
+# and print the passphrase to STDOUT.
+{
+    while read -r ID; do
+        PUBKEY_STRAW_FILE="$LPASSH_ADD_TMP/$ID"
+        read -r PUBKEY_STRAW <"$PUBKEY_STRAW_FILE" || ERR=$?
+        if [ ${ERR-0} -gt 1 ]; then
+            # shellcheck disable=2006
+            PUBKEY_STRAW=`auth_lpass "$PASSWORD" show --field='Public Key' "$ID"`
+            cat <<EOF >"$PUBKEY_STRAW_FILE" || :
+$PUBKEY_STRAW
+EOF
+        fi
+        
+        if [ "$PUBKEY_STRAW" ] && [ "$PUBKEY_STRAW" = "$PUBKEY_NEEDLE" ]; then
+            auth_lpass "$PASSWORD" show --field=Passphrase "$ID"
+            exit
+        fi
+    done
 
-# If we reach this point, then we couldn't find the key.
-warn  '%s: not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
-if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
-    "$__LPASSH_ADD_ASKPASS" "$PROMPT"
-elif [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ]; then
-    askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
-else
-    panic 64 "no tty, can't ask for passphrase."
-fi
+    # If we reach this point, then we couldn't find the key.
+    warn  '%s: not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
+    if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
+        "$__LPASSH_ADD_ASKPASS" "$PROMPT"
+    elif [ "$__LPASSH_ADD_TTY" != "not a tty" ] && [ -c "$__LPASSH_ADD_TTY" ]; then
+        askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
+    else
+        panic 64 "no tty, can't ask for passphrase."
+    fi
+}

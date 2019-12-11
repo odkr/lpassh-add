@@ -248,7 +248,7 @@ EOF
     EX="[ -d \"\$LPASSH_ADD_TMP\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
     mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
     export TMPDIR="$LPASSH_ADD_TMP"
-    mkdir -m 0700 "$TMPDIR/lpass" || exit 69
+#    mkdir -m 0700 "$TMPDIR/lpass" || exit 69
     lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
         panic 69 'not logged into LastPass.'
     # shellcheck disable=2006
@@ -301,7 +301,7 @@ IFS=:
     contains "$PRIVKEY_NEEDLE_FILE" "$LPASSH_ADD_IGNORE_KEYS" && exit 1
 unset IFS
 if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
-    warn 'PID: %d.' "$$"
+    warn 'askpass PID: %d.' "$$"
     # shellcheck disable=2006
     PASSWORD=`"$__LPASSH_ADD_ASKPASS" "$LPASS_PROMT"`
 else

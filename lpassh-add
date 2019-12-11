@@ -283,14 +283,14 @@ EOF
 
     # Prepare temporary directory.
     trap onexit 0 1 2 3 15
-    readonly LPASSH_ADD_TMP="${TMPDIR%/}/lpassh-add"
-    export LPASSH_ADD_TMP
-    LPASSH_ADD_TMPDIR_CREATED=''
-    EX="[ \"\${LPASSH_ADD_TMPDIR_CREATED-}\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
-    mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
+    readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/lpassh-add"
+    export LPASSH_ADD_TMPDIR
+    TMPDIR_CREATED=''
+    EX="[ \"\${TMPDIR_CREATED-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""
+    mkdir -m 0700 "$LPASSH_ADD_TMPDIR" || exit 69
     # shellcheck disable=2034
-    LPASSH_ADD_TMPDIR_CREATED=x
-    export TMPDIR="$LPASSH_ADD_TMP"
+    TMPDIR_CREATED=x
+    export TMPDIR="$LPASSH_ADD_TMPDIR"
 
     # Check if a we're logged into LastPass *or* a username has been given.
     lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
@@ -357,7 +357,7 @@ read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
 
 # Lookup the LastPass IDs of *all* SSh keys, caching the result.
 {
-    KEY_IDS="$LPASSH_ADD_TMP/key_ids"
+    KEY_IDS="$LPASSH_ADD_TMPDIR/key_ids"
     if [ -e "$KEY_IDS" ]; then
         cat "$KEY_IDS" || exit 69
     else
@@ -371,7 +371,7 @@ read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
 # and print the passphrase to STDOUT.
 {
     while read -r ID; do
-        PUBKEY_STRAW_FILE="$LPASSH_ADD_TMP/$ID"
+        PUBKEY_STRAW_FILE="$LPASSH_ADD_TMPDIR/$ID"
         if [ -e "$PUBKEY_STRAW_FILE" ]; then
             read -r PUBKEY_STRAW <"$PUBKEY_STRAW_FILE" || ERR=$?
             [ ${ERR-0} -gt 1 ] && exit 66

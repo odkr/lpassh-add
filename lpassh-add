@@ -128,14 +128,11 @@ warn() (
 # prints the MESSAGE to STDERR and exits with STATUS.
 # shellcheck disable=2059
 panic() {
-    (
-        set +eu
-        status="${1:?'panic: missing STATUS.'}"
-        shift
-        warn "$@"
-        exit "$status"
-    )
-    exit
+    set +eu
+    __PANIC_STATUS="${1:?'panic: missing STATUS.'}"
+    shift
+    warn "$@"
+    exit "$__PANIC_STATUS"
 }
 
 # Takes a NEEDLE and a HAYSTACK as arguments,

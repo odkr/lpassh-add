@@ -219,18 +219,16 @@ export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
         do
             case $ARG in
                 -h|--help)
-                    cat <<EOF
+                    exec cat <<EOF
 usage: lpassh-add [options] [file ...]
 lpassh-add accepts the same arguments as ssh-add.
 EOF
-                    exit
                     ;;
                 --version)
-                    cat <<EOF
+                    exec cat <<EOF
 lpassh-add v1.0.2
 (c) 2018 Odin Kroeger
 EOF
-                    exit
                     ;;
                 --)
                     break

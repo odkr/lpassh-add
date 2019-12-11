@@ -102,7 +102,7 @@ onexit() {
     set +e
     eval "${EX-}"
     EX=''
-    kill "-$1" $$ 2>/dev/null
+    kill "-$1" -$$ 2>/dev/null
     exit "$__ONEXIT_STATUS"
 }
 

@@ -106,10 +106,10 @@ onexit() {
     exit "$__ONEXIT_STATUS"
 }
 
-# Registers `onexit` to catch signals 0, 1, 2, 3, 6, and 15.
+# Registers `onexit` to catch signals 0, 1, 2, 3, and 15.
 # shellcheck disable=2064
 register_onexit() {
-    for __REGISTER_ONEXIT_SIGNO in 0 1 2 3 6 13 15
+    for __REGISTER_ONEXIT_SIGNO in 0 1 2 3 15
     do
         trap "onexit $__REGISTER_ONEXIT_SIGNO" $__REGISTER_ONEXIT_SIGNO
     done

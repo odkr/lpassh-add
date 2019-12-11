@@ -285,8 +285,11 @@ EOF
     trap onexit 0 1 2 3 15
     readonly LPASSH_ADD_TMP="${TMPDIR%/}/lpassh-add"
     export LPASSH_ADD_TMP
-    EX="[ -d \"\$LPASSH_ADD_TMP\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
+    LPASSH_ADD_TMPDIR_CREATED=''
+    EX="[ \"\${LPASSH_ADD_TMPDIR_CREATED-}\" ] && rm -rf \"\$LPASSH_ADD_TMP\""
     mkdir -m 0700 "$LPASSH_ADD_TMP" || exit 69
+    # shellcheck disable=2034
+    LPASSH_ADD_TMPDIR_CREATED=x
     export TMPDIR="$LPASSH_ADD_TMP"
 
     # Check if a we're logged into LastPass *or* a username has been given.

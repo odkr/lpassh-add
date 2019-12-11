@@ -24,16 +24,20 @@
 # See <https://github.com/okroeger/lpassh-add/> for more information.
 #
 #
-# Portability
+# PORTABILITY
 # ===========
 #
-# This script complies with the Shell Command Language as POSIX specifies it.
-# However, it also aims to be SVR4 compatible and to work with buggy shells.
-# This requires some weird constructs; in order of appearance:
+# This script complies with the Shell Command Language as POSIX.1-2017 defines 
+# it. Morever, it aims to be SVR4 compatible, which requires it to run on 
+# shells that are buggy. This necessitates some weird constructs;
+# in order of appearance:
 #
 # onexit():
-# * I do not use `unset`, because some shells abort when
-#   a variable that hasn't been set is unset.
+# * I use:
+#       VAR=''
+#
+#   Instead of:
+#       unset VAR
 #
 # onexit(), main script:
 # * I use:

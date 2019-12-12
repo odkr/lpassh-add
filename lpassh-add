@@ -142,7 +142,7 @@ EOF
 
 # Takes a DEVICE and checks if it refers to a TTY device.
 isatty() {
-    : "${1:?"isatty: missing DEVICE."}"
+    : "${1:?'isatty: missing DEVICE.'}"
     [ "$1" != "not a tty" ] && [ -c "$1" ]
 }
 
@@ -209,7 +209,7 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
     unset IFS
 
     # Make sure the temporary directory is set.
-    : "${TMPDIR:=${HOME:?"not set or empty."}}"
+    : "${TMPDIR:=${HOME:?'not set or empty.'}}"
 
     # Make sure SSH_ASKPASS points to a system programme.
     if [ "${SSH_ASKPASS-}" ]; then

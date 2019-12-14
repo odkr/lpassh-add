@@ -198,7 +198,7 @@ Download
 --------
 
 Download the repository from:
-<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.4>
+<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.5>
 
 
 Installation
@@ -210,12 +210,12 @@ also want to install the manual page.
 
 You can do this by::
 
-    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.4 | tar -xz
+    curl https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.5 | tar -xz
     # Check the source!
-    more lpassh-add-1.0.4/lpassh-add
+    more lpassh-add-1.0.5/lpassh-add
     # If -- and only if -- you like what you see, continue by:
     sudo mkdir -pm 0755 /usr/local/bin
-    sudo cp lpassh-add-1.0.4/lpassh-add /usr/local/bin
+    sudo cp lpassh-add-1.0.5/lpassh-add /usr/local/bin
     sudo cp lpassh-add.1.man /usr/local/share/man/man1
 
 Note, ``lpassh-add`` *must* reside in a directory that's in the ``PATH``,
@@ -224,7 +224,7 @@ or else ``ssh-add`` can't find it.
 There isn't much of a point in keeping the repository around,
 so you may then wish to delete it by saying::
 
-    rm -rf lpassh-add-1.0.4
+    rm -rf lpassh-add-1.0.5
 
 
 Documentation

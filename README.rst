@@ -91,10 +91,10 @@ threat models apply.
 ``lpass-add`` itself trusts your system (i.e., your terminal emulator, 
 the shell, the utilities it calls, etc.), the LastPass command line client,
 and your environment. That said, it overrides the environment variables
-``PATH``, ``IFS``, ``HOME``, ``LPASS_AGENT_DISABLE``, 
-``LPASS_DISABLE_PINENTRY``, ``LPASS_PINENTRY``, and ``LPASS_AUTO_SYNC_TIME``,
-all of which it overrides. Moreover, it checks the permissions of the utility
-``SSH_ASKPASS`` points to, but only cursorily.
+``PATH``, ``IFS``, ``LPASS_AGENT_DISABLE``, ``LPASS_DISABLE_PINENTRY``,
+``LPASS_PINENTRY``, and ``LPASS_AUTO_SYNC_TIME``. Moreover, it checks
+the permissions of the utility that ``SSH_ASKPASS`` points to,
+but only cursorily.
 
 Note, ``lpass`` reads environment settings from ``$HOME/.lpass/env``,
 so you can still override these settings.

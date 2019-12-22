@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.0.5 - Get SSh private key passphrases from LastPass
+# lpass-ssh-add v1.0.6b - Get SSh private key passphrases from LastPass
 #
 # Copyright 2018, 2019 Odin Kroeger
 #
@@ -97,7 +97,7 @@ onexit() {
         eval "$EX"
         EX=''
     fi
-    kill -15 -$$ 2>/dev/null
+    kill -15 -$$
     exit "$__ONEXIT_STATUS"
 }
 

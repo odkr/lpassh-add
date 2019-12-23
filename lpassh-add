@@ -28,9 +28,9 @@
 # ===========
 #
 # This script complies with the Shell Command Language as POSIX.1-2017 defines 
-# it. Morever, it aims to be SVR4 compatible, which requires it to run on 
-# shells that are buggy. This necessitates some weird constructs;
-# in order of appearance:
+# it. Morever, it aims to be SVR4.2 compatible, which requires it to run on 
+# shells that are buggy, necessitating some weird constructs; in order of
+# appearance:
 #
 # onexit():
 # * I use:
@@ -82,7 +82,7 @@
 #
 # * I test whether any arguments have been passed before referencing `$@`
 #   because some shells will abort if `$@` is referenced but no arguments
-#   have and `set -u` is in effect.
+#   have been given and `set -u` is in effect.
 
 
 # FUNCTIONS

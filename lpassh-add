@@ -217,6 +217,7 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
         if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
             __LPASSH_ADD_ASKPASS="$SSH_ASKPASS"
         else
+            # The fork allows us to retain $@.
             (
                 IFS=/
                 for elem in $SSH_ASKPASS; do
@@ -255,8 +256,8 @@ EOF
                     ;;
                 --version)
                     exec cat <<EOF
-lpassh-add v1.0.5
-(c) 2018 Odin Kroeger
+lpassh-add v1.0.6b
+(c) 2018, 2019 Odin Kroeger
 EOF
                     ;;
                 --)

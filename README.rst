@@ -188,7 +188,7 @@ You need:
 Apart from OpenSSh and the LastPass command line client, ``lpassh_add`` is
 `POSIX.1-2017 <http://pubs.opengroup.org/onlinepubs/9699919799/>`_ compliant.
 So it should work on any modern Unix system (e.g., macOS, FreeBSD, NetBSD,
-OpenBSD, Linux). ``lpassh-add`` also aims to be `System V Release 4
+OpenBSD, Linux). ``lpassh-add`` also aims to be `System V Release 4.2
 <https://www.in-ulm.de/~mascheck/bourne/>`_ compatible. So it should also
 work on many older Unix systems (you may need to change the shebang line
 though).

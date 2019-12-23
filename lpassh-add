@@ -275,7 +275,14 @@ EOF
 
     # Prepare temporary directory.
     trap onexit 0 1 2 3 15
-    readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/lpassh-add"
+    # shellcheck disable=2006,2039
+    : "${RANDOM:=`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
+    # shellcheck disable=2039
+    TMP_NAME="$RANDOM-$$"
+    # shellcheck disable=2006
+    NAME_MAX=`getconf NAME_MAX "$TMPDIR"` || NAME_MAX=14
+    [ "$NAME_MAX" -ge 24 ] && TMP_NAME="lpassh-add.$TMP_NAME"
+    readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/$TMP_NAME"
     export LPASSH_ADD_TMPDIR
     TMPDIR_CREATED=''
     EX="[ \"\${TMPDIR_CREATED-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""

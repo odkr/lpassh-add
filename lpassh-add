@@ -88,7 +88,7 @@
 #
 #   Instead of:
 #
-#       tmpfile=$(echo 'mkdtemp(t)' | m4 -D t="...") || exit
+#       tmpfile=`echo 'mkdtemp(t)' | m4 -D t="XXX"`` || exit
 #
 #   POSIX does not require the `mktemp` utility. 
 #   And many Linux distributions ignore that POSIX requires the `m4` utility.

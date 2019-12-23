@@ -291,7 +291,7 @@ EOF
     # Check what TTY to read passwords from.
     # shellcheck disable=2006
     __LPASSH_ADD_TTY=`tty` || :
-    [ "$__LPASSH_ADD_TTY" ] || panic 69 'could not get TTY.'
+    [ "$__LPASSH_ADD_TTY" ] || panic 69 'could not determine TTY.'
     export __LPASSH_ADD_TTY
 
     # Call ssh-add.

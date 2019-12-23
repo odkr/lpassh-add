@@ -164,7 +164,7 @@ askpass() (
 $*
 EOF
     # shellcheck disable=2016
-    EX='stty echo 2>/dev/null; [ "$__ONEXIT_STATUS" -eq 0 ] && echo >&2'
+    EX='stty echo 2>/dev/null; echo >&2'
     stty -echo
     pass=''
     read -r pass
@@ -347,7 +347,7 @@ elif isatty "$__LPASSH_ADD_TTY"; then
 else
     panic 64 "No TTY. Can't ask for LastPass master password."
 fi
-[ "${PASSWORD-}" ] || panic 64 'No password given. Aborting.'
+[ "${PASSWORD-}" ] || panic 64 'No password given.'
 readonly PASSWORD
 
 # Log into LastPass if necessary.

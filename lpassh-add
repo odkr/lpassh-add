@@ -203,7 +203,7 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
     # Set a secure path.
     PATH=/bin:/usr/bin:/usr/local/bin
     # shellcheck disable=2006
-    PATH="$PATH:"`getconf PATH`
+    PATH="`getconf PATH`:$PATH"
 
     # Make sure no fancy input field separator is set.
     unset IFS

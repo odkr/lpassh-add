@@ -83,6 +83,15 @@
 # * I test whether any arguments have been passed before referencing `$@`
 #   because some shells will abort if `$@` is referenced but no arguments
 #   have been given and `set -u` is in effect.
+#
+# * I create temporary directories myself.
+#
+#   Instead of:
+#
+#       tmpfile=$(echo 'mkdtemp(t)' | m4 -D t="...") || exit
+#
+#   POSIX does not require the `mktemp` utility. And many Linux distributions
+#   ignore that POSIX requires the `m4` utility.
 
 
 # FUNCTIONS
@@ -149,7 +158,7 @@ isatty() {
 # Takes a prompt as argument and asks for a password.
 # shellcheck disable=2006
 askpass() (
-    trap onexit 0 1 2 3 15
+    trap onexit 0
     # shellcheck disable=2046
     cat <<EOF | tr -d '\n' >&2
 $*
@@ -273,8 +282,10 @@ EOF
         done
     fi
 
+    # Catch signals.
+    trap onexit 0
+
     # Prepare temporary directory.
-    trap onexit 0 1 2 3 15
     # shellcheck disable=2006,2039
     : "${RANDOM:=`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
     # shellcheck disable=2039
@@ -284,11 +295,9 @@ EOF
     [ "$NAME_MAX" -ge 24 ] && TMP_NAME="lpassh-add.$TMP_NAME"
     readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/$TMP_NAME"
     export LPASSH_ADD_TMPDIR
-    TMPDIR_CREATED=''
-    EX="[ \"\${TMPDIR_CREATED-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""
+    EX="[ \"\${LPASSH_ADD_TMPDIR-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""
     mkdir -m 0700 "$LPASSH_ADD_TMPDIR" || exit 69
     # shellcheck disable=2034
-    TMPDIR_CREATED=x
     export TMPDIR="$LPASSH_ADD_TMPDIR"
 
     # Check if a we're logged into LastPass *or* a username has been given.
@@ -343,7 +352,7 @@ readonly PASSWORD
 
 # Log into LastPass if necessary.
 lpass status --quiet || {
-    trap onexit 0 1 2 3 15
+    trap onexit 0
     auth_lpass "$PASSWORD" login --color=never "$LPASSH_ADD_USERNAME" \
         2>/dev/null 1>&2 || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016

@@ -158,12 +158,12 @@ isatty() {
 # Takes a prompt as argument and asks for a password.
 # shellcheck disable=2006
 askpass() (
+    pass=''
     trap onexit 0
     printf -- %s "$*" >&2
     # shellcheck disable=2016
     EX='stty echo 2>/dev/null; echo >&2'
     stty -echo
-    pass=''
     read -r pass
     cat <<EOF
 $pass

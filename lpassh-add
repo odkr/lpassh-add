@@ -106,7 +106,7 @@ onexit() {
         eval "$EX"
         EX=''
     fi
-    kill -15 -$$
+    kill -15 -$$ 2>/dev/null
     exit "$__ONEXIT_STATUS"
 }
 

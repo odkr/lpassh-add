@@ -159,10 +159,7 @@ isatty() {
 # shellcheck disable=2006
 askpass() (
     trap onexit 0
-    # shellcheck disable=2046
-    cat <<EOF | tr -d '\n' >&2
-$*
-EOF
+    printf -- %s "$*" >&2
     # shellcheck disable=2016
     EX='stty echo 2>/dev/null; echo >&2'
     stty -echo

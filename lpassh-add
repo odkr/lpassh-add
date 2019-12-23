@@ -173,7 +173,8 @@ EOF
 # Takes a PASSWORD and ARGUMENTS for `lpass` and
 # runs `lpass` with ARGUMENTS, authenticating with PASSWORD.
 auth_lpass() (
-    password="${1:?'auth_lpass: missing PASSWORD.'}"; shift
+    password="${1:?'auth_lpass: missing PASSWORD.'}"
+    shift
     exec lpass "$@" <<EOF
 $password
 EOF

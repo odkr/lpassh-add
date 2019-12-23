@@ -90,8 +90,8 @@
 #
 #       tmpfile=$(echo 'mkdtemp(t)' | m4 -D t="...") || exit
 #
-#   POSIX does not require the `mktemp` utility. And many Linux distributions
-#   ignore that POSIX requires the `m4` utility.
+#   POSIX does not require the `mktemp` utility. 
+#   And many Linux distributions ignore that POSIX requires the `m4` utility.
 
 
 # FUNCTIONS

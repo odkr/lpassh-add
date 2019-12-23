@@ -209,7 +209,7 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
     unset IFS
 
     # Make sure the temporary directory is set.
-    : "${TMPDIR:=${HOME:?'not set or empty.'}}"
+    : "${TMPDIR:=${HOME:?'Not set or empty.'}}"
 
     # Make sure SSH_ASKPASS points to a system programme.
     if [ "${SSH_ASKPASS-}" ]; then
@@ -227,13 +227,13 @@ if [ -z "${__LPASSH_ADD_TTY-}" ]; then
                     # shellcheck disable=2006,2012
                     set -- `ls -d -l -n "${path:?}" | awk '{print $1, $3, $4}'`
                     [ $# -eq 3 ]      \
-                        || panic 79 '%s: cannot parse path.' "$path"
+                        || panic 79 '%s: Cannot parse path.' "$path"
                     [ "$2" -eq 0 ]    \
-                        || panic 69 '%s: not owned by root.' "$path"
+                        || panic 69 '%s: Not owned by root.' "$path"
                     [ "$3" -lt 1000 ] \
-                        || panic 69 '%s: not owned by a system group.' "$path"
+                        || panic 69 '%s: Not owned by a system group.' "$path"
                     case ${1#????} in
-                        *w*) panic 69 '%s: non-owner writeable.' "$path";;
+                        *w*) panic 69 '%s: Non-owner writeable.' "$path";;
                     esac
                 done
                 exit 0
@@ -286,12 +286,12 @@ EOF
 
     # Check if a we're logged into LastPass *or* a username has been given.
     lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
-        panic 69 'not logged into LastPass.'
+        panic 69 'Not logged into LastPass.'
 
     # Check what TTY to read passwords from.
     # shellcheck disable=2006
     __LPASSH_ADD_TTY=`tty` || :
-    [ "$__LPASSH_ADD_TTY" ] || panic 69 'could not determine TTY.'
+    [ "$__LPASSH_ADD_TTY" ] || panic 69 'Cannot determine TTY.'
     export __LPASSH_ADD_TTY
 
     # Call ssh-add.
@@ -329,16 +329,16 @@ elif isatty "$__LPASSH_ADD_TTY"; then
     # shellcheck disable=2006
     PASSWORD=`askpass "$LPASS_PROMT" <"$__LPASSH_ADD_TTY"`
 else
-    panic 64 "no tty, can't ask for LastPass master password."
+    panic 64 "No TTY. Can't ask for LastPass master password."
 fi
-[ "${PASSWORD-}" ] || panic 64 'no password given, aborting.'
+[ "${PASSWORD-}" ] || panic 64 'No password given. Aborting.'
 readonly PASSWORD
 
 # Log into LastPass if necessary.
 lpass status --quiet || {
     trap onexit 0 1 2 3 15
     auth_lpass "$PASSWORD" login --color=never "$LPASSH_ADD_USERNAME" \
-        2>/dev/null 1>&2 || panic 69 'login to LastPass failed.'
+        2>/dev/null 1>&2 || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016
     EX='auth_lpass "$PASSWORD" logout --force 2>/dev/null 1>&2'
 }
@@ -384,12 +384,12 @@ EOF
     done
 
     # If we reach this point, then we couldn't find the key.
-    warn  '%s: not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
+    warn  '%s: Not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
     if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
         "$__LPASSH_ADD_ASKPASS" "$PROMPT"
     elif isatty "$__LPASSH_ADD_TTY"; then
         askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
     else
-        panic 64 "no tty, can't ask for passphrase."
+        panic 64 "No TTY. Can't ask for passphrase."
     fi
 }

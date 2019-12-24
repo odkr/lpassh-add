@@ -290,7 +290,8 @@ EOF
     TMP_NAME="$RANDOM-$$"
     # shellcheck disable=2006
     NAME_MAX=`getconf NAME_MAX "$TMPDIR"` || NAME_MAX=14
-    [ "$NAME_MAX" -ge 24 ] && TMP_NAME="lpassh-add.$TMP_NAME"
+    [ "$NAME_MAX" -ge 24  ] && TMP_NAME="lpassh-add.$TMP_NAME"
+    [ "$HOME" = "$TMPDIR" ] && TMP_NAME=".$TMP_NAME"
     readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/$TMP_NAME"
     export LPASSH_ADD_TMPDIR
     EX="[ \"\${LPASSH_ADD_TMPDIR-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""

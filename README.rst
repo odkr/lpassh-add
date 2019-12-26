@@ -220,10 +220,23 @@ so you may then wish to delete it by saying::
     rm -rf lpassh-add-1.0.5
 
 
+Tested with
+===========
+
+=======================  ========
+Bourne-compatible shell  version
+=======================  ========
+bash                     3.2.57
+dash                     0.5.10.2
+yash                     2.49
+zsh                      5.3
+=======================  ========
+
+
 Documentation
 =============
 
-See the manual page.
+See the manual.
 
 
 Contact

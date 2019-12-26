@@ -96,13 +96,6 @@ while the LastPass agent is running, every programme that runs under your user
 (or as the superuser) can get a copy of your password database by simply running
 \fBlpass export\fP\&.
 .sp
-As a consequence of \fInot\fP using the LastPass agent, you have to enter your
-LastPass master password once for every SSh key that you want to add to the
-SSh agent. However, \fBssh\-add\fP re\-tries the last passphrase you entered for
-all subsequent keys. So if you use the same passphrase for all your SSh keys
-and store that passphrase in LastPass, you only have to enter your LastPass
-master password once.
-.sp
 Also, \fBlpassh\-add\fP is but a short\-ish shell script (it\(aqs about 235 lines of
 code). So you can easily check that it doesn\(aqt do anything fishy.
 .SH ENVIRONMENT

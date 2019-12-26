@@ -23,13 +23,13 @@ Description
 and query you for the remaining ones.
 
 It does so by calling ``ssh-add``, but setting itself as ``SSH_ASKPASS``
-utility. Therefore, ``ssh-add`` will call ``lpassh-add`` again. 
+utility. Therefore, ``ssh-add`` will call ``lpassh-add`` again.
 ``lpassh-add`` then:
 
 1. extracts the filename of the private key from the passphrase prompt,
 2. uses that filename to locate the corresponding public key file,
 3. reads that key from that file,
-4. searches LastPass for a Secure Note that lists that key, and, 
+4. searches LastPass for a Secure Note that lists that key, and,
    if it finds one,
 5. passes the passphrase stored in that note on to ``ssh-add``.
 
@@ -47,8 +47,8 @@ Filesystem
 ----------
 
 ``lpassh-add`` expects that you store public and private keys in the same
-directory, whichever it is, with the filename of the public key being the 
-same as that of the private key save for also ending in '.pub'. This is 
+directory, whichever it is, with the filename of the public key being the
+same as that of the private key save for also ending in '.pub'. This is
 what OpenSSh does by default.
 
 For example:
@@ -88,7 +88,7 @@ evaluate the security risks yourself. Above all, since ``lpass-add`` is
 but a wrapper around OpenSSh and the LastPass command line client, their
 threat models apply.
 
-``lpass-add`` itself trusts your system (i.e., your terminal emulator, 
+``lpass-add`` itself trusts your system (i.e., your terminal emulator,
 the shell, the utilities it calls, etc.), the LastPass command line client,
 and your environment. That said, it overrides the environment variables
 ``PATH``, ``IFS``, ``LPASS_AGENT_DISABLE``, ``LPASS_DISABLE_PINENTRY``,
@@ -111,13 +111,6 @@ LastPass agent is running, every programme that runs under your user (or as
 the superuser) can get a copy of your password database, simply by calling
 ``lpass export``. This conforms to their threat model, but it may still make
 you feel uneasy.
-
-As a consequence of *not* using the LastPass agent, you have to enter your
-LastPass master password once for every SSh key that you want to add to the
-SSh agent. However, ``ssh-add`` re-tries the last passphrase you entered for
-all subsequent keys. So if you use the same passphrase for all your SSh keys
-and store that passphrase in LastPass, you only have to enter your LastPass
-master password once.
 
 Also, ``lpassh-add`` is but a short-ish shell script (it's about 220 lines of
 code). So you can easily check that it doesn't do anything fishy.
@@ -171,7 +164,7 @@ environment variables (see *Security* above for details).
 
 
 Getting ``lpassh-add``
-====================
+======================
 
 You use ``lpassh-add`` **at your own risk**. You have been warned.
 

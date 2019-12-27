@@ -97,10 +97,11 @@
 # FUNCTIONS
 # =========
 
-# Runs `$EX`, propagates the signal received, if any, and exits.
+# Runs `$EX`, propagates the signal received, if any, kills children, and exits.
 onexit() {
     __ONEXIT_STATUS=$?
-    trap '' 1 2 3 15 || :
+    # shellcheck disable=2086
+    trap '' ${__LPASSH_ADD_CATCH_SIGNALS-'2 3 15'} || :
     set +e
     if [ "${EX-}" ]; then
         eval "$EX"
@@ -109,8 +110,11 @@ onexit() {
     # shellcheck disable=2006
     if [ "${1-0}" -gt 0 ]; then
         kill "-$1" "-$$"
-        # kill "-$1" "`jobs -p 2>/dev/null`" 2>/dev/null
-        # exit $(($1 + 128))
+    else
+        # shellcheck disable=2046
+        __ONEXIT_CHILDREN=`jobs -p 2>/dev/null`
+        # shellcheck disable=2086
+        [ "$__ONEXIT_CHILDREN" ] && kill $__ONEXIT_CHILDREN 2>/dev/null
     fi
     exit "$__ONEXIT_STATUS"
 }
@@ -151,7 +155,7 @@ var_cp() {
     [ $# -eq 2 ] || panic 70 'usage: var_cp SOURCE TARGET.'
     for __VAR_CP_VARNAME
     do
-        case "$__VAR_CP_VARNAME" in
+        case $__VAR_CP_VARNAME in
             *[!A-Za-z0-9_]*)
                 panic 70 '%s: Not a variable name.' "$__VAR_CP_VARNAME"
                 ;;
@@ -189,7 +193,8 @@ isatty() {
 # shellcheck disable=2006
 askpass() (
     pass=''
-    trap onexit 0 1 2 3 15
+    # shellcheck disable=2086
+    trap onexit 0 ${__LPASSH_ADD_CATCH_SIGNALS-2 3 15}
     printf -- %s "$*" >&2
     # shellcheck disable=2016
     EX='stty echo 2>/dev/null; echo >&2'
@@ -335,7 +340,8 @@ if [ "${SSH_ASKPASS-}" ]; then
                 || panic 69 '%s: Not owned by root.' "$ACC"
             [ "$3" -lt 1000 ] \
                 || panic 69 '%s: Not owned by a system group.' "$ACC"
-            case ${1#????} in
+            PERMS="$1"
+            case ${PERMS#????} in
                 *w*) panic 69 '%s: Non-owner writeable.' "$ACC";;
             esac
         done
@@ -346,11 +352,14 @@ export PATH IFS PWD __LPASSH_ADD_ASKPASS
 
 # Check what TTY to read passwords from.
 # shellcheck disable=2006
-__LPASSH_ADD_TTY=`tty` || :
-[ "$__LPASSH_ADD_TTY" ] || panic 69 'Cannot determine TTY.'
+TTY=`tty` || :
+[ "$TTY" ] || panic 69 'Cannot determine TTY.'
 
 # Prepare cleanup.
-trapsig onexit 0 1 2 3 15
+readonly __LPASSH_ADD_CATCH_SIGNALS='2 3 15'
+export __LPASSH_ADD_CATCH_SIGNALS
+# shellcheck disable=2086
+trapsig onexit 0 $__LPASSH_ADD_CATCH_SIGNALS
 
 # Prepare temporary directory.
 # shellcheck disable=2006,2039
@@ -361,11 +370,11 @@ TMP_NAME="$RANDOM-$$"
 NAME_MAX=`getconf NAME_MAX "$TMPDIR"` || NAME_MAX=14
 [ "$NAME_MAX" -ge 24  ] && TMP_NAME="lpassh-add.$TMP_NAME"
 [ "$HOME" = "$TMPDIR" ] && TMP_NAME=".$TMP_NAME"
-readonly LPASSH_ADD_TMPDIR="${TMPDIR%/}/$TMP_NAME"
-EX="[ \"\${LPASSH_ADD_TMPDIR-}\" ] && rm -rf \"\$LPASSH_ADD_TMPDIR\""
-mkdir -m 0700 "$LPASSH_ADD_TMPDIR" || exit 69
+readonly PRIV_TMPDIR="$TMPDIR/$TMP_NAME"
+EX="[ \"\${PRIV_TMPDIR-}\" ] && rm -rf \"\$PRIV_TMPDIR\""
+mkdir -m 0700 "$PRIV_TMPDIR" || exit 69
 # shellcheck disable=2034
-export TMPDIR="$LPASSH_ADD_TMPDIR"
+export TMPDIR="$PRIV_TMPDIR"
 
 # Check if a we're logged into LastPass *or* a username has been given.
 lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
@@ -374,14 +383,14 @@ lpass status --quiet || [ "${LPASSH_ADD_USERNAME-}" ] || \
 # Log into LastPass if necessary.
 PASSWORD=
 lpass status --quiet || {
-    LPASS_PROMT='LastPass master password: '
+    PROMPT='LastPass master password: '
     if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
         warn 'ID of process asking for passphrase: %d.' "$$"
         # shellcheck disable=2006
-        PASSWORD=`"$__LPASSH_ADD_ASKPASS" "$LPASS_PROMT"`
-    elif isatty "$__LPASSH_ADD_TTY"; then
+        PASSWORD=`"$__LPASSH_ADD_ASKPASS" "$PROMPT"`
+    elif isatty "$TTY"; then
         # shellcheck disable=2006
-        PASSWORD=`askpass "$LPASS_PROMT" <"$__LPASSH_ADD_TTY"`
+        PASSWORD=`askpass "$PROMPT" <"$TTY"`
     else
         panic 64 "No TTY. Can't ask for LastPass master password."
     fi
@@ -398,11 +407,13 @@ readonly PASSWORD
 # shellcheck disable=2006
 KEY_IDS=`auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
          sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'` || ERR=$?
-[ "${ERR-0}" -eq 0 ] || panic 69 'Could not retrieve SSh key IDs from LastPass.'
-[ "$KEY_IDS" ] || panic 0 'No SSh key IDs found in LastPass.'
+[ "${ERR-0}" -eq 0 ] || \
+    panic 69 'Could not obtain IDs of SSh keys from LastPass.'
+[ "$KEY_IDS" ] || panic 0 'No SSh keys found in LastPass.'
 
 # Create a FIFO to accept queries from the worker.
-__LPASSH_ADD_PIPE="$LPASSH_ADD_TMPDIR/pipe"
+__LPASSH_ADD_PIPE="$PRIV_TMPDIR/pipe"
+export __LPASSH_ADD_PIPE
 mkfifo -m 0700 "$__LPASSH_ADD_PIPE" || exit
 
 
@@ -412,6 +423,7 @@ mkfifo -m 0700 "$__LPASSH_ADD_PIPE" || exit
 # Prepare to answer queries and call `ssh-add`.
 while read -r PRIVKEY_NEEDLE_FILE <"$__LPASSH_ADD_PIPE"; do
     # Read the public key file.
+    [ "$PRIVKEY_NEEDLE_FILE" ] || continue
     read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
     if [ ${ERR-0} -gt 1 ]; then 
         warn 'read: Returned %d.' "$ERR"
@@ -441,20 +453,25 @@ while read -r PRIVKEY_NEEDLE_FILE <"$__LPASSH_ADD_PIPE"; do
 
     # Ask for the password if we didn't find it in LastPass.
     [ "$HIT" ] && continue
+
     warn '%s: Not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
     PROMPT="Passphrase for $PRIVKEY_NEEDLE_FILE: "
     if [ "${__LPASSH_ADD_ASKPASS-}" ]; then
         "$__LPASSH_ADD_ASKPASS" "$PROMPT"
-    elif isatty "$__LPASSH_ADD_TTY"; then
-        askpass "$PROMPT" <"$__LPASSH_ADD_TTY"
+    elif isatty "$TTY"; then
+        askpass "$PROMPT" <"$TTY"
     else
         warn "No TTY. Can't ask for passphrase."
     fi
 done | (
-    trapsig onexit 0
-    EX='exec 3>&-'
+    # shellcheck disable=2086
+    trapsig onexit ${__LPASSH_ADD_CATCH_SIGNALS-'2 3 15'}
+    readonly __LPASSH_ADD_PIPE
+    # shellcheck disable=2016
+    EX='exec 3>&-; echo >"$__LPASSH_ADD_PIPE"'
     exec 3>"$__LPASSH_ADD_PIPE"
 
+    # FIXME: Mention in portability section.
     case $# in
         0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
         *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;

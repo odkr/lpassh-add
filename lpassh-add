@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.0.6b - Get SSh private key passphrases from LastPass
+# lpass-ssh-add v1.1.0b - Get SSh private key passphrases from LastPass
 #
 # Copyright 2018, 2019 Odin Kroeger
 #
@@ -306,7 +306,7 @@ EOF
                 ;;
             --version)
                 exec cat <<EOF
-lpassh-add v1.0.6b
+lpassh-add v1.1.0b
 (c) 2018, 2019 Odin Kroeger
 EOF
                 ;;

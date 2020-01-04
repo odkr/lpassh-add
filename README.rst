@@ -51,7 +51,7 @@ Where to store SSh keys
 
 *Filesystem:* You need to store public and private keys in the same directory,
 with the filename of the public key being that of the private key, save for
-additionally ending with '.pub'. (This is what OpenSSh does by default.) 
+additionally ending with '.pub'. (This is what OpenSSh does by default.)
 For example:
 
 .. image:: illustration-keys.png

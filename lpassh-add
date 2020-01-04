@@ -84,14 +84,9 @@
 #   because some shells will abort if `$@` is referenced but no arguments
 #   have been given and `set -u` is in effect.
 #
-# * I create temporary directories myself.
-#
-#   Instead of:
-#
-#       tmpfile=`echo 'mkdtemp(t)' | m4 -D t="XXX"`` || exit
-#
-#   POSIX does not require the `mktemp` utility. 
-#   And many Linux distributions ignore that POSIX requires the `m4` utility.
+# * I create temporary directories myself, instead of using `mktemp` or
+#   `m4`. POSIX does not require `mktemp`. And many Linux distributions
+#   don't ship with `m4`.
 
 
 # FUNCTIONS
@@ -114,7 +109,7 @@ onexit() {
         # shellcheck disable=2046
         __ONEXIT_CHILDREN=`jobs -p 2>/dev/null`
         # shellcheck disable=2086
-        [ "$__ONEXIT_CHILDREN" ] && kill $__ONEXIT_CHILDREN 2>/dev/null
+        [ "${__ONEXIT_CHILDREN-}" ] && kill $__ONEXIT_CHILDREN 2>/dev/null
     fi
     exit "$__ONEXIT_STATUS"
 }
@@ -140,7 +135,10 @@ warn() (
     message="${1:?'warn: missing MESSAGE.'}"
     shift
     # shellcheck disable=2059
-    printf -- "lpassh-add: $message\\n" "$@" >&2
+    case $# in
+        0) printf 'lpassh-add: %s\n' "$message" >&2;;
+        *) printf -- "lpassh-add: $message\\n" "$@" >&2;;
+    esac
 )
 
 # Takes an exit STATUS, a MESSAGE, and ARGUMENTS,
@@ -150,7 +148,7 @@ panic() {
     set +eu
     __PANIC_STATUS="${1:?'panic: missing STATUS.'}"
     shift
-    warn "$@"
+    [ $# -gt 0 ] && warn "$@"
     exit "$__PANIC_STATUS"
 }
 
@@ -190,19 +188,26 @@ EOF
 # Takes a prompt as argument and asks for a password.
 # shellcheck disable=2006
 askpass() (
-    pass='' prompt="${1:?'missing PROMPT'}" tty="${2-}" util="${3-}"
-    [ "$util"   ] && exec "$util" "$prompt"
-    [ -c "$tty" ] || panic 69 'No TTY. Cannot ask for password.'
-    trapsig onexit 0 2 3 15
-    exec 0<"$tty"
-    # shellcheck disable=2016
-    EX='stty echo 2>/dev/null; echo >&2'
-    stty -echo
-    printf -- '%s: ' "$prompt" >&2
-    read -r pass
-    cat <<EOF
+    prompt="${1:?'missing PROMPT'}" tty="${2-}" util="${3-}"
+    if [ "$util"   ]; then
+        # shellcheck disable=2016
+        warn 'ID of process calling %s: %d.' \
+            "$util" "`exec sh -c 'echo $PPID'`"
+        "$util" "$prompt"
+    elif [ -c "$tty" ]; then
+        trapsig onexit 0 2 3 15
+        exec 0<"$tty"
+        # shellcheck disable=2016
+        EX='stty echo 2>/dev/null; exec 0<&-; echo >&2'
+        stty -echo
+        printf -- '%s: ' "$prompt" >&2
+        read -r pass
+        cat <<EOF
 $pass
 EOF
+    else
+        panic 69 'No TTY. Cannot ask for password.'
+    fi
 )
 
 # Takes a PASSWORD and ARGUMENTS for `lpass` and
@@ -210,6 +215,7 @@ EOF
 auth_lpass() (
     password="${1?'auth_lpass: missing PASSWORD.'}"
     shift
+    [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
     exec lpass "$@" <<EOF
 $password
 EOF
@@ -374,8 +380,7 @@ mkdir -m 0700 "$PRIV_TMPDIR" || exit 69
 export TMPDIR="$PRIV_TMPDIR"
 
 # Log into LastPass if necessary.
-# FIXME: the whole if elif else tree should be part of askpass
-PASSWORD=
+PASSWORD=''
 lpass status --quiet || {
     [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
     # shellcheck disable=2006
@@ -386,7 +391,6 @@ lpass status --quiet || {
     # shellcheck disable=2016
     EX="lpass logout --force >/dev/null; $EX"
 }
-readonly PASSWORD
 
 # Lookup the LastPass IDs of all SSh keys.
 # shellcheck disable=2006
@@ -398,7 +402,6 @@ KEY_IDS=`auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
 
 # Create a FIFO to accept queries from the worker.
 __LPASSH_ADD_PIPE="$PRIV_TMPDIR/pipe"
-export __LPASSH_ADD_PIPE
 mkfifo -m 0700 "$__LPASSH_ADD_PIPE" || exit
 
 
@@ -419,18 +422,21 @@ while read -r PRIVKEY_NEEDLE_FILE; do
     HIT=''
     for ID in $KEY_IDS; do
         # Cache the result.
-        var_cp "PUBKEY_OF_$ID" PUBKEY
+        var_cp "PUBKEY_$ID" PUBKEY
         if ! [ "$PUBKEY" ]; then
             # shellcheck disable=2006
             PUBKEY=`auth_lpass "$PASSWORD" show --field='Public Key' "$ID"`
             [ "$PUBKEY" ] || PUBKEY="<not found>"
-            var_cp PUBKEY "PUBKEY_OF_$ID"
+            var_cp PUBKEY "PUBKEY_$ID"
         fi
 
         # Tell the worker the password.
         if [ "$PUBKEY" = "$PUBKEY_NEEDLE" ]; then
             auth_lpass "$PASSWORD" show --field=Passphrase "$ID" || ERR=$?
-            [ "${ERR-0}" -ne 0 ] && warn 'lpass: Returned %d.' "$ERR"
+            if [ "${ERR-0}" -ne 0 ]; then
+                warn 'lpass: Returned %d.' "$ERR"
+                continue
+            fi
             HIT=x
             break
         fi
@@ -448,12 +454,8 @@ done <"$__LPASSH_ADD_PIPE" |
     exec 3>"$__LPASSH_ADD_PIPE"
     rm -f "$__LPASSH_ADD_PIPE"
 
-    # FIXME: Mention in portability section.
     case $# in
-        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
-        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
+        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@";;
+        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add;;
     esac
 )
-
-# TODO:
-# * Check own security.

@@ -152,7 +152,8 @@ panic() {
     exit "$__PANIC_STATUS"
 }
 
-# Copies content of variable SOURCE to variable TARGET. 
+# Takes a SOURCE and a TARGET as arguments and copies the content of
+# the variable named SOURCE to that of the variable named TARGET. 
 var_cp() {
     [ $# -eq 2 ] || panic 70 'usage: var_cp SOURCE TARGET.'
     for __VAR_CP_VARNAME
@@ -166,8 +167,8 @@ var_cp() {
     eval "$2=\"\${$1-}\""
 }
 
-# Takes a NEEDLE and a HAYSTACK as arguments,
-# returns true if NEEDLE is in HAYSTACK.
+# Takes a NEEDLE and STRAWs as arguments,
+# returns true if NEEDLE equals one STRAW.
 contains() (
     needle="${1:?'contains: missing NEEDLE.'}"
     shift
@@ -324,7 +325,10 @@ EOF
 fi
 
 # Make sure the temporary directory is set.
-: "${TMPDIR:=${HOME:?'Not set or empty.'}}"
+if ! [ "${TMPDIR-}" ]; then
+    : "${HOME:?'Not set or empty.'}"
+    TMPDIR="$HOME"
+fi
 
 # Make sure SSH_ASKPASS points to a system programme.
 if [ "${SSH_ASKPASS-}" ]; then
@@ -358,7 +362,7 @@ export PATH IFS PWD
 
 # Check what TTY to read passwords from.
 # shellcheck disable=2006
-TTY=`tty` || :
+TTY=`tty`  || :
 [ "$TTY" ] || panic 69 'Cannot determine TTY.'
 
 # Prepare cleanup.
@@ -366,18 +370,18 @@ trapsig onexit 0 2 3 15
 
 # Make temporary directory.
 # shellcheck disable=2006,2039
-: "${RANDOM:=`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
+RAND="${RANDOM:-`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
 # shellcheck disable=2039
-TMP_NAME="$RANDOM-$$"
+TMP_NAME="$RAND-$$"
 # shellcheck disable=2006
 NAME_MAX=`getconf NAME_MAX "$TMPDIR" 2>/dev/null` || NAME_MAX=14
 [ "$NAME_MAX" -ge 24  ] && TMP_NAME="lpassh-add.$TMP_NAME"
 [ "$HOME" = "$TMPDIR" ] && TMP_NAME=".$TMP_NAME"
-readonly PRIV_TMPDIR="$TMPDIR/$TMP_NAME"
-EX="[ \"\${PRIV_TMPDIR-}\" ] && rm -rf \"\$PRIV_TMPDIR\""
-mkdir -m 0700 "$PRIV_TMPDIR" || exit 69
+readonly MY_TMPDIR="$TMPDIR/$TMP_NAME"
+EX="[ \"\${MY_TMPDIR-}\" ] && rm -rf \"\$MY_TMPDIR\""
+mkdir -m 0700 "$MY_TMPDIR" || exit 69
 # shellcheck disable=2034
-export TMPDIR="$PRIV_TMPDIR"
+export TMPDIR="$MY_TMPDIR"
 
 # Log into LastPass if necessary.
 PASSWORD=''
@@ -401,7 +405,7 @@ KEY_IDS=`auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
 [ "$KEY_IDS" ] || panic 0 'No SSh keys found in LastPass.'
 
 # Create a FIFO to accept queries from the worker.
-PIPE="$PRIV_TMPDIR/pipe"
+PIPE="$MY_TMPDIR/pipe"
 mkfifo -m 0700 "$PIPE" || exit
 
 

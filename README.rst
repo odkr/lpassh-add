@@ -21,7 +21,7 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-``lpassh-add`` 'adds' SSh keys to the SSh agent, just as ``ssh-add`` would.
+``lpassh-add`` adds SSh keys to the SSh agent, just as ``ssh-add`` would.
 However, it looks up the passphrases for those keys in LastPass. It only asks
 you for the passphrase for a key if it can't find that passphrase there.
 
@@ -29,8 +29,11 @@ you for the passphrase for a key if it can't find that passphrase there.
 Mode of operation
 -----------------
 
-``lpassh-add` calls ``ssh-add``, but sets itself as ``SSH_ASKPASS`` utility.
-Consequently, ``ssh-add`` calls ``lpassh-add`` again. ``lpassh-add`` then:
+``lpassh-add`` calls ``ssh-add``, but sets itself as ``SSH_ASKPASS`` utility.
+
+Consequently, ``ssh-add`` calls ``lpassh-add`` again.
+
+``lpassh-add`` then:
 
 1. extracts the filename of the private key from the passphrase prompt,
 2. uses that filename to locate the corresponding public key file,
@@ -48,8 +51,7 @@ Where to store SSh keys
 
 *Filesystem:* You need to store public and private keys in the same directory,
 with the filename of the public key being that of the private key, save for
-additionally ending with '.pub'. (This is what OpenSSh does by default.)
-
+additionally ending with '.pub'. (This is what OpenSSh does by default.) 
 For example:
 
 .. image:: illustration-keys.png
@@ -65,7 +67,6 @@ also need to store the public key that corresponds to that private key in the
 for that key. Moreover, you need to place such Secure Notes in a folder named
 "SSh keys". You can pick another folder by setting the environment variable
 ``LPASSH_ADD_FOLDER``.
-
 For example:
 
 .. image:: illustration-lpass.png
@@ -183,8 +184,11 @@ though).
 | Bourne-compatible shell | version  |
 +=========================+==========+
 | bash                    | 3.2.57   |
++-------------------------+----------+
 | dash                    | 0.5.10.2 |
++-------------------------+----------+
 | yash                    | 2.49     |
++-------------------------+----------+
 | zsh                     | 5.3      |
 +-------------------------+----------+
 

@@ -136,8 +136,8 @@ warn() (
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf 'lpassh-add: %s\n' "$message" >&2;;
-        *) printf -- "lpassh-add: $message\\n" "$@" >&2;;
+        0) printf 'lpassh-add: %s\n' "$message" >&2 ;;
+        *) printf -- "lpassh-add: $message\\n" "$@" >&2 ;;
     esac
 )
 
@@ -348,7 +348,7 @@ if [ "${SSH_ASKPASS-}" ]; then
                 || panic 69 '%s: Not owned by a system group.' "$ACC"
             PERMS="$1"
             case ${PERMS#????} in
-                *w*) panic 69 '%s: Non-owner writeable.' "$ACC";;
+                *w*) panic 69 '%s: Non-owner writeable.' "$ACC" ;;
             esac
         done
         MY_ASKPASS="$SSH_ASKPASS"
@@ -364,7 +364,7 @@ TTY=`tty` || :
 # Prepare cleanup.
 trapsig onexit 0 2 3 15
 
-# Prepare temporary directory.
+# Make temporary directory.
 # shellcheck disable=2006,2039
 : "${RANDOM:=`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
 # shellcheck disable=2039
@@ -387,7 +387,7 @@ lpass status --quiet || {
     PASSWORD=`askpass 'LastPass master password' "$TTY" "${MY_ASKPASS-}"`
     [ "${PASSWORD-}" ] || panic 64 'No password given.'
     auth_lpass "$PASSWORD" login --color=never "$LPASSH_ADD_USERNAME" \
-        2>/dev/null 1>&2 || panic 69 'Could not log into LastPass.'
+        1>/dev/null 2>&1 || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016
     EX="lpass logout --force >/dev/null; $EX"
 }
@@ -401,8 +401,8 @@ KEY_IDS=`auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
 [ "$KEY_IDS" ] || panic 0 'No SSh keys found in LastPass.'
 
 # Create a FIFO to accept queries from the worker.
-__LPASSH_ADD_PIPE="$PRIV_TMPDIR/pipe"
-mkfifo -m 0700 "$__LPASSH_ADD_PIPE" || exit
+PIPE="$PRIV_TMPDIR/pipe"
+mkfifo -m 0700 "$PIPE" || exit
 
 
 # MAIN
@@ -446,16 +446,16 @@ while read -r PRIVKEY_NEEDLE_FILE; do
     [ "$HIT" ] && continue
     warn '%s: Not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
     askpass "Passphrase for $PRIVKEY_NEEDLE_FILE" "$TTY" "${MY_ASKPASS-}"
-done <"$__LPASSH_ADD_PIPE" | 
+done <"$PIPE" | 
 (
     trapsig onexit 0 2 3 15
     # shellcheck disable=2016
     EX='exec 3>&-'
-    exec 3>"$__LPASSH_ADD_PIPE"
-    rm -f "$__LPASSH_ADD_PIPE"
+    exec 3>"$PIPE"
+    rm -f "$PIPE"
 
     case $# in
-        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@";;
-        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add;;
+        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
+        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
     esac
 )

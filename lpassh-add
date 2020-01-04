@@ -309,7 +309,7 @@ EOF
             --version)
                 exec cat <<EOF
 lpassh-add v1.1.0b
-(c) 2018, 2019 Odin Kroeger
+(c) 2018, 2019, 2020 Odin Kroeger
 EOF
                 ;;
             --)

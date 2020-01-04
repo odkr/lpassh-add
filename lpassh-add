@@ -190,7 +190,7 @@ EOF
 # shellcheck disable=2006
 askpass() (
     prompt="${1:?'missing PROMPT'}" tty="${2-}" util="${3-}"
-    if [ "$util"   ]; then
+    if [ "$util" ]; then
         # shellcheck disable=2016
         warn 'ID of process calling %s: %d.' \
             "$util" "`exec sh -c 'echo $PPID'`"
@@ -198,8 +198,9 @@ askpass() (
     elif [ -c "$tty" ]; then
         trapsig onexit 0 2 3 15
         exec 0<"$tty"
+        exec 2>"$tty"
         # shellcheck disable=2016
-        EX='stty echo 2>/dev/null; exec 0<&-; echo >&2'
+        EX='stty echo 2>/dev/null; exec 0<&-; echo >&2; exec 2>&-'
         stty -echo
         printf -- '%s: ' "$prompt" >&2
         read -r pass
@@ -228,7 +229,7 @@ EOF
 
 # shellcheck disable=2039
 [ "$BASH_VERSION" ] && set -o posix
-[ "$ZSH_VERSION" ]  && emulate sh 2>/dev/null
+[ "$ZSH_VERSION"  ] && emulate sh 2>/dev/null
 # shellcheck disable=2034
 BIN_SH=xpg4 NULLCMD=:
 export BIN_SH

@@ -113,7 +113,7 @@ password and reads the answer from a teletype device, including **ssh-add**.)
 # CAVEATS
 
 **lpassh-add** ignores your `PATH` and `IFS` as well as some of
-LastPass' environment variables (see *SECURITY* above for details).
+LastPass' environment variables (see *SECURITY* for details).
 
 # AUTHOR
 

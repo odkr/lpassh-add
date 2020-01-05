@@ -10,7 +10,7 @@
 
 **lpassh-add** adds SSh keys to the SSh agent, just as **ssh-add**
 would, but looks up the passphrases for those keys in LastPass. It only
-asks you for the passphrase for a key if it can't find it there.
+asks you for the passphrase for a key if it can’t find it there.
 
 ## Mode of operation
 
@@ -22,27 +22,27 @@ and:
 3.  searches LastPass for a Secure Note that lists that public key, and
 4.  passes on the passphrase stored in that note to **ssh-add**.
 
-If it doesn't find the passphrase of a key in LastPass, it asks you for
+If it doesn’t find the passphrase of a key in LastPass, it asks you for
 it.
 
-If you're not logged into LastPass and `LPASSH_ADD_USERNAME` is set,
+If you’re not logged into LastPass and `LPASSH_ADD_USERNAME` is set,
 **lpassh-add** logs you into LastPass. It also logs you out again.
 
 ## Where to store SSh keys
 
 *Filesystem:* You need to store public and private keys in the same
 directory, with the filename of the public key being that of the private
-key, save for also ending with '.pub'. (This is what OpenSSh does by
+key, save for also ending with ‘.pub’. (This is what OpenSSh does by
 default.)
 
 ![A terminal client showing files.](illustration-keys.png)
 
 *LastPass:* You need to store the passphrase for each of your private
-SSh keys in the "Passphrase" field of a so-called Secure Note of the
-type "SSH Key". You also need to store the public key that corresponds
-to that private key in the "Public Key" field of that note, so that
+SSh keys in the “Passphrase” field of a so-called Secure Note of the
+type “SSH Key”. You also need to store the public key that corresponds
+to that private key in the “Public Key” field of that note, so that
 **lpassh-add** can identify the entry of that key. Moreover, you need to
-place Secure Notes for SSh keys in a folder named "SSh keys". You can
+place Secure Notes for SSh keys in a folder named “SSh keys”. You can
 pick another folder by setting the environment variable
 `LPASSH_ADD_LASTPASS_FOLDER`. You can also make **lpassh-add** search
 *all* LastPass folders, by setting `LPASSH_ADD_LASTPASS_FOLDER` to the
@@ -55,12 +55,12 @@ key.](illustration-lpass.png)
 
   - LPASSH\_ADD\_LASTPASS\_FOLDER  
     LastPass folder you store your SSh keys in. If you set this variable
-    to the empty string (""), then **lpassh-add** will search *all*
-    LastPass folders for passphrases. (Default: "SSh keys")
+    to the empty string ("“), then **lpassh-add** will search *all*
+    LastPass folders for passphrases. (Default:”SSh keys")
   - LPASSH\_ADD\_USERNAME  
     A LastPass username. If set, **lpassh-add** uses this username to
-    log you into LastPass if you aren't logged in already. (Default:
-    *none*, i.e., don't log into LastPass.)
+    log you into LastPass if you aren’t logged in already. (Default:
+    *none*, i.e., don’t log into LastPass.)
   - LPASSH\_ADD\_KEYS  
     A colon-separated list of absolute paths to private keys. For
     example: `$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa`. If set to a
@@ -70,7 +70,7 @@ key.](illustration-lpass.png)
     A colon-separated list of absolute paths to private keys. For
     example: `$HOME/.ssh/id_rsa`. If set to a non-empty value,
     **lpassh-add** will ignore those keys. (Default: *empty*, i.e.,
-    don't ignore any key.)
+    don’t ignore any key.)
   - SSH\_ASKPASS  
     Utility to ask for passphrases. (Default: *none*.)
 
@@ -109,7 +109,7 @@ from a teletype device, including **ssh-add**.)
 # CAVEATS
 
 **lpassh-add** ignores your `PATH` and `IFS` as well as some of
-LastPass' environment variables (see *SECURITY* above for details).
+LastPass’ environment variables (see *SECURITY* for details).
 
 # AUTHOR
 

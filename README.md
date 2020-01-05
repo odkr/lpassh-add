@@ -6,42 +6,38 @@ the passphrases for those keys from LastPass, if possible. It is a
 *dumb* wrapper around **ssh-add** and the [LastPass command line
 client](https://github.com/lastpass/lastpass-cli).
 
-**lpassh-add** is but a short-ish shell script. You can easily check
-that it doesn't do anything funky.
+**lpassh-add** is but a short-ish shell script.
+You can easily check that it doesn't do anything funky.
 
 See the [manual](MANUAL.md) and the [source](lpassh-add) for details.
+
 
 ## INSTALLATION
 
 You use **lpassh-add** *at your own risk*. You have been warned.
-
-### System requirements
 
 You need:
 
 1. [OpenSSh](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 
-Apart from OpenSSh and the LastPass command line client, **lpassh-add**
-is [POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/)
-compliant. So it should work on any modern Unix system (e.g., macOS,
-FreeBSD, NetBSD, OpenBSD, Linux). **lpassh-add** also aims to be [System
-V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/) compatible. So
-it should also work on many older Unix systems (you may need to change
-the shebang line though).
-
-### Download
+Apart from OpenSSh and the LastPass command line client, **lpassh-add** is
+[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/)-compliant.
+So it should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
+OpenBSD, or macOS). **lpassh-add** also *aims* to be
+[System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/)-compatible.
+So it should also run on many older Unix systems
+(you may need to adapt the shebang line though).
 
 Download the repository from:
-<https://codeload.github.com/odkr/lpassh-add/tar.gz/v1.0.5>
-
-### Set-up
+<https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
 
 Unpack the repository, copy **lpassh-add** to a directory in your `PATH`,
 and make it executable. You may also want to install the manual page.
 
 If you have [curl](https://curl.haxx.se/) or
-[wget](https://www.gnu.org/software/wget/), you can do so by:
+            [wget](https://www.gnu.org/software/wget/),
+you can do all of the above by:
 
 ```sh
     NAME=lpassh-add VERS=1.0.5
@@ -63,14 +59,17 @@ If you have [curl](https://curl.haxx.se/) or
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** won't be able to find it.
 
+
 ## DOCUMENTATION
 
-See the [manual](MANUAL.md) and the [source](lpassh-add) for details.
+See the [manual](MANUAL.md) and the [source](lpassh-add).
+
 
 ## CONCTACT
 
-If there's something wrong with **lpassh-add**, [open an
-issue](https://github.com/odkr/lpassh-add/issues).
+If there's something wrong with **lpassh-add**,
+[open an issue](https://github.com/odkr/lpassh-add/issues).
+
 
 ## LICENSE
 

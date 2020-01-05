@@ -6,10 +6,10 @@ the passphrases for those keys from LastPass, if possible. It is a
 *dumb* wrapper around **ssh-add** and the [LastPass command line
 client](https://github.com/lastpass/lastpass-cli).
 
-**lpassh-add** is but a short-ish shell script. So you can easily check
+**lpassh-add** is but a short-ish shell script. You can easily check
 that it doesn't do anything funky.
 
-See the [manual](MANUAL.md) for details.
+See the [manual](MANUAL.md) and the [source](lpassh-add) for details.
 
 ## INSTALLATION
 
@@ -30,15 +30,6 @@ V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/) compatible. So
 it should also work on many older Unix systems (you may need to change
 the shebang line though).
 
-**lpassh-add** is known to work with:
-
-| Bourne-compatible shell | version  |
-| ----------------------- | -------- |
-| bash                    | 3.2.57   |
-| dash                    | 0.5.10.2 |
-| yash                    | 2.49     |
-| zsh                     | 5.3      |
-
 ### Download
 
 Download the repository from:
@@ -57,15 +48,16 @@ If you have [curl](https://curl.haxx.se/) or
     PROG="${NAME:?}-${VERS:?}/${NAME:?}"
     URL="https://github.com/odkr/${NAME:?}/archive/v${VERS:?}.tar.gz"
     {
+        ERR=0
         curl -L "$URL" || ERR=$?
-        [ "${ERR-0}" -eq 127 ] && wget -q -O - "$URL"
+        [ "$ERR" -eq 127 ] && wget -q -O - "$URL"
     } | tar -xz
     # Check the source!
     more "${PROG:?}"
     # If you like what you've seen, continue by:
     sudo mkdir -pm 0755 /usr/local/bin
     sudo cp "${PROG:?}" /usr/local/bin
-    sudo cp "${PROG:?}.1.man" /usr/local/share/man/man1
+    sudo cp "${PROG:?}.1" /usr/local/share/man/man1
 ```
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,

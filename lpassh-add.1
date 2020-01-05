@@ -13,16 +13,12 @@
 \f[B]lpassh-add\f[R] adds SSh keys to the SSh agent, just as
 \f[B]ssh-add\f[R] would, but looks up the passphrases for those keys in
 LastPass.
-It only asks you for the passphrase for a key if it can\[cq]t find that
-passphrase there.
+It only asks you for the passphrase for a key if it can\[aq]t find it
+there.
 .SS Mode of operation
 .PP
-\f[B]lpassh-add\f[R] calls \f[B]ssh-add\f[R], but sets itself as
-\f[C]SSH_ASKPASS\f[R] utility.
-.PP
-Consequently, \f[B]ssh-add\f[R] calls \f[B]lpassh-add\f[R] again.
-.PP
-\f[B]lpassh-add\f[R] then:
+\f[B]lpassh-add\f[R] calls \f[B]ssh-add\f[R], sets itself as
+\f[C]SSH_ASKPASS\f[R] utility, and:
 .IP "1." 3
 extracts the filename of the private key from the passphrase prompt,
 .IP "2." 3
@@ -32,28 +28,27 @@ searches LastPass for a Secure Note that lists that public key, and
 .IP "4." 3
 passes on the passphrase stored in that note to \f[B]ssh-add\f[R].
 .PP
-If it doesn\[cq]t find the passphrase of a key in LastPass, it asks you
+If it doesn\[aq]t find the passphrase of a key in LastPass, it asks you
 for it.
 .PP
-If you\[cq]re not logged into LastPass, but
-\f[C]LPASSH_ADD_USERNAME\f[R] is set, \f[B]lpassh-add\f[R] logs you into
-LastPass.
+If you\[aq]re not logged into LastPass and \f[C]LPASSH_ADD_USERNAME\f[R]
+is set, \f[B]lpassh-add\f[R] logs you into LastPass.
 It also logs you out again.
 .SS Where to store SSh keys
 .PP
 \f[I]Filesystem:\f[R] You need to store public and private keys in the
 same directory, with the filename of the public key being that of the
-private key, save for additionally ending with \[oq].pub\[cq].
+private key, save for also ending with \[aq].pub\[aq].
 (This is what OpenSSh does by default.)
 .PP
 \f[I]LastPass:\f[R] You need to store the passphrase for each of your
-private SSh keys in the \[lq]Passphrase\[rq] field of a so-called Secure
-Note of the type \[lq]SSH Key\[rq].
+private SSh keys in the \[dq]Passphrase\[dq] field of a so-called Secure
+Note of the type \[dq]SSH Key\[dq].
 You also need to store the public key that corresponds to that private
-key in the \[lq]Public Key\[rq] field of that note, so that
+key in the \[dq]Public Key\[dq] field of that note, so that
 \f[B]lpassh-add\f[R] can identify the entry of that key.
 Moreover, you need to place Secure Notes for SSh keys in a folder named
-\[lq]SSh keys\[rq].
+\[dq]SSh keys\[dq].
 You can pick another folder by setting the environment variable
 \f[C]LPASSH_ADD_LASTPASS_FOLDER\f[R].
 You can also make \f[B]lpassh-add\f[R] search \f[I]all\f[R] LastPass
@@ -86,7 +81,7 @@ A colon-separated list of absolute paths to private keys.
 For example: \f[C]$HOME/.ssh/id_rsa\f[R].
 If set to a non-empty value, \f[B]lpassh-add\f[R] will ignore those
 keys.
-(Default: \f[I]empty\f[R], i.e., don\[cq]t ignore any key.)
+(Default: \f[I]empty\f[R], i.e., don\[aq]t ignore any key.)
 .TP
 .B SSH_ASKPASS
 Utility to ask for passphrases.

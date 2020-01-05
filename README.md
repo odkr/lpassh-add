@@ -27,13 +27,13 @@ So it should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, or macOS). **lpassh-add** also *aims* to be
 [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/)-compatible.
 So it should also run on many older Unix systems
-(you may need to adapt the shebang line though).
+(you may need to adapt the shebang line).
 
 Download the repository from:
 <https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
 
 Unpack the repository, copy **lpassh-add** to a directory in your `PATH`,
-and make it executable. You may also want to install the manual page.
+and make it executable. You may want to install the manual page, too.
 
 If you have [curl](https://curl.haxx.se/) or
             [wget](https://www.gnu.org/software/wget/),

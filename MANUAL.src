@@ -16,47 +16,39 @@ section: 1
 
 **lpassh-add** adds SSh keys to the SSh agent, just as **ssh-add**
 would, but looks up the passphrases for those keys in LastPass. It only
-asks you for the passphrase for a key if it can’t find that passphrase
-there.
+asks you for the passphrase for a key if it can't find it there.
 
 ## Mode of operation
 
-**lpassh-add** calls **ssh-add**, but sets itself as `SSH_ASKPASS` utility.
-
-Consequently, **ssh-add** calls **lpassh-add** again.
-
-**lpassh-add** then:
+**lpassh-add** calls **ssh-add**, sets itself as `SSH_ASKPASS` utility, and:
 
 1. extracts the filename of the private key from the passphrase prompt,
 2. uses that filename to locate the corresponding public key file,
 3. searches LastPass for a Secure Note that lists that public key, and
 4. passes on the passphrase stored in that note to **ssh-add**.
 
-If it doesn’t find the passphrase of a key in LastPass, it asks you for
-it.
+If it doesn't find the passphrase of a key in LastPass, it asks you for it.
 
-If you’re not logged into LastPass, but `LPASSH_ADD_USERNAME` is set,
+If you're not logged into LastPass and `LPASSH_ADD_USERNAME` is set,
 **lpassh-add** logs you into LastPass. It also logs you out again.
 
 ## Where to store SSh keys
 
-*Filesystem:* You need to store public and private keys in the same
-directory, with the filename of the public key being that of the private
-key, save for additionally ending with ‘.pub’. (This is what OpenSSh
-does by default.)
+*Filesystem:* You need to store public and private keys in the same directory,
+with the filename of the public key being that of the private key, save for 
+also ending with '.pub'. (This is what OpenSSh does by default.)
 
 ![A terminal client showing files.](illustration-keys.png)
 
-*LastPass:* You need to store the passphrase for each of your private
-SSh keys in the “Passphrase” field of a so-called Secure Note of the
-type “SSH Key”. You also need to store the public key that corresponds
-to that private key in the “Public Key” field of that note, so that
-**lpassh-add** can identify the entry of that key. Moreover, you need to
-place Secure Notes for SSh keys in a folder named “SSh keys”. You can
-pick another folder by setting the environment variable
-`LPASSH_ADD_LASTPASS_FOLDER`. You can also make **lpassh-add** search
-*all* LastPass folders, by setting `LPASSH_ADD_LASTPASS_FOLDER` to the
-empty string (""), but this is slow.
+*LastPass:* You need to store the passphrase for each of your private SSh keys
+in the "Passphrase" field of a so-called Secure Note of the type "SSH Key". You
+also need to store the public key that corresponds to that private key in the
+"Public Key" field of that note, so that **lpassh-add** can identify the entry 
+of that key. Moreover, you need to place Secure Notes for SSh keys in a folder
+named "SSh keys". You can pick another folder by setting the environment 
+variable `LPASSH_ADD_LASTPASS_FOLDER`. You can also make **lpassh-add** search
+*all* LastPass folders, by setting `LPASSH_ADD_LASTPASS_FOLDER` to the empty
+string (""), but this is slow.
 
 ![The LastPass client showing an entry for an SSh key.](illustration-lpass.png)
 
@@ -82,7 +74,7 @@ LPASSH_ADD_IGNORE_KEYS
 :   A colon-separated list of absolute paths to private keys.
     For example: `$HOME/.ssh/id_rsa`. If set to a non-empty value,
     **lpassh-add** will ignore those keys.
-    (Default: *empty*, i.e., don’t ignore any key.)
+    (Default: *empty*, i.e., don't ignore any key.)
 
 SSH_ASKPASS
 :   Utility to ask for passphrases.

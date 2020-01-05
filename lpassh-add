@@ -237,7 +237,7 @@ export BIN_SH
 set -Cefu
 umask 077
 
-: "${LPASSH_ADD_LASTPASS_FOLDER:=SSh keys}"
+: "${LPASSH_ADD_LASTPASS_FOLDER="SSh keys"}"
 [ "${LPASS_AGENT_DISABLE-0}"    -eq 1 ] || LPASS_AGENT_DISABLE=1
 [ "${LPASS_DISABLE_PINENTRY-0}" -eq 1 ] || LPASS_DISABLE_PINENTRY=1
 [ "${LPASS_AGENT_PINENTRY-}" ]          && LPASS_PINENTRY=''
@@ -399,10 +399,12 @@ lpass status --quiet || {
 
 # Lookup the LastPass IDs of all SSh keys.
 # shellcheck disable=2006
-KEY_IDS=`auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER" |
+KEY_IDS=`if [ "${LPASSH_ADD_LASTPASS_FOLDER-}" ]
+            then auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER"
+            else auth_lpass "$PASSWORD" ls
+         fi |
          sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'` || ERR=$?
-[ "${ERR-0}" -eq 0 ] || \
-    panic 69 'Could not obtain IDs of SSh keys from LastPass.'
+[ "${ERR-0}" -eq 0 ] || panic 69 'Could not retrieve IDs from LastPass.'
 [ "$KEY_IDS" ] || panic 0 'No SSh keys found in LastPass.'
 
 # Create a FIFO to accept queries from the worker.
@@ -427,16 +429,18 @@ while read -r PRIVKEY_NEEDLE_FILE; do
     HIT=''
     for ID in $KEY_IDS; do
         # Cache the result.
-        var_cp "PUBKEY_$ID" PUBKEY
-        if ! [ "$PUBKEY" ]; then
+        var_cp "PUBKEY_$ID" PUBKEY_STRAW
+        if ! [ "$PUBKEY_STRAW" ]; then
             # shellcheck disable=2006
-            PUBKEY=`auth_lpass "$PASSWORD" show --field='Public Key' "$ID"`
-            [ "$PUBKEY" ] || PUBKEY="<not found>"
-            var_cp PUBKEY "PUBKEY_$ID"
+            ERR=0 PUBKEY_STRAW=`auth_lpass "$PASSWORD" show \
+                --field='Public Key' "$ID" 2>/dev/null` || ERR=$?
+            [ "${ERR-0}" -eq 0 ] || continue
+            [ "$PUBKEY_STRAW" ] || PUBKEY_STRAW="<not found>"
+            var_cp PUBKEY_STRAW "PUBKEY_$ID"
         fi
 
         # Tell the worker the password.
-        if [ "$PUBKEY" = "$PUBKEY_NEEDLE" ]; then
+        if [ "$PUBKEY_STRAW" = "$PUBKEY_NEEDLE" ]; then
             auth_lpass "$PASSWORD" show --field=Passphrase "$ID" || ERR=$?
             if [ "${ERR-0}" -ne 0 ]; then
                 warn 'lpass: Returned %d.' "$ERR"

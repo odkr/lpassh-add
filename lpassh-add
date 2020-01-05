@@ -27,10 +27,9 @@
 # PORTABILITY
 # ===========
 #
-# This script complies with the Shell Command Language as POSIX.1-2017 defines 
-# it. Morever, it aims to be SVR4.2 compatible, which requires it to run on 
-# shells that are buggy, necessitating some weird constructs; in order of
-# appearance:
+# This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
+# This requires it to run on buggy shells, shells that are buggy. This, 
+# in turn, necessitates some *weird* constructs; in order of appearance:
 #
 # onexit():
 # * I use:
@@ -92,7 +91,7 @@
 # FUNCTIONS
 # =========
 
-# Runs `$EX`, propagates the signal received, if any, kills children, and exits.
+# Runs `$EX`, propagates the signal received, kills children, and exits.
 onexit() {
     __ONEXIT_STATUS=$?
     # shellcheck disable=2086
@@ -416,7 +415,8 @@ mkfifo -m 0700 "$PIPE" || exit
 # ====
 
 # shellcheck disable=2094
-while read -r PRIVKEY_NEEDLE_FILE; do
+while read -r PRIVKEY_NEEDLE_FILE
+do
     # Read the public key file.
     [ "$PRIVKEY_NEEDLE_FILE" ] || continue
     read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
@@ -427,7 +427,8 @@ while read -r PRIVKEY_NEEDLE_FILE; do
 
     # Search the public key that the worker has asked for.
     HIT=''
-    for ID in $KEY_IDS; do
+    for ID in $KEY_IDS
+    do
         # Cache the result.
         var_cp "PUBKEY_$ID" PUBKEY_STRAW
         if ! [ "$PUBKEY_STRAW" ]; then

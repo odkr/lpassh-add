@@ -2,26 +2,26 @@
 lpassh-add
 ==========
 
-``lpassh-add`` works just like `OpenSSh <https://www.openssh.com>`_'s
-``ssh-add``, that is, it unlocks your SSh private keys, but it retrieves
+**lpassh-add** works just like `OpenSSh <https://www.openssh.com>`_'s
+**ssh-add**, that is, it unlocks your SSh private keys, but it retrieves
 the passphrases for those keys from LastPass, if possible. It is a *dumb*
-wrapper around ``ssh-add`` and the `LastPass command line client
+wrapper around **ssh-add** and the `LastPass command line client
 <https://github.com/lastpass/lastpass-cli>`_.
 
-``lpassh-add`` is but a short-ish shell script.
+**lpassh-add** is but a short-ish shell script.
 So you can easily check that it doesn't do anything funky.
 
 
 SYNOPSIS
 ========
 
-``lpassh-add`` accepts the same arguments as ``ssh-add``.
+**lpassh-add** accepts the same arguments as **ssh-add**.
 
 
 DESCRIPTION
 ===========
 
-``lpassh-add`` adds SSh keys to the SSh agent, just as ``ssh-add`` would.
+**lpassh-add** adds SSh keys to the SSh agent, just as **ssh-add** would.
 However, it looks up the passphrases for those keys in LastPass. It only asks
 you for the passphrase for a key if it can't find that passphrase there.
 
@@ -29,21 +29,21 @@ you for the passphrase for a key if it can't find that passphrase there.
 Mode of operation
 -----------------
 
-``lpassh-add`` calls ``ssh-add``, but sets itself as ``SSH_ASKPASS`` utility.
+**lpassh-add** calls **ssh-add**, but sets itself as ``SSH_ASKPASS`` utility.
 
-Consequently, ``ssh-add`` calls ``lpassh-add`` again.
+Consequently, **ssh-add** calls **lpassh-add** again.
 
-``lpassh-add`` then:
+**lpassh-add** then:
 
 1. extracts the filename of the private key from the passphrase prompt,
 2. uses that filename to locate the corresponding public key file,
 3. searches LastPass for a Secure Note that lists that public key, and
-4. passes on the passphrase stored in that note to ``ssh-add``.
+4. passes on the passphrase stored in that note to **ssh-add**.
 
 If it doesn't find the passphrase of a key in LastPass, it asks you for it.
 
 If you're not logged into LastPass, but ``LPASSH_ADD_USERNAME`` is set,
-``lpassh-add`` logs you into LastPass. It also logs you out again.
+**lpassh-add** logs you into LastPass. It also logs you out again.
 
 
 Where to store SSh keys
@@ -52,28 +52,26 @@ Where to store SSh keys
 *Filesystem:* You need to store public and private keys in the same directory,
 with the filename of the public key being that of the private key, save for
 additionally ending with '.pub'. (This is what OpenSSh does by default.)
-For example:
 
 .. image:: illustration-keys.png
   :height: 762px
   :width: 539px
   :align: center
-  :alt: Screenshot of a terminal client showing files.
+  :alt: A terminal client showing files.
 
 *LastPass:* You need to store the passphrase for each of your private SSh keys
 in the "Passphrase" field of a so-called Secure Note of the type "SSH Key". You
 also need to store the public key that corresponds to that private key in the
-"Public Key" field of that note, so that ``lpassh-add`` can identify the entry
+"Public Key" field of that note, so that **lpassh-add** can identify the entry
 for that key. Moreover, you need to place such Secure Notes in a folder named
 "SSh keys". You can pick another folder by setting the environment variable
 ``LPASSH_ADD_FOLDER``.
-For example:
 
 .. image:: illustration-lpass.png
    :height: 600px
    :width: 395px
    :align: center
-   :alt: Screenshot of the LastPass client showing an entry for an SSh key.
+   :alt: The LastPass client showing an entry for an SSh key.
 
 
 ENVIRONMENT
@@ -85,69 +83,69 @@ LPASSH_ADD_LASTPASS_FOLDER
 
 LPASSH_ADD_USERNAME
     A LastPass username.
-    If set, ``lpassh-add`` uses this username to log you into LastPass.
+    If set, **lpassh-add** uses this username to log you into LastPass.
     (Default: *none*, i.e., don't log into LastPass.)
 
 LPASSH_ADD_KEYS
     A colon-separated list of absolute paths to OpenSSh private keys.
-    For example: "$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa".
-    If set to a non-empty value, ``lpassh-add`` will ignore other keys.
+    For example: ``$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa``.
+    If set to a non-empty value, **lpassh-add** will ignore other keys.
     (Default: *empty*, i.e., try all keys.)
 
 LPASSH_ADD_IGNORE_KEYS
     A colon-separated list of absolute paths to OpenSSh private keys.
-    For example: "$HOME/.ssh/id_rsa".
-    If set to a non-empty value, ``lpassh-add`` will ignore those keys.
+    For example: ``$HOME/.ssh/id_rsa``.
+    If set to a non-empty value, **lpassh-add** will ignore those keys.
     (Default: *empty*, i.e., don't ignore any key.)
 
 SSH_ASKPASS
-  Utility to ask for passphrases.
-  (Default: *none*, i.e., read passphrases from the current TTY.)
+    Utility to ask for passphrases.
+    (Default: *none*, i.e., read passphrases from the current TTY.)
 
 
 SECURITY
 ========
 
-``lpassh-add`` is but a shell script. You should read the source code and
-evaluate the security risks yourself. Above all, since ``lpass-add`` is
+**lpassh-add** is but a shell script. You should read the source code and
+evaluate the security risks yourself. Above all, since **lpassh-add** is
 but a wrapper around OpenSSh and the LastPass command line client, their
 threat models apply.
 
-``lpass-add`` itself trusts your system (i.e., your terminal emulator,
+**lpassh-add** itself trusts your system (i.e., your terminal emulator,
 the shell, the utilities it calls, etc.), the LastPass command line client,
 and your environment. That said, it overrides the environment variables
 ``PATH``, ``IFS``, ``LPASS_AGENT_DISABLE``, ``LPASS_DISABLE_PINENTRY``,
 ``LPASS_PINENTRY``, and ``LPASS_AUTO_SYNC_TIME``. Moreover, it checks
 the permissions of the utility that ``SSH_ASKPASS`` points to.
 
-``lpassh-add`` does *not* use the LastPass agent. This is because every
+**lpassh-add** does *not* use the LastPass agent. This is because every
 programme that runs under your user (or as the superuser) can get a copy
 of your password database while the LastPass agent is running, by calling
 ``lpass export``. This conforms to their threat model, but it may still
 make you feel uneasy.
 
-*Note:* ``lpass`` reads environment settings from ``$HOME/.lpass/env``,
+*Note:* **lpass** reads environment settings from ``$HOME/.lpass/env``,
 so you can still override these settings.
 
-You should be aware that if you do *not* set ``SSH_ASKPASS``, ``lpassh_add``
+You should be aware that if you do *not* set ``SSH_ASKPASS``, **lpassh-add**
 will prompt you for passphrases and read them from the TTY of the process.
 However, it does *not* have exclusive access to that TTY, so any other process
 that runs under your user (or as the superuser) can also read that TTY.
 (This is true for *any* programme that prompts you for a password and reads
-the answer from a TTY, including ``ssh-add``.) So set ``SSH_ASKPASS``.
+the answer from a TTY, including **ssh-add**.)
 
 
 CAVEATS
 =======
 
-``lpassh-add`` ignores your ``PATH`` and ``IFS`` as well as some of LastPass'
+**lpassh-add** ignores your ``PATH`` and ``IFS`` as well as some of LastPass'
 environment variables (see *Security* above for details).
 
 
 INSTALLATION
 ============
 
-You use ``lpassh-add`` **at your own risk**. You have been warned.
+You use **lpassh-add** *at your own risk*. You have been warned.
 
 
 System requirements
@@ -159,15 +157,15 @@ You need:
 2. The `LastPass command line client
    <https://github.com/lastpass/lastpass-cli>`_
 
-Apart from OpenSSh and the LastPass command line client, ``lpassh_add`` is
+Apart from OpenSSh and the LastPass command line client, **lpassh-add** is
 `POSIX.1-2017 <http://pubs.opengroup.org/onlinepubs/9699919799/>`_ compliant.
 So it should work on any modern Unix system (e.g., macOS, FreeBSD, NetBSD,
-OpenBSD, Linux). ``lpassh-add`` also aims to be `System V Release 4.2
+OpenBSD, Linux). **lpassh-add** also aims to be `System V Release 4.2
 <https://www.in-ulm.de/~mascheck/bourne/>`_ compatible. So it should also
 work on many older Unix systems (you may need to change the shebang line
 though).
 
-``lpassh_add`` is known to work with:
+**lpassh-add** is known to work with:
 
 +-------------------------+----------+
 | Bourne-compatible shell | version  |
@@ -192,7 +190,7 @@ Download the repository from:
 Set-up
 ------
 
-Unpack the repository, copy ``lpassh-add`` to a directory in your ``PATH``,
+Unpack the repository, copy **lpassh-add** to a directory in your ``PATH``,
 and make it executable. You may also want to install the manual page.
 
 If you have `curl <https://curl.haxx.se/>`_ or
@@ -213,8 +211,8 @@ you can do so by::
     sudo cp "${PROG:?}" /usr/local/bin
     sudo cp "${PROG:?}.1.man" /usr/local/share/man/man1
 
-*Note:* ``lpassh-add`` *must* reside in a directory that's in your ``PATH``,
-or else ``ssh-add`` won't be able to find it.
+*Note:* **lpassh-add** *must* reside in a directory that's in your ``PATH``,
+or else **ssh-add** won't be able to find it.
 
 
 DOCUMENTATION
@@ -226,7 +224,7 @@ See the manual.
 CONCTACT
 ========
 
-If there's something wrong with ``lpassh-add``, `open an issue
+If there's something wrong with **lpassh-add**, `open an issue
 <https://github.com/odkr/lpassh-add/issues>`_.
 
 

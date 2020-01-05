@@ -8,8 +8,8 @@ the passphrases for those keys from LastPass, if possible. It is a *dumb*
 wrapper around ``ssh-add`` and the `LastPass command line client
 <https://github.com/lastpass/lastpass-cli>`_.
 
-``lpassh-add`` is but a short-ish shell script. (It's about 255 lines of
-code.) So you can easily check that it doesn't do anything funky.
+``lpassh-add`` is but a short-ish shell script.
+So you can easily check that it doesn't do anything funky.
 
 
 SYNOPSIS
@@ -79,41 +79,30 @@ For example:
 ENVIRONMENT
 ===========
 
-+----------------------------+-----------------------------------------------+
-| Variable                   | Description                                   |
-+============================+===============================================+
-| LPASSH_ADD_LASTPASS_FOLDER | LastPass folder you store your SSh keys in.   |
-|                            +-----------------------------------------------+
-|                            | Default: "SSh keys"                           |
-+----------------------------+-----------------------------------------------+
-| LPASSH_ADD_USERNAME        | A LastPass username. If set, ``lpassh-add``   |
-|                            | uses this username to log you into LastPass   |
-|                            | if you are not logged in already.             |
-|                            | If ``lpassh-add`` logs you in, it will also   |
-|                            | log you out once it's done.                   |
-|                            +-----------------------------------------------+
-|                            | Default: *none*                               |
-+----------------------------+-----------------------------------------------+
-| LPASSH_ADD_KEYS            | A list of absolute paths to OpenSSh private   |
-|                            | keys, separated by colons (':'); for example: |
-|                            | "$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa".    |
-|                            | If set to a non-empty value, ``lpassh-add``   |
-|                            | will ignore other keys.                       |
-|                            +-----------------------------------------------+
-|                            | Default: *empty* (Try all keys.)              |
-+----------------------------+-----------------------------------------------+
-| LPASSH_ADD_IGNORE_KEYS     | A list of absolute paths to OpenSSh private   |
-|                            | keys, separated by colons (':'); for example: |
-|                            | "$HOME/.ssh/id_rsa". If set to a non-empty    |
-|                            | value, ``lpassh-add`` will ignore those keys. |
-|                            +-----------------------------------------------+
-|                            | Default: *empty* (Don't ignore any key.)      |
-+----------------------------+-----------------------------------------------+
-| SSH_ASKPASS                | Utility to ask for passphrases you didn't     |
-|                            | store in LastPass if STDIN is not a terminal. |
-|                            +-----------------------------------------------+
-|                            | Default: *none*                               |
-+----------------------------+-----------------------------------------------+
+LPASSH_ADD_LASTPASS_FOLDER
+    LastPass folder you store your SSh keys in.
+    (Default: "SSh keys")
+
+LPASSH_ADD_USERNAME
+    A LastPass username.
+    If set, ``lpassh-add`` uses this username to log you into LastPass.
+    (Default: *none*, i.e., don't log into LastPass.)
+
+LPASSH_ADD_KEYS
+    A colon-separated list of absolute paths to OpenSSh private keys.
+    For example: "$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa".
+    If set to a non-empty value, ``lpassh-add`` will ignore other keys.
+    (Default: *empty*, i.e., try all keys.)
+
+LPASSH_ADD_IGNORE_KEYS
+    A colon-separated list of absolute paths to OpenSSh private keys.
+    For example: "$HOME/.ssh/id_rsa".
+    If set to a non-empty value, ``lpassh-add`` will ignore those keys.
+    (Default: *empty*, i.e., don't ignore any key.)
+
+SSH_ASKPASS
+  Utility to ask for passphrases.
+  (Default: *none*, i.e., read passphrases from the current TTY.)
 
 
 SECURITY

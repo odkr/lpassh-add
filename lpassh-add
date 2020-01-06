@@ -214,7 +214,6 @@ EOF
 # Runs `lpass` with the given arguments, 
 # but authenticates with $LASTPASS_PASSWORD.
 auth_lpass() {
-    warn "yo"
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
     LPASS_DISABLE_PINENTRY=1 lpass "$@" <<EOF
 $LASTPASS_PASSWORD

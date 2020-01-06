@@ -35,6 +35,9 @@
 # * I use:
 #       VAR=''
 #
+#   Or:
+#       VAR=''; unset VAR
+#
 #   Instead of:
 #       unset VAR
 #
@@ -95,7 +98,7 @@
 onexit() {
     __ONEXIT_STATUS=$?
     # shellcheck disable=2086
-    trap '' ${TRAPS-2 3 15} || :
+    trap '' ${TRAPS-2 15} || :
     set +e
     if [ "${EX-}" ]; then
         eval "$EX"
@@ -195,7 +198,7 @@ askpass() (
             "$util" "`exec sh -c 'echo $PPID'`"
         "$util" "$prompt"
     elif [ -c "$tty" ]; then
-        trapsig onexit 0 2 3 15
+        trapsig onexit 0 2 15
         exec 0<"$tty"
         exec 2>"$tty"
         # shellcheck disable=2016
@@ -230,6 +233,12 @@ EOF
 # shellcheck disable=2034
 BIN_SH=xpg4 NULLCMD=:
 export BIN_SH
+
+CLICOLOR_FORCE=
+unset CLICOLOR_FORCE
+export CLICOLOR_FORCE
+
+export POSIXLY_CORRECT=x
 
 set -Cefu
 umask 077
@@ -322,7 +331,7 @@ EOF
 fi
 
 # Make sure the temporary directory is set.
-if ! [ "${TMPDIR-}" ]; then
+if [ -z "${TMPDIR-}" ]; then
     : "${HOME:?'Not set or empty.'}"
     TMPDIR="$HOME"
 fi
@@ -332,7 +341,7 @@ for UTIL in "${LPASS_ASKPASS-}" "${SSH_ASKPASS-}"
 do
     [ "${UTIL-}" ] || continue
     # shellcheck disable=2006,2046
-    if [ "$UTIL" = `basename "$UTIL"` ]; then
+    if [ "$UTIL" = `expr "//$UTIL" : '.*/\(.*\)'` ]; then
         ASKPASS="$UTIL"
         break
     else
@@ -345,7 +354,7 @@ do
             # shellcheck disable=2006,2012
             set -- `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`
             [ $# -eq 3 ]      \
-                || panic 79 '%s: Cannot parse path.' "$ACC"
+                || panic 69 '%s: Cannot parse path.' "$ACC"
             [ "$2" -eq 0 ]    \
                 || panic 69 '%s: Not owned by root.' "$ACC"
             [ "$3" -lt 1000 ] \
@@ -367,7 +376,7 @@ TTY=`tty`  || :
 [ "$TTY" ] || panic 69 'Cannot determine TTY.'
 
 # Prepare cleanup.
-trapsig onexit 0 2 3 15
+trapsig onexit 0 2 15
 
 # Make temporary directory.
 # shellcheck disable=2006,2039
@@ -394,6 +403,10 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
         LASTPASS_PASSWORD=`askpass 'LastPass master password' "$TTY" "${ASKPASS-}"`
         [ "${LASTPASS_PASSWORD-}" ] || panic 64 'No password given.'
         LPASS=auth_lpass
+        # Make sure lpass reads from STDIN.
+        LPASS_ASKPASS=''
+        unset LPASS_ASKPASS
+        export LPASS_ASKPASS
     fi
     "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
         || panic 69 'Could not log into LastPass.'
@@ -411,7 +424,7 @@ ERR=0 KEY_IDS=`"$LPASS" ls "${LPASSH_ADD_LASTPASS_FOLDER-}" |
 
 # Create a FIFO to accept queries from the worker.
 PIPE="$MY_TMPDIR/pipe"
-mkfifo -m 0700 "$PIPE" || exit
+mkfifo -m 0700 "$PIPE" || exit 69
 
 
 # MAIN
@@ -438,7 +451,7 @@ do
 
         # Cache the result.
         var_cp "PUBKEY_$ID" PUBKEY
-        if ! [ "$PUBKEY" ]; then
+        if [ -z "$PUBKEY" ]; then
             # shellcheck disable=2006
             PUBKEY=`"$LPASS" show --field='Public Key' "$ID" 2>/dev/null` \
                 || ERR=$?
@@ -464,7 +477,7 @@ do
     askpass "Passphrase for $PRIVKEY_NEEDLE_FILE" "$TTY" "${ASKPASS-}"
 done <"$PIPE" | 
 (
-    trapsig onexit 0 2 3 15
+    trapsig onexit 0 2 15
     # shellcheck disable=2016
     EX='exec 3>&-'
     exec 3>"$PIPE"

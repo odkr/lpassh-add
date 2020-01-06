@@ -8,9 +8,11 @@ section: 1
 
 **lpassh-add** - Unlocks SSh keys using LastPass
 
+
 # SYNOPSIS
 
 **lpassh-add** accepts the same arguments as **ssh-add**.
+
 
 # DESCRIPTION
 
@@ -52,6 +54,7 @@ empty string (""), but this is slow.
 
 ![The LastPass client showing an entry for an SSh key.](illustration-lpass.png)
 
+
 # ENVIRONMENT
 
 LPASSH_ADD_LASTPASS_FOLDER  
@@ -89,6 +92,7 @@ SSH_ASKPASS
 :   Utility to ask for passphrases. Only used if `LPASS_ASKPASS` is *not* set.
     (Default: *unset*.)
 
+
 # SECURITY
 
 **lpassh-add** is but a shell script. You should read the source code and
@@ -117,14 +121,42 @@ access to that device; any other process you (or the superuser) runs can also
 read from that device. (This is true for *any* programme that reads data from
 a teletype device, including **ssh-add**.)
 
+
+# EXIT STATUS
+
+0
+:   Success.
+
+64
+:   Usage error.
+
+69
+:   Any other error.
+
+70
+:   A bug.
+
+> 128
+:   Terminated by a signal.
+
+Other non-zero status
+:   Unexpected error.
+
+**lpassh-add** may exit with other statuses on some systems (e.g., Solaris)
+or when run by some shells (e.g., **zsh**). However, you can safely assume
+that 0 indicates success and non-zero failure.
+
+
 # CAVEATS
 
 **lpassh-add** ignores your `PATH` and `IFS` as well as some of
 LastPass' environment variables.
 
+
 # AUTHOR
 
 Copyright 2018, 2019, 2020 Odin Kroeger
+
 
 # SEE ALSO
 

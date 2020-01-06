@@ -15,7 +15,7 @@
 LastPass.
 It only asks you for the passphrase for a key if it can\[aq]t find it
 there.
-.SS Mode of operation
+.SS How it works
 .PP
 \f[B]lpassh-add\f[R] calls \f[B]ssh-add\f[R], sets itself as
 \f[C]SSH_ASKPASS\f[R] utility, and:
@@ -46,14 +46,14 @@ private SSh keys in the \[dq]Passphrase\[dq] field of a so-called Secure
 Note of the type \[dq]SSH Key\[dq].
 You also need to store the public key that corresponds to that private
 key in the \[dq]Public Key\[dq] field of that note, so that
-\f[B]lpassh-add\f[R] can identify the entry of that key.
+\f[B]lpassh-add\f[R] can identify the entry as belonging to that key.
 Moreover, you need to place Secure Notes for SSh keys in a folder named
 \[dq]SSh keys\[dq].
 You can pick another folder by setting the environment variable
 \f[C]LPASSH_ADD_LASTPASS_FOLDER\f[R].
-You can also make \f[B]lpassh-add\f[R] search \f[I]all\f[R] LastPass
-folders, by setting \f[C]LPASSH_ADD_LASTPASS_FOLDER\f[R] to the empty
-string (\[dq]\[dq]), but this is slow.
+You can make \f[B]lpassh-add\f[R] search \f[I]all\f[R] LastPass folders,
+by setting \f[C]LPASSH_ADD_LASTPASS_FOLDER\f[R] to the empty string
+(\[dq]\[dq]), but this is slow.
 .SH ENVIRONMENT
 .TP
 .B LPASSH_ADD_LASTPASS_FOLDER
@@ -67,67 +67,106 @@ passphrases.
 A LastPass username.
 If set, \f[B]lpassh-add\f[R] uses this username to log you into LastPass
 if you aren\[aq]t logged in already.
-(Default: \f[I]none\f[R], i.e., don\[aq]t log into LastPass.)
+(Default: \f[I]unset\f[R].
+That is, don\[aq]t log into LastPass.)
 .TP
 .B LPASSH_ADD_KEYS
 A colon-separated list of absolute paths to private keys.
 For example: \f[C]$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa\f[R].
 If set to a non-empty value, \f[B]lpassh-add\f[R] will ignore other
 keys.
-(Default: \f[I]empty\f[R], i.e., try all keys.)
+(Default: \f[I]unset\f[R].
+That is, try all keys.)
 .TP
 .B LPASSH_ADD_IGNORE_KEYS
 A colon-separated list of absolute paths to private keys.
 For example: \f[C]$HOME/.ssh/id_rsa\f[R].
 If set to a non-empty value, \f[B]lpassh-add\f[R] will ignore those
 keys.
-(Default: \f[I]empty\f[R], i.e., don\[aq]t ignore any key.)
+(Default: \f[I]unset\f[R].
+That is, don\[aq]t ignore any key.)
+.TP
+.B LPASSH_ADD_AGENT_DISABLE
+0 (for false) or 1 (for true).
+Whether \f[B]lpassh-add\f[R] should use the LastPass agent.
+Any value other than 0 or 1 will be ignored.
+(Default: \f[I]unset\f[R].
+That is, respect \f[C]LPASS_AGENT_DISABLE\f[R].)
+.TP
+.B LPASS_ASKPASS
+Utility to ask for passphrases.
+Takes precedence over \f[C]SSH_ASKPASS\f[R].
+(Default: \f[I]unset\f[R].)
 .TP
 .B SSH_ASKPASS
 Utility to ask for passphrases.
-(Default: \f[I]none\f[R].)
+Only used if \f[C]LPASS_ASKPASS\f[R] is \f[I]not\f[R] set.
+(Default: \f[I]unset\f[R].)
 .SH SECURITY
 .PP
 \f[B]lpassh-add\f[R] is but a shell script.
 You should read the source code and evaluate the security risks
 yourself.
-Above all, since \f[B]lpassh-add\f[R] is but a wrapper around OpenSSh
-and the LastPass command line client, their threat models apply.
+Above all, since \f[B]lpassh-add\f[R] is a wrapper around OpenSSh and
+the LastPass command line client, their threat models apply.
 .PP
 \f[B]lpassh-add\f[R] itself trusts your system (i.e., your terminal
-emulator, the shell, the utilities it calls, etc.), the LastPass command
-line client, and your environment.
+emulator, the shell, the utilities it calls, etc.), OpenSSh, the
+LastPass command line client, and your environment.
 That said, it overrides the environment variables \f[C]PATH\f[R],
-\f[C]IFS\f[R], \f[C]LPASS_AGENT_DISABLE\f[R],
-\f[C]LPASS_DISABLE_PINENTRY\f[R], \f[C]LPASS_PINENTRY\f[R], and
-\f[C]LPASS_AUTO_SYNC_TIME\f[R].
+\f[C]IFS\f[R], and \f[C]LPASS_AUTO_SYNC_TIME\f[R].
 Moreover, it checks the permissions of the utility \f[C]SSH_ASKPASS\f[R]
 points to.
 .PP
-\f[B]lpassh-add\f[R] does \f[I]not\f[R] use the LastPass agent.
-This is because every programme that runs under your user (or as the
-superuser) can get a copy of your password database while the LastPass
-agent is running, by calling \f[C]lpass export\f[R].
-This conforms to their threat model, but it may still make you feel
-uneasy.
+If you\[aq]re using the LastPass agent, any programme that you (or the
+superuser) runs can get a copy of your password database by calling
+\f[C]lpass export\f[R] while the agent is running.
+This conforms to LastPass\[aq] threat model, but it may still make you
+feel uneasy.
+You can use \f[B]lpassh-add\f[R] \f[I]without\f[R] using the LastPass
+agent, by setting \f[C]LPASSH_ADD_AGENT_DISABLE\f[R] or
+\f[C]LPASS_AGENT_DISABLE\f[R] to 1.
+\f[B]lpassh-add\f[R] will still only ask you for your LastPass password
+once.
+However, it will store a copy of that password in memory while it\[aq]s
+running.
+(If you\[aq]re using the LastPass agent, it won\[aq]t.)
 .PP
-\f[I]Note:\f[R] \f[B]lpass\f[R] reads environment settings from
-\f[C]$HOME/.lpass/env\f[R], so you can still override these settings.
-.PP
-You should be aware that if you do \f[I]not\f[R] set
-\f[C]SSH_ASKPASS\f[R], \f[B]lpassh-add\f[R] will prompt you for
-passphrases and read them from the teletype device of your terminal.
+If you do \f[I]not\f[R] set \f[C]SSH_ASKPASS\f[R], \f[B]lpassh-add\f[R]
+will read passphrases from the teletype device of your terminal.
 However, it does \f[I]not\f[R] have exclusive access to that device; any
-other process that runs under your user (or as the superuser) can also
-read from that device.
-(This is true for \f[I]any\f[R] programme that prompts you for a
-password and reads the answer from a teletype device, including
-\f[B]ssh-add\f[R].)
+other process you (or the superuser) runs can also read from that
+device.
+(This is true for \f[I]any\f[R] programme that reads data from a
+teletype device, including \f[B]ssh-add\f[R].)
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 64
+Usage error.
+.TP
+.B 69
+Any other error.
+.TP
+.B 70
+A bug.
+.TP
+.B > 128
+Terminated by a signal.
+.TP
+.B Other non-zero status
+Unexpected error.
+.PP
+\f[B]lpassh-add\f[R] may exit with other statuses on some systems (e.g.,
+Solaris) or when run by some shells (e.g., \f[B]zsh\f[R]).
+However, you can safely assume that 0 indicates success and non-zero
+failure.
 .SH CAVEATS
 .PP
 \f[B]lpassh-add\f[R] ignores your \f[C]PATH\f[R] and \f[C]IFS\f[R] as
-well as some of LastPass\[aq] environment variables (see
-\f[I]SECURITY\f[R] for details).
+well as some of LastPass\[aq] environment variables.
 .SH AUTHOR
 .PP
 Copyright 2018, 2019, 2020 Odin Kroeger

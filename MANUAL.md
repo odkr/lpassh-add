@@ -10,43 +10,43 @@
 
 **lpassh-add** adds SSh keys to the SSh agent, just as **ssh-add**
 would, but looks up the passphrases for those keys in LastPass. It only
-asks you for the passphrase for a key if it can’t find it there.
+asks you for the passphrase for a key if it can't find it there.
 
-## Mode of operation
+## How it works
 
 **lpassh-add** calls **ssh-add**, sets itself as `SSH_ASKPASS` utility,
 and:
 
-1.  extracts the filename of the private key from the passphrase prompt,
-2.  uses that filename to locate the corresponding public key file,
-3.  searches LastPass for a Secure Note that lists that public key, and
-4.  passes on the passphrase stored in that note to **ssh-add**.
+1. extracts the filename of the private key from the passphrase prompt,
+2. uses that filename to locate the corresponding public key file,
+3. searches LastPass for a Secure Note that lists that public key, and
+4. passes on the passphrase stored in that note to **ssh-add**.
 
-If it doesn’t find the passphrase of a key in LastPass, it asks you for
+If it doesn't find the passphrase of a key in LastPass, it asks you for
 it.
 
-If you’re not logged into LastPass and `LPASSH_ADD_USERNAME` is set,
+If you're not logged into LastPass and `LPASSH_ADD_USERNAME` is set,
 **lpassh-add** logs you into LastPass. It also logs you out again.
 
 ## Where to store SSh keys
 
 *Filesystem:* You need to store public and private keys in the same
 directory, with the filename of the public key being that of the private
-key, save for also ending with ‘.pub’. (This is what OpenSSh does by
+key, save for also ending with '.pub'. (This is what OpenSSh does by
 default.)
 
 ![A terminal client showing files.](illustration-keys.png)
 
 *LastPass:* You need to store the passphrase for each of your private
-SSh keys in the “Passphrase” field of a so-called Secure Note of the
-type “SSH Key”. You also need to store the public key that corresponds
-to that private key in the “Public Key” field of that note, so that
-**lpassh-add** can identify the entry of that key. Moreover, you need to
-place Secure Notes for SSh keys in a folder named “SSh keys”. You can
-pick another folder by setting the environment variable
-`LPASSH_ADD_LASTPASS_FOLDER`. You can also make **lpassh-add** search
-*all* LastPass folders, by setting `LPASSH_ADD_LASTPASS_FOLDER` to the
-empty string (""), but this is slow.
+SSh keys in the "Passphrase" field of a so-called Secure Note of the
+type "SSH Key". You also need to store the public key that corresponds
+to that private key in the "Public Key" field of that note, so that
+**lpassh-add** can identify the entry as belonging to that key.
+Moreover, you need to place Secure Notes for SSh keys in a folder named
+"SSh keys". You can pick another folder by setting the environment
+variable `LPASSH_ADD_LASTPASS_FOLDER`. You can make **lpassh-add**
+search *all* LastPass folders, by setting `LPASSH_ADD_LASTPASS_FOLDER`
+to the empty string (""), but this is slow.
 
 ![The LastPass client showing an entry for an SSh
 key.](illustration-lpass.png)
@@ -55,61 +55,87 @@ key.](illustration-lpass.png)
 
   - LPASSH\_ADD\_LASTPASS\_FOLDER  
     LastPass folder you store your SSh keys in. If you set this variable
-    to the empty string ("“), then **lpassh-add** will search *all*
-    LastPass folders for passphrases. (Default:”SSh keys")
+    to the empty string (""), then **lpassh-add** will search *all*
+    LastPass folders for passphrases. (Default: "SSh keys")
   - LPASSH\_ADD\_USERNAME  
     A LastPass username. If set, **lpassh-add** uses this username to
-    log you into LastPass if you aren’t logged in already. (Default:
-    *none*, i.e., don’t log into LastPass.)
+    log you into LastPass if you aren't logged in already. (Default:
+    *unset*. That is, don't log into LastPass.)
   - LPASSH\_ADD\_KEYS  
     A colon-separated list of absolute paths to private keys. For
     example: `$HOME/.ssh/id_ed25519:$HOME/.ssh/id_rsa`. If set to a
     non-empty value, **lpassh-add** will ignore other keys. (Default:
-    *empty*, i.e., try all keys.)
+    *unset*. That is, try all keys.)
   - LPASSH\_ADD\_IGNORE\_KEYS  
     A colon-separated list of absolute paths to private keys. For
     example: `$HOME/.ssh/id_rsa`. If set to a non-empty value,
-    **lpassh-add** will ignore those keys. (Default: *empty*, i.e.,
-    don’t ignore any key.)
+    **lpassh-add** will ignore those keys. (Default: *unset*. That is,
+    don't ignore any key.)
+  - LPASSH\_ADD\_AGENT\_DISABLE  
+    0 (for false) or 1 (for true). Whether **lpassh-add** should use the
+    LastPass agent. Any value other than 0 or 1 will be ignored.
+    (Default: *unset*. That is, respect `LPASS_AGENT_DISABLE`.)
+  - LPASS\_ASKPASS  
+    Utility to ask for passphrases. Takes precedence over `SSH_ASKPASS`.
+    (Default: *unset*.)
   - SSH\_ASKPASS  
-    Utility to ask for passphrases. (Default: *none*.)
+    Utility to ask for passphrases. Only used if `LPASS_ASKPASS` is
+    *not* set. (Default: *unset*.)
 
 # SECURITY
 
 **lpassh-add** is but a shell script. You should read the source code
 and evaluate the security risks yourself. Above all, since
-**lpassh-add** is but a wrapper around OpenSSh and the LastPass command
-line client, their threat models apply.
+**lpassh-add** is a wrapper around OpenSSh and the LastPass command line
+client, their threat models apply.
 
 **lpassh-add** itself trusts your system (i.e., your terminal emulator,
-the shell, the utilities it calls, etc.), the LastPass command line
-client, and your environment. That said, it overrides the environment
-variables `PATH`, `IFS`, `LPASS_AGENT_DISABLE`,
-`LPASS_DISABLE_PINENTRY`, `LPASS_PINENTRY`, and `LPASS_AUTO_SYNC_TIME`.
+the shell, the utilities it calls, etc.), OpenSSh, the LastPass command
+line client, and your environment. That said, it overrides the
+environment variables `PATH`, `IFS`, and `LPASS_AUTO_SYNC_TIME`.
 Moreover, it checks the permissions of the utility `SSH_ASKPASS` points
 to.
 
-**lpassh-add** does *not* use the LastPass agent. This is because every
-programme that runs under your user (or as the superuser) can get a copy
-of your password database while the LastPass agent is running, by
-calling `lpass export`. This conforms to their threat model, but it may
-still make you feel uneasy.
+If you're using the LastPass agent, any programme that you (or the
+superuser) runs can get a copy of your password database by calling
+`lpass export` while the agent is running. This conforms to LastPass'
+threat model, but it may still make you feel uneasy. You can use
+**lpassh-add** *without* using the LastPass agent, by setting
+`LPASSH_ADD_AGENT_DISABLE` or `LPASS_AGENT_DISABLE` to 1. **lpassh-add**
+will still only ask you for your LastPass password once. However, it
+will store a copy of that password in memory while it's running. (If
+you're using the LastPass agent, it won't.)
 
-*Note:* **lpass** reads environment settings from `$HOME/.lpass/env`, so
-you can still override these settings.
+If you do *not* set `SSH_ASKPASS`, **lpassh-add** will read passphrases
+from the teletype device of your terminal. However, it does *not* have
+exclusive access to that device; any other process you (or the
+superuser) runs can also read from that device. (This is true for *any*
+programme that reads data from a teletype device, including
+**ssh-add**.)
 
-You should be aware that if you do *not* set `SSH_ASKPASS`,
-**lpassh-add** will prompt you for passphrases and read them from the
-teletype device of your terminal. However, it does *not* have exclusive
-access to that device; any other process that runs under your user (or
-as the superuser) can also read from that device. (This is true for
-*any* programme that prompts you for a password and reads the answer
-from a teletype device, including **ssh-add**.)
+# EXIT STATUS
+
+  - 0  
+    Success.
+  - 64  
+    Usage error.
+  - 69  
+    Any other error.
+  - 70  
+    A bug.
+  - \> 128  
+    Terminated by a signal.
+  - Other non-zero status  
+    Unexpected error.
+
+**lpassh-add** may exit with other statuses on some systems (e.g.,
+Solaris) or when run by some shells (e.g., **zsh**). However, you can
+safely assume that 0 indicates success and non-zero failure.
 
 # CAVEATS
 
 **lpassh-add** ignores your `PATH` and `IFS` as well as some of
-LastPass’ environment variables (see *SECURITY* for details).
+LastPass' environment variables.
 
 # AUTHOR
 

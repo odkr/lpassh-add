@@ -26,8 +26,9 @@ Apart from OpenSSh and the LastPass command line client, **lpassh-add** is
 So it should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, or macOS). **lpassh-add** also *aims* to be
 [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/)-compatible.
-So it should also run on many older Unix systems
-(you may need to adapt the shebang line).
+So it should also run on many older Unix systems. However, you may need to
+change the shebang line, so that it points to a POSIX-compliant shell
+(e.g., on Solaris).
 
 Download the repository from:
 <https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
@@ -44,14 +45,12 @@ you can do all of the above by:
     PROG="${NAME:?}-${VERS:?}/${NAME:?}"
     URL="https://github.com/odkr/${NAME:?}/archive/v${VERS:?}.tar.gz"
     {
-        ERR=0
-        curl -L "$URL" || ERR=$?
+        ERR=0; curl -L "$URL" || ERR=$?
         [ "$ERR" -eq 127 ] && wget -q -O - "$URL"
     } | tar -xz
     # Check the source!
     more "${PROG:?}"
-    # If you like what you've seen, continue by:
-    sudo mkdir -pm 0755 /usr/local/bin
+    # If you like what see, continue by:
     sudo cp "${PROG:?}" /usr/local/bin
     sudo cp "${PROG:?}.1" /usr/local/share/man/man1
 ```

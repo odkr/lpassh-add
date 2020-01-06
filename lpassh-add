@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.0b - Get SSh private key passphrases from LastPass
+# lpass-ssh-add v1.1.0b - Unlock SSh keys using LastPass
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -102,7 +102,7 @@ onexit() {
     set +e
     if [ "${EX-}" ]; then
         eval "$EX"
-        EX=''
+        unset EX
     fi
     # shellcheck disable=2006
     if [ "${1-0}" -gt 0 ]; then
@@ -170,7 +170,7 @@ var_cp() {
 }
 
 # Takes a NEEDLE and STRAWs as arguments,
-# returns true if NEEDLE equals one STRAW.
+# returns true if NEEDLE equals a STRAW.
 contains() (
     needle="${1:?'contains: missing NEEDLE.'}"
     shift
@@ -215,7 +215,7 @@ EOF
 )
 
 # Runs `lpass` with the given arguments, 
-# but authenticates with $LASTPASS_PASSWORD.
+# authenticating with $LASTPASS_PASSWORD.
 auth_lpass() {
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
     LPASS_DISABLE_PINENTRY=1 lpass "$@" <<EOF
@@ -231,14 +231,8 @@ EOF
 [ "$BASH_VERSION" ] && set -o posix
 [ "$ZSH_VERSION"  ] && emulate sh 2>/dev/null
 # shellcheck disable=2034
-BIN_SH=xpg4 NULLCMD=:
-export BIN_SH
-
-CLICOLOR_FORCE=
-unset CLICOLOR_FORCE
-export CLICOLOR_FORCE
-
-export POSIXLY_CORRECT=x
+BIN_SH=xpg4 NULLCMD=: POSIXLY_CORRECT=x CLICOLOR_FORCE=''
+export BIN_SH CLICOLOR_FORCE POSIXLY_CORRECT
 
 set -Cefu
 umask 077
@@ -368,7 +362,7 @@ do
         break
     fi
 done
-export PATH IFS PWD
+export PATH IFS
 
 # Check what TTY to read passwords from.
 # shellcheck disable=2006
@@ -381,7 +375,6 @@ trapsig onexit 0 2 15
 # Make temporary directory.
 # shellcheck disable=2006,2039
 RAND="${RANDOM:-`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
-# shellcheck disable=2039
 TMP_NAME="$RAND-$$"
 # shellcheck disable=2006
 NAME_MAX=`getconf NAME_MAX "$TMPDIR" 2>/dev/null` || NAME_MAX=14

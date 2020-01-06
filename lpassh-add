@@ -42,7 +42,7 @@
 # * I use:
 #       command || ...
 #   Or
-#       command || { ... }
+#       command || STATUS=$?
 #
 #   Instead of:
 #       if ! command; then ...
@@ -211,16 +211,15 @@ EOF
     fi
 )
 
-# Takes a PASSWORD and ARGUMENTS for `lpass` and
-# runs `lpass` with ARGUMENTS, authenticating with PASSWORD.
-auth_lpass() (
-    password="${1?'auth_lpass: missing PASSWORD.'}"
-    shift
+# Runs `lpass` with the given arguments, 
+# but authenticates with $LASTPASS_PASSWORD.
+auth_lpass() {
+    warn "yo"
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
-    exec lpass "$@" <<EOF
-$password
+    LPASS_DISABLE_PINENTRY=1 lpass "$@" <<EOF
+$LASTPASS_PASSWORD
 EOF
-)
+}
 
 
 # SETTINGS
@@ -237,12 +236,11 @@ set -Cefu
 umask 077
 
 : "${LPASSH_ADD_LASTPASS_FOLDER="SSh keys"}"
-[ "${LPASS_AGENT_DISABLE-0}"    -eq 1 ] || LPASS_AGENT_DISABLE=1
-[ "${LPASS_DISABLE_PINENTRY-0}" -eq 1 ] || LPASS_DISABLE_PINENTRY=1
-[ "${LPASS_AGENT_PINENTRY-}" ]          && LPASS_PINENTRY=''
-LPASS_AUTO_SYNC_TIME=30
-export LPASS_AGENT_DISABLE LPASS_DISABLE_PINENTRY \
-    LPASS_PINENTRY LPASS_AUTO_SYNC_TIME
+export LPASS_AUTO_SYNC_TIME=30
+
+case "${LPASSH_ADD_AGENT_DISABLE-}" in
+    0|1) export LPASS_AGENT_DISABLE="$LPASSH_ADD_AGENT_DISABLE";;
+esac
 
 
 # WORKER
@@ -330,11 +328,15 @@ if ! [ "${TMPDIR-}" ]; then
     TMPDIR="$HOME"
 fi
 
+# TODO:
+# * Use LPASS_ASKPASS and prefer it over SSH_ASKPASS.
+# * Set ASKPASS to askpass and skip the whole test nonsense.
+
 # Make sure SSH_ASKPASS points to a system programme.
 if [ "${SSH_ASKPASS-}" ]; then
     # shellcheck disable=2006,2046
     if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
-        MY_ASKPASS="$SSH_ASKPASS"
+        ASKPASS="$SSH_ASKPASS"
     else
         IFS=/
         for ELEM in $SSH_ASKPASS
@@ -355,7 +357,7 @@ if [ "${SSH_ASKPASS-}" ]; then
                 *w*) panic 69 '%s: Non-owner writeable.' "$ACC" ;;
             esac
         done
-        MY_ASKPASS="$SSH_ASKPASS"
+        ASKPASS="$SSH_ASKPASS"
     fi
 fi
 export PATH IFS PWD
@@ -384,27 +386,29 @@ mkdir -m 0700 "$MY_TMPDIR" || exit 69
 export TMPDIR="$MY_TMPDIR"
 
 # Log into LastPass if necessary.
-PASSWORD=''
-lpass status --quiet || {
+LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PASSWORD=''
+lpass status --quiet || LASTPASS_STATUS=$?
+if [ "$LASTPASS_STATUS" -ne 0 ]; then
     [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
-    # shellcheck disable=2006
-    PASSWORD=`askpass 'LastPass master password' "$TTY" "${MY_ASKPASS-}"`
-    [ "${PASSWORD-}" ] || panic 64 'No password given.'
-    auth_lpass "$PASSWORD" login --color=never "$LPASSH_ADD_USERNAME" \
-        1>/dev/null 2>&1 || panic 69 'Could not log into LastPass.'
+    if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
+        # shellcheck disable=2006
+        LASTPASS_PASSWORD=`askpass 'LastPass master password' "$TTY" "${ASKPASS-}"`
+        [ "${LASTPASS_PASSWORD-}" ] || panic 64 'No password given.'
+        LPASS=auth_lpass
+    fi
+    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
+        || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016
     EX="lpass logout --force >/dev/null; $EX"
-}
+fi
+readonly LASTPASS_PASSWORD
 
 # Lookup the LastPass IDs of all SSh keys.
 # shellcheck disable=2006
-KEY_IDS=`if [ "${LPASSH_ADD_LASTPASS_FOLDER-}" ]
-            then auth_lpass "$PASSWORD" ls "$LPASSH_ADD_LASTPASS_FOLDER"
-            else auth_lpass "$PASSWORD" ls
-         fi |
-         sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'` || ERR=$?
-[ "${ERR-0}" -eq 0 ] || panic 69 'Could not retrieve IDs from LastPass.'
-[ "$KEY_IDS" ] || panic 0 'No SSh keys found in LastPass.'
+ERR=0 KEY_IDS=`"$LPASS" ls "${LPASSH_ADD_LASTPASS_FOLDER-}" |
+               sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'` || ERR=$?
+[ "$ERR" -eq 0 ] || panic 69 'Could not retrieve IDs from LastPass.'
+[ "$KEY_IDS"   ] || panic 69 'No SSh keys found in LastPass.'
 
 # Create a FIFO to accept queries from the worker.
 PIPE="$MY_TMPDIR/pipe"
@@ -417,10 +421,12 @@ mkfifo -m 0700 "$PIPE" || exit
 # shellcheck disable=2094
 while read -r PRIVKEY_NEEDLE_FILE
 do
+    ERR=0
+
     # Read the public key file.
     [ "$PRIVKEY_NEEDLE_FILE" ] || continue
     read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
-    if [ ${ERR-0} -gt 1 ]; then 
+    if [ "$ERR" -gt 1 ]; then 
         warn 'read: Returned %d.' "$ERR"
         continue
     fi
@@ -429,33 +435,34 @@ do
     HIT=''
     for ID in $KEY_IDS
     do
+        ERR=0
+
         # Cache the result.
-        var_cp "PUBKEY_$ID" PUBKEY_STRAW
-        if ! [ "$PUBKEY_STRAW" ]; then
+        var_cp "PUBKEY_$ID" PUBKEY
+        if ! [ "$PUBKEY" ]; then
             # shellcheck disable=2006
-            ERR=0 PUBKEY_STRAW=`auth_lpass "$PASSWORD" show \
-                --field='Public Key' "$ID" 2>/dev/null` || ERR=$?
-            [ "${ERR-0}" -eq 0 ] || continue
-            [ "$PUBKEY_STRAW" ] || PUBKEY_STRAW="<not found>"
-            var_cp PUBKEY_STRAW "PUBKEY_$ID"
+            PUBKEY=`"$LPASS" show --field='Public Key' "$ID" 2>/dev/null` \
+                || ERR=$?
+            [ "$ERR" -eq 0 ] || continue
+            [ "$PUBKEY"    ] || PUBKEY="<not found>"
+            var_cp PUBKEY "PUBKEY_$ID"
         fi
 
         # Tell the worker the password.
-        if [ "$PUBKEY_STRAW" = "$PUBKEY_NEEDLE" ]; then
-            auth_lpass "$PASSWORD" show --field=Passphrase "$ID" || ERR=$?
-            if [ "${ERR-0}" -ne 0 ]; then
-                warn 'lpass: Returned %d.' "$ERR"
-                continue
+        if [ "$PUBKEY" = "$PUBKEY_NEEDLE" ]; then
+            "$LPASS" show --field=Passphrase "$ID" || ERR=$?
+            if [ "$ERR" -eq 0 ]; then
+                HIT=x
+                break
             fi
-            HIT=x
-            break
+            warn 'lpass: Returned %d.' "$ERR"
         fi
     done
 
     # Ask for the password if we didn't find it in LastPass.
     [ "$HIT" ] && continue
     warn '%s: Not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
-    askpass "Passphrase for $PRIVKEY_NEEDLE_FILE" "$TTY" "${MY_ASKPASS-}"
+    askpass "Passphrase for $PRIVKEY_NEEDLE_FILE" "$TTY" "${ASKPASS-}"
 done <"$PIPE" | 
 (
     trapsig onexit 0 2 3 15

@@ -81,8 +81,12 @@ LPASSH_ADD_AGENT_DISABLE
     LastPass agent. Any value other than 0 or 1 will be ignored.
     (Default: *unset*. That is, respect `LPASS_AGENT_DISABLE`.)
 
+LPASS_ASKPASS
+:   Utility to ask for passphrases. Takes precedence over `SSH_ASKPASS`.
+    (Default: *unset*.)
+
 SSH_ASKPASS
-:   Utility to ask for passphrases.
+:   Utility to ask for passphrases. Only used if `LPASS_ASKPASS` is *not* set.
     (Default: *unset*.)
 
 # SECURITY

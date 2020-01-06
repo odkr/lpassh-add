@@ -328,18 +328,17 @@ if ! [ "${TMPDIR-}" ]; then
     TMPDIR="$HOME"
 fi
 
-# TODO:
-# * Use LPASS_ASKPASS and prefer it over SSH_ASKPASS.
-# * Set ASKPASS to askpass and skip the whole test nonsense.
-
-# Make sure SSH_ASKPASS points to a system programme.
-if [ "${SSH_ASKPASS-}" ]; then
+# Make sure LPASS_ASKPASS and SSH_ASKPASS point to a system programme.
+for UTIL in "${LPASS_ASKPASS-}" "${SSH_ASKPASS-}"
+do
+    [ "${UTIL-}" ] || continue
     # shellcheck disable=2006,2046
-    if [ "$SSH_ASKPASS" = `basename "$SSH_ASKPASS"` ]; then
-        ASKPASS="$SSH_ASKPASS"
+    if [ "$UTIL" = `basename "$UTIL"` ]; then
+        ASKPASS="$UTIL"
+        break
     else
         IFS=/
-        for ELEM in $SSH_ASKPASS
+        for ELEM in $UTIL
         do
             unset IFS
             [ "$ELEM" ] || continue
@@ -357,9 +356,10 @@ if [ "${SSH_ASKPASS-}" ]; then
                 *w*) panic 69 '%s: Non-owner writeable.' "$ACC" ;;
             esac
         done
-        ASKPASS="$SSH_ASKPASS"
+        ASKPASS="$UTIL"
+        break
     fi
-fi
+done
 export PATH IFS PWD
 
 # Check what TTY to read passwords from.

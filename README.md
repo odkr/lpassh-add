@@ -56,7 +56,7 @@ you can do all of the above by:
 ```
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
-or else **ssh-add** won't be able to find it.
+or else **ssh-add** may *not* be able to find it.
 
 
 ## DOCUMENTATION

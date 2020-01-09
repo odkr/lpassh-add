@@ -35,19 +35,19 @@ OPTIONS
 
 Most of these options are simply passed through to **ssh-add**.
 
--c
+\-c
    Confirm every use of an identity.
 
--h
+\-h
    Show help.
 
--q
+\-q
    Be quieter.
 
--t **LIFETIME**
+\-t **LIFETIME**
    Automatically re-lock keys after **LIFETIME**.
 
--V
+\-V
    Show version.
 
 

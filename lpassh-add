@@ -108,7 +108,8 @@ trapsig() {
         # shellcheck disable=2064
         trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNO"
         # shellcheck disable=2086
-        for __TRAPSIG_TRAPPED in 0 ${TRAPS-}; do
+        for __TRAPSIG_TRAPPED in 0 ${TRAPS-}
+        do
             [ "$__TRAPSIG_SIGNO" -eq "$__TRAPSIG_TRAPPED" ] && continue 2
         done
         TRAPS="${TRAPS-} $__TRAPSIG_SIGNO"
@@ -297,7 +298,8 @@ unset IFS
 # ==============
 
 # Parse arguments.
-while [ $# -gt 0 ]; do
+while [ $# -gt 0 ]
+do
     ARG="$1"
     case $ARG in
         -[cq])
@@ -372,7 +374,7 @@ do
                 [ "$ELEM" ] || continue
                 ACC="${ACC-}/$ELEM"
                 # shellcheck disable=2012,2121         
-                set x `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`; shift
+                set -- `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`
                 [ $# -eq 3 ]      \
                     || panic 69 '%s: Cannot parse stats.' "$ACC"
                 [ "$2" -eq 0 ]    \
@@ -436,8 +438,7 @@ IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_LPASS_PATH_REGEX"`
 # shellcheck disable=2121
 if [ $# -eq 0 ]; then
     PF="$HOME/.ssh/id_"
-    set x "${PF}rsa" "${PF}dsa" "${PF}ecdsa" "${PF}ed25519"
-    shift
+    set -- "${PF}rsa" "${PF}dsa" "${PF}ecdsa" "${PF}ed25519"
 else
     KEYS_GIVEN=x
 fi
@@ -459,7 +460,8 @@ $PASS
 EOF
 
     # Try every passphrase.
-    for ID in $IDS; do
+    for ID in $IDS
+    do
         case "$ID" in *[!0-9]*) continue; esac
         eval "PASS=\"\${PASS_$ID-}\""
         if [ -z "$PASS" ]; then
@@ -475,7 +477,8 @@ EOF
     [ "${QUIET-}" ] || warn '%s: No passphrase from LastPass matches.' "$KEY"
 
     ITER=0 MAX_RETRIES=2
-    while [ "$ITER" -lt "$MAX_RETRIES" ]; do
+    while [ "$ITER" -lt "$MAX_RETRIES" ]
+    do
         case $ITER in
             0) PROMPT="Passphrase for $KEY:";;
             1) PROMPT="Wrong passphrase for $KEY. Re-try:";;

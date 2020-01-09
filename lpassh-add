@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.0b - Unlock SSh keys using LastPass
+# lpass-ssh-add v1.1.0b - Unlock SSh keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -29,72 +29,39 @@
 #
 # This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
 # This requires it to run on buggy shells, shells that are buggy. This, 
-# in turn, necessitates some *weird* constructs; in order of appearance:
+# in turn, necessitates some *weird* constructs.
 #
-# onexit():
-# * I use:
-#       VAR=''
-#
-#   Or:
-#       VAR=''; unset VAR
-#
-#   Instead of:
-#       unset VAR
-#
-# onexit(), main script:
-# * I use:
-#       command || ...
-#   Or
-#       command || STATUS=$?
-#
-#   Instead of:
-#       if ! command; then ...
-#
-# regex():
-# * I use:
-#       foo=`sed 'pattern' <<EOF
-#       $bar
-#       EOF`
-#
-#   Instead of:
-#       foo="${bar#pattern}"
-#
-# main script:
-# * I use:
-#       cat <<EOF
-#       $var
-#       EOF
-#
-#   Instead of:
-#       echo "$var"
-#
-#   Or:
-#       printf -- '%s\n' "$var"
-#
-#   Neither `echo` nor `printf` are safe with arbitrary input.
-#   Also, in some shells `echo` and `printf` are not builtins, to the
-#   effect that they, and "$var", would show up in the output of `ps`.
-#   This would allow any user on a system to snoop passwords.
-#
-# * I use:
-#       `...`
-#
-#   Instead of:
-#       $(...)
-#
-# * I test whether any arguments have been passed before referencing `$@`
-#   because some shells will abort if `$@` is referenced but no arguments
-#   have been given and `set -u` is in effect.
-#
-# * I create temporary directories myself, instead of using `mktemp` or
-#   `m4`. POSIX does not require `mktemp`. And many Linux distributions
-#   don't ship with `m4`.
+# See:
+# * <https://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Portable-Shell.html>
+# * <https://www.in-ulm.de/~mascheck/bourne/>
 
 
 # FUNCTIONS
 # =========
 
-# Runs `$EX`, propagates the signal received, kills children, and exits.
+# onexit - Run code on exit.
+# 
+# Synopsis:
+#   onexit SIGNO
+#
+# Description:
+#   * Runs the shell code in the global variable $EX.
+#   * If SIGNO is greater than 0, propagates that signal to the process group.
+#   * If SIGNO isn't given or 0, terminates all children.
+#   * Exits the script.
+#
+# Arguments:
+#   SIGNO (integer):
+#       A signal number.
+#
+# Global variables:
+#   EX (string): 
+#       Code to be run. Unset thereafter.
+#   TRAPS (space-separated list of integers):
+#       Signal numbers traps have been registered for (read-only).
+# 
+# Exits with:
+#   The value of $? at the time it was called.
 onexit() {
     __ONEXIT_STATUS=$?
     # shellcheck disable=2086
@@ -104,107 +71,153 @@ onexit() {
         eval "$EX"
         unset EX
     fi
-    # shellcheck disable=2006
-    if [ "${1-0}" -gt 0 ]; then
-        kill "-$1" "-$$"
-    else
-        # shellcheck disable=2046
-        __ONEXIT_CHILDREN=`jobs -p 2>/dev/null`
-        # shellcheck disable=2086
-        [ "${__ONEXIT_CHILDREN-}" ] && kill $__ONEXIT_CHILDREN 2>/dev/null
-    fi
+    if [ "${1-0}" -gt 0 ]
+        then kill "-$1" "-$$"
+        else jobs -p | xargs kill
+    fi 2>/dev/null
     exit "$__ONEXIT_STATUS"
 }
 
-# Registers a HANDLER for signals. Has the same function signature as `trap`.
-# Stores every signal it registers a HANDLER for into the global $TRAPS.
+# trapsig - Register functions to trap signals.
+#
+# Synopsis:
+#   trapsig FUNCTION SIGNO
+#
+# Description:
+#   Registers FUNCTIOn to handle SIGNO.
+#
+# Arguments:
+#   FUNCTION (string):
+#       A shell function.
+#   SIGNO (integer):
+#       A signal number or 0 for "on programme exit".
+#
+# Global variables:
+#   TRAPS (space-separated list of integers):
+#       Signal numbers traps have been registered for. 
+#       Adds every SIGNO to TRAPS.
+#
+# Returns:
+#   0:
+#       Always.
 trapsig() {
-    __TRAPSIG_HANDLER="${1:?'missing HANDLER.'}"
+    __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
     shift
-    for __TRAPSIG_SIGNAL
+    for __TRAPSIG_SIGNO
     do
         # shellcheck disable=2064
-        trap "$__TRAPSIG_HANDLER $__TRAPSIG_SIGNAL" "$__TRAPSIG_SIGNAL"
+        trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNO"
         # shellcheck disable=2086
-        contains "$__TRAPSIG_SIGNAL" EXIT 0 ${TRAPS:=} || \
-            TRAPS="$TRAPS $__TRAPSIG_SIGNAL"
+        for __TRAPSIG_TRAPPED in 0 ${TRAPS-}; do
+            [ "$__TRAPSIG_SIGNO" -eq "$__TRAPSIG_TRAPPED" ] && continue 2
+        done
+        TRAPS="${TRAPS-} $__TRAPSIG_SIGNO"
     done
 }
 
-# Takes a MESSAGE and ARGUMENTS (think `printf`) and
-# prints the formated MESSAGE to STDERR.
+# warns - Prints a message to STDERR.
+#
+# Synopsis:
+#   warn MESSAGE [ARG [ARG [...]]]
+#
+# Description:
+#   * Formats MESSAGE with the given ARGs (think printf).
+#   * Prefixes the message with "lpassh-add: ", appends a linefeed,
+#     and prints the message to STDERR.
+#
+# Arguments:
+#   MESSAGE (string):
+#       The message.
+#   ARG (any):
+#       Arguments for MESSAGE (think printf).
+#
+# Returns:
+#   0:
+#       Always.
 warn() (
-    message="${1:?'warn: missing MESSAGE.'}"
+    string="${1:?'warn: missing MESSAGE.'}"
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf 'lpassh-add: %s\n' "$message" >&2 ;;
-        *) printf -- "lpassh-add: $message\\n" "$@" >&2 ;;
-    esac
+        0) printf -- 'lpassh-add: %s\n' "$string"  ;;
+        *) printf -- "lpassh-add: $string\\n" "$@" ;;
+    esac >&2
 )
 
-# Takes an exit STATUS, a MESSAGE, and ARGUMENTS,
-# prints the MESSAGE to STDERR and exits with STATUS.
+# panic - Exits the script with an error message.
+#
+# Synopsis:
+#   panic [STATUS [MESSAGE [ARG [ARG [...]]]]]
+#
+# Description:
+#   * Prints MESSAGE to STDERR, as warn would.
+#   * Exits the programme with STATUS.
+#
+# Arguments:
+#   STATUS (integer):
+#       The status to exit with. Defaults to 69.
+#
+#   See warn for the remaing arguments.
+#
+# Exits with:
+#   STATUS
 # shellcheck disable=2059
 panic() {
     set +eu
-    __PANIC_STATUS="${1:?'panic: missing STATUS.'}"
-    shift
-    [ $# -gt 0 ] && warn "$@"
+    __PANIC_STATUS="${1:-69}"
+    if [ $# -gt 0 ]; then
+        shift
+        [ $# -gt 0 ] && warn "$@"
+    fi
     exit "$__PANIC_STATUS"
 }
 
-# Takes a SOURCE and a TARGET as arguments and copies the content of
-# the variable named SOURCE to that of the variable named TARGET. 
-var_cp() {
-    [ $# -eq 2 ] || panic 70 'usage: var_cp SOURCE TARGET.'
-    for __VAR_CP_VARNAME
-    do
-        case $__VAR_CP_VARNAME in
-            *[!A-Za-z0-9_]*)
-                panic 70 '%s: Not a variable name.' "$__VAR_CP_VARNAME"
-                ;;
-        esac
-    done
-    eval "$2=\"\${$1-}\""
-}
-
-# Takes a NEEDLE and STRAWs as arguments,
-# returns true if NEEDLE equals a STRAW.
-contains() (
-    needle="${1:?'contains: missing NEEDLE.'}"
-    shift
-    for straw
-    do [ "$needle" = "$straw" ] && return
-    done
-    return 1
-)
-
-# Takes a REGEX and a STRING as arguments,
-# applies REGEX to STRING, and prints the result.
-regex() {
-    sed "${1:?'regex: missing REGEX.'}" <<EOF
-$2
-EOF
-}
-
-# Takes a prompt as argument and asks for a password.
+# askpass - Ask for a passphrase.
+#
+# Synopsis:
+#   askpass PROMPT TTY [UTIL]
+#
+# Description:
+#   Asks for a passphrase. If UTIL is given, prints its process ID to STDERR
+#   and calls UTIL, passing PROMPT as first argument. UTIL should prompt the
+#   user for a password and print the answer to STDOUT. If UTIL is *not* given,
+#   then it prompts the user for the password on and reads the user's reponse
+#   from TTY. If TTY hasn't been given, prints a warning to STDERR and returns
+#   an error. Prints the passphrase it obtains to STDOUT.
+#
+# Arguments:
+#   PROMPT (string):
+#       The string to display to the user to ask for a passphrase.
+#   TTY (a teletype device):
+#       The teletype device of the current terminal.
+#   UTIL (a programme):
+#       A programme that confirms to the so-called SSh Askpass Protocol.
+#
+# Side-effects:
+#   * If UTIL isn't given, disables and renables echo on TTY.
+#   * May print an error message to STDERR.
+#
+# Returns:
+#   0:
+#       Success.
+#   Non-zero:
+#       An error occurred.
 # shellcheck disable=2006
 askpass() (
-    prompt="${1:?'missing PROMPT'}" tty="${2-}" util="${3-}"
-    if [ "$util" ]; then
+    : "${1:?'askpass: missing PROMPT'}"
+    : "${2:?'missing TTY'}"
+    if [ "${3-}" ]; then
         # shellcheck disable=2016
-        warn 'ID of process calling %s: %d.' \
-            "$util" "`exec sh -c 'echo $PPID'`"
-        "$util" "$prompt"
-    elif [ -c "$tty" ]; then
+        warn 'ID of process calling %s: %d.' "$3" "`exec sh -c 'echo $PPID'`"
+        "$3" "$1"
+    elif [ -c "$2" ]; then
         trapsig onexit 0 2 15
-        exec 0<"$tty"
-        exec 2>"$tty"
-        # shellcheck disable=2016
-        EX='stty echo 2>/dev/null; exec 0<&-; echo >&2; exec 2>&-'
+        # shellcheck disable=2094
+        exec 0<"$2" 2>"$2"
+        # shellcheck disable=2030
+        EX='stty echo 2>/dev/null; echo >&2; exec 0<&- 2>&-'
         stty -echo
-        printf -- '%s: ' "$prompt" >&2
+        printf -- '%s ' "$1" >&2
         read -r pass
         cat <<EOF
 $pass
@@ -214,12 +227,28 @@ EOF
     fi
 )
 
-# Runs `lpass` with the given arguments, 
-# authenticating with $LASTPASS_PASSWORD.
+# auth_lpass - Run lpass, but authenticate using a given password.
+#
+# Synopsis:
+#   auth_lpass [...]
+#
+# Description:
+#   Calls lpass and passes on all of its arguments to it.
+#   Also prints the content of the global variable $LASTPASS_PWD to its STDIN.
+#
+# Arguments:
+#   Are passed on to lpass.
+#
+# Global variables:
+#   LASTPASS_PWD (string):
+#       The LastPass master password (read-only).
+#
+# Returns:
+#   Whatever lpass returns.
 auth_lpass() {
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
     LPASS_DISABLE_PINENTRY=1 lpass "$@" <<EOF
-$LASTPASS_PASSWORD
+$LASTPASS_PWD
 EOF
 }
 
@@ -231,13 +260,13 @@ EOF
 [ "$BASH_VERSION" ] && set -o posix
 [ "$ZSH_VERSION"  ] && emulate sh 2>/dev/null
 # shellcheck disable=2034
-BIN_SH=xpg4 NULLCMD=: POSIXLY_CORRECT=x CLICOLOR_FORCE=''
+BIN_SH=xpg4 NULLCMD=: POSIXLY_CORRECT=x CLICOLOR_FORCE=
 export BIN_SH CLICOLOR_FORCE POSIXLY_CORRECT
 
 set -Cefu
 umask 077
 
-: "${LPASSH_ADD_LASTPASS_FOLDER="SSh keys"}"
+: "${LPASSH_ADD_LPASS_PATH_REGEX=ssh}"
 export LPASS_AUTO_SYNC_TIME=30
 
 case "${LPASSH_ADD_AGENT_DISABLE-}" in
@@ -245,90 +274,86 @@ case "${LPASSH_ADD_AGENT_DISABLE-}" in
 esac
 
 
-# WORKER
-# ======
-
-if [ "${SSH_ASKPASS-}" = "$0" ]; then
-    # Check which key `ssh-add` tries to unlock.
-    PROMPT="$*"
-    # shellcheck disable=2006
-    PRIVKEY_NEEDLE_FILE=`regex 's/^[^\/]\{1,\}//; s/: $//' "$PROMPT"`
-
-    # Check whether we should unlock that key.
-    IFS=:
-    if [ "${LPASSH_ADD_KEYS-}" ]; then
-        contains "$PRIVKEY_NEEDLE_FILE" "${LPASSH_ADD_KEYS-}" || exit 1
-    fi
-    if [ "${LPASSH_ADD_IGNORE_KEYS-}" ]; then
-        contains "$PRIVKEY_NEEDLE_FILE" "${LPASSH_ADD_IGNORE_KEYS-}" && exit 1
-    fi
-    unset IFS
-
-    # Query the parent process for the password.
-    cat >&3 <<EOF
-$PRIVKEY_NEEDLE_FILE
-EOF
-
-    # Read the response.
-    read -r PASSWORD || ERR=$?
-    if [ "${ERR-0}" -gt 1 ]; then
-        warn 'read: Returned %d.' "$ERR"
-        exit 69
-    fi
-
-    # Pass it on to `ssh-add`.
-    exec cat <<EOF
-$PASSWORD
-EOF
-fi
-
-
-# INITIALISATION
-# ==============
+# SANITISE ENVIRONMENT
+# ====================
 
 # Set a secure path.
 PATH=/bin:/usr/bin:/usr/local/bin
 # shellcheck disable=2006
 PATH="`getconf PATH`:$PATH"
-
 # Make sure no fancy input field separator is set.
 unset IFS
 
-# Parse arguments
-if [ $# -gt 0 ]; then
-    for ARG
-    do
-        case $ARG in
-            -h|--help)
-                exec cat <<EOF
-usage: lpassh-add [options] [file ...]
-lpassh-add accepts the same arguments as ssh-add.
+
+# SERVE PASSWORD TO SSH-ADD
+# =========================
+
+# FIXME: Explain this.
+
+[ "${SSH_ASKPASS-}" = "$0" ] && exec cat
+
+
+# INITIALISATION
+# ==============
+
+# Parse arguments.
+while [ $# -gt 0 ]; do
+    ARG="$1"
+    case $ARG in
+        -[cq])
+            shift
+            OPTS="${OPTS-} $ARG"
+            [ "$ARG" = -q ] && QUIET=x
+            ;;
+        -t)
+            [ "${2-}" ] || panic 64 '%s: Missing lifetime.' "$ARG"
+            OPTS="${OPTS-} $ARG $2"
+            shift 2
+            ;;
+        -[ADdeEkKLlsXx])
+            panic 64 '%s: Unsupported option.' "$ARG"
+            ;;
+        -h)
+            exec cat <<EOF
+lpassh-add v1.1.0b - Unlocks SSh keys using LastPass.
+
+Synopsis:
+    lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
+
+Arguments:
+    KEY         FIXME
+
+Options:
+    -c          Confirm every use of an identity.
+    -h          Show this help screen.
+    -q          Be quieter.
+    -t LIFETIME Automatically re-lock keys after LIFETIME.
+    -V          Show version.
+
+See the manual for details.
 EOF
-                ;;
-            --version)
-                exec cat <<EOF
+            ;;
+        -V)
+            exec cat <<EOF
 lpassh-add v1.1.0b
 (c) 2018, 2019, 2020 Odin Kroeger
+Released under the MIT license.
 EOF
-                ;;
-            --)
-                break
-                ;;
-            -*)
-                :
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
-fi
+            ;;
+        --)
+            shift
+            break
+            ;;
 
-# Make sure the temporary directory is set.
-if [ -z "${TMPDIR-}" ]; then
-    : "${HOME:?'Not set or empty.'}"
-    TMPDIR="$HOME"
-fi
+        -*)
+            panic 64 '%s: Unknown option.' "$ARG"
+            :
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 # Make sure LPASS_ASKPASS and SSH_ASKPASS point to a system programme.
 for UTIL in "${LPASS_ASKPASS-}" "${SSH_ASKPASS-}"
@@ -339,25 +364,27 @@ do
         ASKPASS="$UTIL"
         break
     else
-        IFS=/
-        for ELEM in $UTIL
-        do
-            unset IFS
-            [ "$ELEM" ] || continue
-            ACC="${ACC-}/$ELEM"
-            # shellcheck disable=2006,2012
-            set -- `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`
-            [ $# -eq 3 ]      \
-                || panic 69 '%s: Cannot parse path.' "$ACC"
-            [ "$2" -eq 0 ]    \
-                || panic 69 '%s: Not owned by root.' "$ACC"
-            [ "$3" -lt 1000 ] \
-                || panic 69 '%s: Not owned by a system group.' "$ACC"
-            PERMS="$1"
-            case ${PERMS#????} in
-                *w*) panic 69 '%s: Non-owner writeable.' "$ACC" ;;
-            esac
-        done
+        (
+            IFS=/
+            for ELEM in $UTIL
+            do
+                unset IFS
+                [ "$ELEM" ] || continue
+                ACC="${ACC-}/$ELEM"
+                # shellcheck disable=2012,2121         
+                set x `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`; shift
+                [ $# -eq 3 ]      \
+                    || panic 69 '%s: Cannot parse stats.' "$ACC"
+                [ "$2" -eq 0 ]    \
+                    || panic 69 '%s: Not owned by root.' "$ACC"
+                [ "$3" -lt 1000 ] \
+                    || panic 69 '%s: Not owned by a system group.' "$ACC"
+                PERMS="$1"
+                case ${PERMS#????} in
+                    *w*) panic 69 '%s: Non-owner writeable.' "$ACC" ;;
+                esac
+            done
+        ) || panic 69 '%s: Not secure.' "$UTIL"
         ASKPASS="$UTIL"
         break
     fi
@@ -367,117 +394,98 @@ export PATH IFS
 # Check what TTY to read passwords from.
 # shellcheck disable=2006
 TTY=`tty`  || :
-[ "$TTY" ] || panic 69 'Cannot determine TTY.'
+[ "$TTY" ] || panic 69 "Cannot determine the terminal's teletype device."
 
 # Prepare cleanup.
 trapsig onexit 0 2 15
-
-# Make temporary directory.
-# shellcheck disable=2006,2039
-RAND="${RANDOM:-`awk 'BEGIN{srand; printf "%x\n", rand * 16^5}' </dev/null`}"
-TMP_NAME="$RAND-$$"
-# shellcheck disable=2006
-NAME_MAX=`getconf NAME_MAX "$TMPDIR" 2>/dev/null` || NAME_MAX=14
-[ "$NAME_MAX" -ge 24  ] && TMP_NAME="lpassh-add.$TMP_NAME"
-[ "$HOME" = "$TMPDIR" ] && TMP_NAME=".$TMP_NAME"
-readonly MY_TMPDIR="$TMPDIR/$TMP_NAME"
-EX="[ \"\${MY_TMPDIR-}\" ] && rm -rf \"\$MY_TMPDIR\""
-mkdir -m 0700 "$MY_TMPDIR" || exit 69
-# shellcheck disable=2034
-export TMPDIR="$MY_TMPDIR"
-
-# Log into LastPass if necessary.
-LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PASSWORD=''
-lpass status --quiet || LASTPASS_STATUS=$?
-if [ "$LASTPASS_STATUS" -ne 0 ]; then
-    [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
-    if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
-        # shellcheck disable=2006
-        LASTPASS_PASSWORD=`askpass 'LastPass master password' "$TTY" "${ASKPASS-}"`
-        [ "${LASTPASS_PASSWORD-}" ] || panic 64 'No password given.'
-        LPASS=auth_lpass
-        # Make sure lpass reads from STDIN.
-        LPASS_ASKPASS=''
-        unset LPASS_ASKPASS
-        export LPASS_ASKPASS
-    fi
-    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
-        || panic 69 'Could not log into LastPass.'
-    # shellcheck disable=2016
-    EX="lpass logout --force >/dev/null; $EX"
-fi
-readonly LASTPASS_PASSWORD
-
-# Lookup the LastPass IDs of all SSh keys.
-# shellcheck disable=2006
-ERR=0 KEY_IDS=`"$LPASS" ls "${LPASSH_ADD_LASTPASS_FOLDER-}" |
-               sed -n 's/.*\[id: \([[:digit:]]\{1,\}\)\]/\1/p'` || ERR=$?
-[ "$ERR" -eq 0 ] || panic 69 'Could not retrieve IDs from LastPass.'
-[ "$KEY_IDS"   ] || panic 69 'No SSh keys found in LastPass.'
-
-# Create a FIFO to accept queries from the worker.
-PIPE="$MY_TMPDIR/pipe"
-mkfifo -m 0700 "$PIPE" || exit 69
 
 
 # MAIN
 # ====
 
-# shellcheck disable=2094
-while read -r PRIVKEY_NEEDLE_FILE
-do
-    ERR=0
+# Log into LastPass if necessary.
+LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PWD=
+lpass status --quiet || LASTPASS_STATUS=$?
+if [ "$LASTPASS_STATUS" -ne 0 ]; then
+    [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
+    if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
+        # shellcheck disable=2006
+        LASTPASS_PWD=`askpass 'LastPass master password' "$TTY" "${ASKPASS-}"`
+        [ "${LASTPASS_PWD-}" ] || panic 64 'No password given.'
+        LPASS=auth_lpass
+        # Make sure lpass reads from STDIN.
+        if [ "${LASTPASS-}" ] || [ "${LASTPASS-x}" = x ]; then
+            unset LPASS_ASKPASS
+            export LPASS_ASKPASS
+        fi
+    fi
+    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
+        || panic 69 'Could not log into LastPass.'
+    # shellcheck disable=2016
+    EX="lpass logout --force >/dev/null"
+fi
+readonly LASTPASS_PWD
 
-    # Read the public key file.
-    [ "$PRIVKEY_NEEDLE_FILE" ] || continue
-    read -r PUBKEY_NEEDLE <"$PRIVKEY_NEEDLE_FILE.pub" || ERR=$?
-    if [ "$ERR" -gt 1 ]; then 
-        warn 'read: Returned %d.' "$ERR"
+# Lookup IDs of all SSh keys.
+# shellcheck disable=2006
+IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_LPASS_PATH_REGEX"`
+[ "$IDS" ] || \
+    panic 69 '%s: No item in LastPass matches.' "$LPASSH_ADD_LPASS_PATH_REGEX"
+
+# Check if keys have been given.
+# shellcheck disable=2121
+if [ $# -eq 0 ]; then
+    PF="$HOME/.ssh/id_"
+    set x "${PF}rsa" "${PF}dsa" "${PF}ecdsa" "${PF}ed25519"
+    shift
+else
+    KEYS_GIVEN=x
+fi
+
+# Unlock the keys.
+export SSH_ASKPASS="$0" DISPLAY=''
+for KEY
+do
+    # Skip if there's no such key.
+    if [ -e "$KEY" ]; then :; else
+        [ "${KEYS_GIVEN-}" ] && warn '%s: No such file.' "$KEY"
         continue
     fi
 
-    # Search the public key that the worker has asked for.
-    HIT=''
-    for ID in $KEY_IDS
-    do
-        ERR=0
+    # Try the last Passphrase.
+    # shellcheck disable=2086
+    [ "${PASS-}" ] && ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
+$PASS
+EOF
 
-        # Cache the result.
-        var_cp "PUBKEY_$ID" PUBKEY
-        if [ -z "$PUBKEY" ]; then
+    # Try every passphrase.
+    for ID in $IDS; do
+        case "$ID" in *[!0-9]*) continue; esac
+        eval "PASS=\"\${PASS_$ID-}\""
+        if [ -z "$PASS" ]; then
             # shellcheck disable=2006
-            PUBKEY=`"$LPASS" show --field='Public Key' "$ID" 2>/dev/null` \
-                || ERR=$?
-            [ "$ERR" -eq 0 ] || continue
-            [ "$PUBKEY"    ] || PUBKEY="<not found>"
-            var_cp PUBKEY "PUBKEY_$ID"
+            PASS=`"$LPASS" show --field=Passphrase "$ID"` || continue
+            eval "PASS_$ID=\"\$PASS\""
         fi
+        # shellcheck disable=2086
+        ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
+$PASS
+EOF
+    done 
+    [ "${QUIET-}" ] || warn '%s: No passphrase from LastPass matches.' "$KEY"
 
-        # Tell the worker the password.
-        if [ "$PUBKEY" = "$PUBKEY_NEEDLE" ]; then
-            "$LPASS" show --field=Passphrase "$ID" || ERR=$?
-            if [ "$ERR" -eq 0 ]; then
-                HIT=x
-                break
-            fi
-            warn 'lpass: Returned %d.' "$ERR"
-        fi
+    ITER=0 MAX_RETRIES=2
+    while [ "$ITER" -lt "$MAX_RETRIES" ]; do
+        case $ITER in
+            0) PROMPT="Passphrase for $KEY:";;
+            1) PROMPT="Wrong passphrase for $KEY. Re-try:";;
+        esac
+        # shellcheck disable=2006
+        PASS=`askpass "$PROMPT" "$TTY" "${ASKPASS-}"` ITER=$((ITER+1))
+        # shellcheck disable=2086
+        ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
+$PASS
+EOF
     done
-
-    # Ask for the password if we didn't find it in LastPass.
-    [ "$HIT" ] && continue
-    warn '%s: Not found in LastPass.' "$PRIVKEY_NEEDLE_FILE"
-    askpass "Passphrase for $PRIVKEY_NEEDLE_FILE" "$TTY" "${ASKPASS-}"
-done <"$PIPE" | 
-(
-    trapsig onexit 0 2 15
-    # shellcheck disable=2016
-    EX='exec 3>&-'
-    exec 3>"$PIPE"
-    rm -f "$PIPE"
-
-    case $# in
-        0) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add "$@" ;;
-        *) SSH_ASKPASS="$0" DISPLAY='' LC_ALL=C ssh-add ;;
-    esac
-)
+    warn '%s: Could not unlock.' "$KEY"
+done

@@ -9,7 +9,7 @@ client](https://github.com/lastpass/lastpass-cli).
 **lpassh-add** is but a short-ish shell script.
 You can easily check that it doesn't do anything funky.
 
-See the [manual](MANUAL.md) and the [source](lpassh-add) for details.
+See the [manual](MANUAL.rst) and the [source](lpassh-add) for details.
 
 
 ## INSTALLATION

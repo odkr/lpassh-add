@@ -28,6 +28,11 @@ ignoring those of them that don\[aq]t exist.
 If you\[aq]re not logged into LastPass and \f[C]LPASSH_ADD_USERNAME\f[R]
 is set, \f[B]lpassh-add\f[R] logs you into LastPass; it also logs you
 out again once it\[aq]s done.
+.PP
+\f[B]lpassh-add\f[R] always retries the last passphrase it processed
+when unlocking the previous key.
+So, if you use the same passphrase for all keys, it will stop quering
+LastPass (or you) once it has found that passphrase.
 .SH OPTIONS
 .PP
 Most of these options are simply passed through to \f[B]ssh-add\f[R].

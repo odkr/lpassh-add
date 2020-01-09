@@ -29,6 +29,11 @@ If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
 **lpassh-add** logs you into LastPass; it also logs you out again once
 it's done.
 
+**lpassh-add** always retries the last passphrase it processed when
+unlocking the previous key. So, if you use the same passphrase for all
+keys, it will stop quering LastPass (or you) once it has found that
+passphrase.
+
 
 OPTIONS
 =======

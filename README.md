@@ -41,18 +41,14 @@ If you have [curl](https://curl.haxx.se/) or
 you can do all of the above by:
 
 ```sh
-    NAME=lpassh-add VERS=1.0.5
-    PROG="${NAME:?}-${VERS:?}/${NAME:?}"
-    URL="https://github.com/odkr/${NAME:?}/archive/v${VERS:?}.tar.gz"
-    {
-        ERR=0; curl -L "$URL" || ERR=$?
-        [ "$ERR" -eq 127 ] && wget -q -O - "$URL"
-    } | tar -xz
+    # Download and unpack.
+    ( URL="https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz"
+      curl -L "$URL"; [ "$?" -eq 127 ] && wget -q -O - "$URL"; ) | tar -xz
     # Check the source!
-    more "${PROG:?}"
+    more lpassh-add-1.0.5/lpassh-add
     # If you like what see, continue by:
-    sudo cp "${PROG:?}" /usr/local/bin
-    sudo cp "${PROG:?}.1" /usr/local/share/man/man1
+    sudo cp lpassh-add-1.0.5/lpassh-add /usr/local/bin
+    sudo cp lpassh-add-1.0.5/lpassh-add.1 /usr/local/share/man/man1
 ```
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,

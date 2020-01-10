@@ -7,7 +7,7 @@ NAME
 SYNOPSIS
 ========
 
-**lpassh-add** [**-ckq**] [**-t** *LIFETIME*] [*KEY* [*KEY* [...]]]
+**lpassh-add** [**-cq**] [**-t** *LIFETIME*] [*KEY* [*KEY* [...]]]
 
 **lpassh-add** **-h**
 

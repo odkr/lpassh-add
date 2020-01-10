@@ -74,7 +74,7 @@ to describe an SSH key, by setting ``LPASSH_ADD_LPASS_PATH_REGEX`` to the
 empty string ("") or any other regular expression that matches any string.
 This is a *bad* idea. It's slow. It will likely pass passphrases to
 **ssh-add** that are none of its business. And it will likely generate a lot
-of warnings; these warnings are harmless, however.
+of warnings; these are harmless, however.
 
 
 ENVIRONMENT

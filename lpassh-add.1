@@ -82,10 +82,10 @@ however.
 A basic regular expression.
 \f[B]lpassh-add\f[R] assumes that any item in your LastPass database the
 path of which matches this expression describes an SSH key.
-If you set this variable to the empty string (\[dq]\[dq]) or any other
-expression that matches any string, \f[B]lpassh-add\f[R] will assume
-that \f[I]every\f[R] item in your LastPass database describes an SSH
-key.
+If you set this variable to a regular expression that matches any
+string, for instance, the empty string (\[dq]\[dq]), then
+\f[B]lpassh-add\f[R] will assume that \f[I]every\f[R] item in your
+LastPass database describes an SSH key.
 This is a \f[I]bad\f[R] idea.
 (Default if not set: \[dq]ssh\[dq].)
 .TP

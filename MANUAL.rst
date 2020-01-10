@@ -83,10 +83,10 @@ ENVIRONMENT
 LPASSH_ADD_LPASS_PATH_REGEX
    A basic regular expression. **lpassh-add** assumes that any item in your
    LastPass database the path of which matches this expression describes an
-   SSH key. If you set this variable to the empty string ("") or any other
-   expression that matches any string, **lpassh-add** will assume that *every*
-   item in your LastPass database describes an SSH key. This is a *bad* idea.
-   (Default if not set: "ssh".)
+   SSH key. If you set this variable to a regular expression that matches any 
+   string, for instance, the empty string (""), then **lpassh-add** will 
+   assume that *every* item in your LastPass database describes an SSH key.
+   This is a *bad* idea. (Default if not set: "ssh".)
 
 LPASSH_ADD_USERNAME
    A LastPass username. If set, **lpassh-add** uses this username to log

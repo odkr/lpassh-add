@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.0b - Unlock SSh keys using LastPass.
+# lpass-ssh-add v1.1.0b - Unlock SSH keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -192,7 +192,7 @@ panic() {
 #   TTY (a teletype device):
 #       The teletype device of the current terminal.
 #   UTIL (a programme):
-#       A programme that confirms to the so-called SSh Askpass Protocol.
+#       A programme that confirms to the so-called SSH Askpass Protocol.
 #
 # Side-effects:
 #   * If UTIL isn't given, disables and renables echo on TTY.
@@ -321,7 +321,7 @@ do
             ;;
         -h)
             exec cat <<EOF
-lpassh-add v1.1.0b - Unlocks SSh keys using LastPass.
+lpassh-add v1.1.0b - Unlocks SSH keys using LastPass.
 
 Synopsis:
     lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
@@ -434,7 +434,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
 fi
 readonly LASTPASS_PWD
 
-# Lookup IDs of all SSh keys.
+# Lookup IDs of all SSH keys.
 # shellcheck disable=2006
 IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_LPASS_PATH_REGEX"`
 [ "$IDS" ] || \

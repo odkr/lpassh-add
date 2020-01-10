@@ -18,21 +18,21 @@ DESCRIPTION
 ===========
 
 **lpassh-add** adds **KEY** to the SSH authentication agent, just as
-**ssh-add** would, but looks up the passphrases for **KEY** in LastPass.
-If it can't the passphrase there, it asks you for it.
+**ssh-add** would, but looks up the passphrase for **KEY** in LastPass.
+If it can't find it there, it asks you for it.
 
 If you don't give any **KEY**, it tries to add ``~/.ssh/id_rsa``,
 ``~/.ssh/id_dsa``, ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``,
-ignoring those of them that don't exist.
+ignoring those that don't exist.
 
 If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
-**lpassh-add** logs you into LastPass; it also logs you out again once
+**lpassh-add** logs you into LastPass; it also logs you out again when
 it's done.
 
-**lpassh-add** always retries the last passphrase it processed when
-unlocking the previous key. So, if you use the same passphrase for all
-keys, it will stop quering LastPass (or you) once it has found that
-passphrase.
+If you try to unlock multiple keys, **lpassh-add** always retries the last
+passphrase, regardless of whether it found that passphrase in LastPass or
+you've just entered it. So, if you use the same passphrase for all keys, it
+will stop quering LastPass or you once it has encountered that passphrase.
 
 
 OPTIONS
@@ -66,27 +66,27 @@ the "Passphrase" field of a so-called Secure Note of the type "SSH Key".
 You also need to include "ssh" in the name of that Secure Note or in the
 name of the folder that you place that note in.
 
-You can change which Secure Notes and folders **lpassh-add** considers
-by setting the environment variable ``LPASSH_ADD_LPASS_PATH_REGEX``.
+You can change which Secure Notes and folders **lpassh-add** tries by
+setting the environment variable ``LPASSH_ADD_LPASS_PATH_REGEX``.
 
-You can also make **lpassh-add** consider *every* item in your LastPass
-database to describe an SSH key, by setting ``LPASSH_ADD_LPASS_PATH_REGEX``
-to the empty string ("") or any other regular expression that matches any
-string. This is a *bad* idea. It's slow. It will likely pass passphrases
-to **ssh-add** that are none of its business. And it will likely generate
-a lot of warnings; these warnings are harmless, however.
+You can also make **lpassh-add** try *every* item in your LastPass database
+to describe an SSH key, by setting ``LPASSH_ADD_LPASS_PATH_REGEX`` to the
+empty string ("") or any other regular expression that matches any string.
+This is a *bad* idea. It's slow. It will likely pass passphrases to
+**ssh-add** that are none of its business. And it will likely generate a lot
+of warnings; these warnings are harmless, however.
 
 
 ENVIRONMENT
 ===========
 
 LPASSH_ADD_LPASS_PATH_REGEX
-   A basic regular expression. **lpassh-add** assumes that every item in your
+   A basic regular expression. **lpassh-add** assumes that any item in your
    LastPass database the path of which matches this expression describes an
    SSH key. If you set this variable to the empty string ("") or any other
-   regular expression that matches any string, **lpassh-add** will consider
-   *all* items in your LastPass database to describe SSH keys.
-   This is a *bad* idea. (Default if not set: "ssh".)
+   expression that matches any string, **lpassh-add** will assume that *every*
+   item in your LastPass database describes an SSH key. This is a *bad* idea.
+   (Default if not set: "ssh".)
 
 LPASSH_ADD_USERNAME
    A LastPass username. If set, **lpassh-add** uses this username to log

@@ -16,23 +16,24 @@
 .SH DESCRIPTION
 .PP
 \f[B]lpassh-add\f[R] adds \f[B]KEY\f[R] to the SSH authentication agent,
-just as \f[B]ssh-add\f[R] would, but looks up the passphrases for
+just as \f[B]ssh-add\f[R] would, but looks up the passphrase for
 \f[B]KEY\f[R] in LastPass.
-If it can\[aq]t the passphrase there, it asks you for it.
+If it can\[aq]t find it there, it asks you for it.
 .PP
 If you don\[aq]t give any \f[B]KEY\f[R], it tries to add
 \f[C]\[ti]/.ssh/id_rsa\f[R], \f[C]\[ti]/.ssh/id_dsa\f[R],
 \f[C]\[ti]/.ssh/id_ecdsa\f[R], and \f[C]\[ti]/.ssh/id_ed25519\f[R],
-ignoring those of them that don\[aq]t exist.
+ignoring those that don\[aq]t exist.
 .PP
 If you\[aq]re not logged into LastPass and \f[C]LPASSH_ADD_USERNAME\f[R]
 is set, \f[B]lpassh-add\f[R] logs you into LastPass; it also logs you
-out again once it\[aq]s done.
+out again when it\[aq]s done.
 .PP
-\f[B]lpassh-add\f[R] always retries the last passphrase it processed
-when unlocking the previous key.
+If you try to unlock multiple keys, \f[B]lpassh-add\f[R] always retries
+the last passphrase, regardless of whether it found that passphrase in
+LastPass or you\[aq]ve just entered it.
 So, if you use the same passphrase for all keys, it will stop quering
-LastPass (or you) once it has found that passphrase.
+LastPass or you once it has encountered that passphrase.
 .SH OPTIONS
 .PP
 Most of these options are simply passed through to \f[B]ssh-add\f[R].
@@ -61,12 +62,12 @@ the \[dq]Passphrase\[dq] field of a so-called Secure Note of the type
 You also need to include \[dq]ssh\[dq] in the name of that Secure Note
 or in the name of the folder that you place that note in.
 .PP
-You can change which Secure Notes and folders \f[B]lpassh-add\f[R]
-considers by setting the environment variable
+You can change which Secure Notes and folders \f[B]lpassh-add\f[R] tries
+by setting the environment variable
 \f[C]LPASSH_ADD_LPASS_PATH_REGEX\f[R].
 .PP
-You can also make \f[B]lpassh-add\f[R] consider \f[I]every\f[R] item in
-your LastPass database to describe an SSH key, by setting
+You can also make \f[B]lpassh-add\f[R] try \f[I]every\f[R] item in your
+LastPass database to describe an SSH key, by setting
 \f[C]LPASSH_ADD_LPASS_PATH_REGEX\f[R] to the empty string (\[dq]\[dq])
 or any other regular expression that matches any string.
 This is a \f[I]bad\f[R] idea.
@@ -79,12 +80,12 @@ harmless, however.
 .TP
 .B LPASSH_ADD_LPASS_PATH_REGEX
 A basic regular expression.
-\f[B]lpassh-add\f[R] assumes that every item in your LastPass database
-the path of which matches this expression describes an SSH key.
+\f[B]lpassh-add\f[R] assumes that any item in your LastPass database the
+path of which matches this expression describes an SSH key.
 If you set this variable to the empty string (\[dq]\[dq]) or any other
-regular expression that matches any string, \f[B]lpassh-add\f[R] will
-consider \f[I]all\f[R] items in your LastPass database to describe SSH
-keys.
+expression that matches any string, \f[B]lpassh-add\f[R] will assume
+that \f[I]every\f[R] item in your LastPass database describes an SSH
+key.
 This is a \f[I]bad\f[R] idea.
 (Default if not set: \[dq]ssh\[dq].)
 .TP

@@ -289,7 +289,11 @@ unset IFS
 # SERVE PASSWORD TO SSH-ADD
 # =========================
 
-# FIXME: Explain this.
+# ssh-add reads passphrases from the terminal's teletype device by default.
+# So, to pass on passphrases to it, this script sets itself as SSH_ASKPASS
+# utility (see below) and then, when it's called by ssh-add, simply calls
+# cat to pass through STDIN to STDOUT. Thereby, it can pass on passphrases
+# to ssh-add by writing them to its STDIN.
 
 [ "${SSH_ASKPASS-}" = "$0" ] && exec cat
 
@@ -323,7 +327,9 @@ Synopsis:
     lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
 
 Arguments:
-    KEY         FIXME
+    KEY         The key to unlock. If no KEY is given, tries to unlock 
+                ~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa, and
+                ~/.ssh/id_ed25519.
 
 Options:
     -c          Confirm every use of an identity.

@@ -260,9 +260,9 @@ do
     ARG="$1"
     case $ARG in
         -[cq])
-            shift
             OPTS="${OPTS-} $ARG"
             [ "$ARG" = -q ] && QUIET=x
+            shift
             ;;
         -t)
             [ "${2-}" ] || panic 64 '%s: Missing lifetime.' "$ARG"
@@ -308,7 +308,6 @@ EOF
 
         -*)
             panic 64 '%s: Unknown option.' "$ARG"
-            :
             ;;
         *)
             break

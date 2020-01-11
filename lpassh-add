@@ -277,7 +277,7 @@ do
 lpassh-add v1.1.1b - Unlocks SSH keys using LastPass.
 
 Synopsis:
-    lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
+    lpassh-add [-cq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
 
 Arguments:
     KEY          The key to unlock. If no KEY is given, tries

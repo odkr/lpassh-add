@@ -399,7 +399,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
         [ "$LASTPASS_PASSWORD" ] || panic 64 'No password given.'
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
-        if [ "${LASTPASS-}" ] || [ "${LASTPASS-x}" = x ]; then
+        if [ "${LPASS_ASKPASS-}" ] || [ "${LPASS_ASKPASS-x}" = x ]; then
             unset LPASS_ASKPASS
             export LPASS_ASKPASS
         fi

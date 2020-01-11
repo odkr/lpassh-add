@@ -182,59 +182,6 @@ panic() {
     exit "$__PANIC_STATUS"
 }
 
-# askpass - Ask for a passphrase.
-#
-# Synopsis:
-#   askpass PROMPT TTY [UTIL]
-#
-# Description:
-#   Asks for a passphrase. If UTIL is given, prints its process ID to STDERR
-#   and calls UTIL, passing PROMPT as first argument. UTIL should prompt the
-#   user for a password and print the answer to STDOUT. If UTIL is *not* given,
-#   then it prompts the user for the password on and reads the user's reponse
-#   from TTY. If TTY hasn't been given, prints a warning to STDERR and returns
-#   an error. Prints the passphrase it obtains to STDOUT.
-#
-# Arguments:
-#   PROMPT (string):
-#       The string to display to the user to ask for a passphrase.
-#   TTY (a teletype device):
-#       The teletype device of the current terminal.
-#   UTIL (a programme):
-#       A programme that confirms to the so-called SSH Askpass Protocol.
-#
-# Side-effects:
-#   * If UTIL isn't given, disables and renables echo on TTY.
-#   * May print an error message to STDERR.
-#
-# Returns:
-#   0:
-#       Success.
-#   Non-zero:
-#       An error occurred.
-# shellcheck disable=2006
-askpass() (
-    : "${1:?'askpass: missing PROMPT'}"
-    : "${2:?'missing TTY'}"
-    if [ "${3-}" ]; then
-        # shellcheck disable=2016
-        warn 'ID of process calling %s: %d.' "$3" "`exec sh -c 'echo $PPID'`"
-        "$3" "$1"
-    elif [ -c "$2" ]; then
-        trapsig onexit 0 2 15
-        # shellcheck disable=2094
-        exec 0<"$2" 2>"$2"
-        # shellcheck disable=2030
-        EX='stty echo 2>/dev/null; echo >&2; exec 0<&- 2>&-'
-        stty -echo
-        printf -- '%s ' "$1" >&2
-        read -r pass
-        b_printf '%s\n' "$pass"
-    else
-        panic 69 "No teletype device. Can't ask for password."
-    fi
-)
-
 # auth_lpass - Run lpass, but authenticate using a given password.
 #
 # Synopsis:
@@ -242,20 +189,20 @@ askpass() (
 #
 # Description:
 #   Calls lpass and passes on all of its arguments to it.
-#   Also prints the content of the global variable $LASTPASS_PWD to its STDIN.
+#   Also prints the content of the global variable $LASTPASS_PASSWORD to its STDIN.
 #
 # Arguments:
 #   Are passed on to lpass.
 #
 # Global variables:
-#   LASTPASS_PWD (string):
+#   LASTPASS_PASSWORD (string):
 #       The LastPass master password (read-only).
 #
 # Returns:
 #   Whatever lpass returns.
 auth_lpass() {
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
-    b_printf '%s\n' "$LASTPASS_PWD" |
+    b_printf '%s\n' "$LASTPASS_PASSWORD" |
     LPASS_DISABLE_PINENTRY=1 lpass "$@"
 }
 
@@ -414,11 +361,6 @@ do
 done
 export PATH IFS
 
-# Check what TTY to read passwords from.
-# shellcheck disable=2006
-TTY=`tty`  || :
-[ "$TTY" ] || panic 69 "Can't determine the terminal's teletype device."
-
 # Prepare cleanup.
 trapsig onexit 0 2 15
 
@@ -427,14 +369,33 @@ trapsig onexit 0 2 15
 # ====
 
 # Log into LastPass if necessary.
-LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PWD=
+LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PASSWORD=
 lpass status --quiet || LASTPASS_STATUS=$?
 if [ "$LASTPASS_STATUS" -ne 0 ]; then
     [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
     if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
-        # shellcheck disable=2006
-        LASTPASS_PWD=`askpass 'LastPass master password' "$TTY" "${ASKPASS-}"`
-        [ "${LASTPASS_PWD-}" ] || panic 64 'No password given.'
+        PROMPT='LastPass master password:'
+        if [ "${ASKPASS-}" ]; then
+            warn 'ID of process calling %s: %d.' "$ASKPASS" "$$"
+            # shellcheck disable=2006
+            LASTPASS_PASSWORD=`$ASKPASS "$PROMPT"`
+        else
+            # shellcheck disable=2006
+            TTY=`tty`
+            [ -c "$TTY" ] || panic 69 "No TTY. Can't ask for password."
+            readonly TTY
+            # shellcheck disable=2031
+            OLD_EX="${EX-}"; 
+            # shellcheck disable=2031
+            EX="stty echo <\"\$TTY\"; echo >\"\$TTY\"; ${EX-}"
+            stty -echo <"$TTY"
+            printf -- '%s ' "$PROMPT" >"$TTY"
+            read -r LASTPASS_PASSWORD <"$TTY"
+            stty echo  <"$TTY"
+            echo >"$TTY"
+            EX="$OLD_EX"
+        fi
+        [ "${LASTPASS_PASSWORD-}" ] || panic 64 'No password given.'
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LASTPASS-}" ] || [ "${LASTPASS-x}" = x ]; then
@@ -442,18 +403,16 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             export LPASS_ASKPASS
         fi
     fi
-    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
+    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null \
         || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016
     EX="lpass logout --force >/dev/null"
 fi
-readonly LASTPASS_PWD
 
 # Lookup IDs of all SSH keys.
 # shellcheck disable=2006
 IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_PATH_REGEX"`
-[ "$IDS" ] || \
-    panic 69 '%s: No LastPass items match.' "$LPASSH_ADD_PATH_REGEX"
+[ "$IDS" ] || panic 69 '%s: No LastPass items match.' "$LPASSH_ADD_PATH_REGEX"
 
 # Unlock the keys.
 NOT_FOUND=0
@@ -475,7 +434,6 @@ do
 done
 [ "$NOT_FOUND" -eq 0 ] && exit
 
-shift $#
 set -- "$KEY_1"
 ITER=2
 while [ $ITER -le $NOT_FOUND ]

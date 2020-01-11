@@ -35,7 +35,7 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 ### Set-up
 
 1. Download the repository from:
-   <https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
+   <https://github.com/odkr/lpassh-add/archive/v1.1.0.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
 4. You may also want to install its manual page.
@@ -46,13 +46,13 @@ you can do all of the above by:
 
 ```sh
     # Download and unpack.
-    ( URL="https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz"
+    ( URL="https://github.com/odkr/lpassh-add/archive/v1.1.0.tar.gz"
       curl -L "$URL"; [ "$?" -eq 127 ] && wget -q -O - "$URL"; ) | tar -xz
     # Check the source!
-    more lpassh-add-1.0.5/lpassh-add
+    more lpassh-add-1.1.0/lpassh-add
     # If you like what see, continue by:
-    sudo cp lpassh-add-1.0.5/lpassh-add /usr/local/bin
-    sudo cp lpassh-add-1.0.5/lpassh-add.1 /usr/local/share/man/man1
+    sudo cp lpassh-add-1.1.0/lpassh-add /usr/local/bin
+    sudo cp lpassh-add-1.1.0/lpassh-add.1 /usr/local/share/man/man1
 ```
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,

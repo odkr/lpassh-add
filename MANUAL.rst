@@ -19,11 +19,10 @@ DESCRIPTION
 
 **lpassh-add** adds *KEY* to the SSH authentication agent, just as **ssh-add**
 would, but looks up the passphrase for *KEY* in LastPass. If it can't find it
-there, it calls **ssh-add**.
+there, it passes the *KEY* to **ssh-add**, which will ask you for it.
 
-If you don't give any *KEY*, it tries to add ``~/.ssh/id_rsa``,
-``~/.ssh/id_dsa``, ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``,
-ignoring those that don't exist.
+If you don't give any *KEY*, it tries ``~/.ssh/id_rsa``, ``~/.ssh/id_dsa``,
+``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``.
 
 If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
 **lpassh-add** logs you into LastPass; it also logs you out again when
@@ -32,8 +31,6 @@ it's done.
 
 OPTIONS
 =======
-
-Most of these options are simply passed through to **ssh-add**.
 
 \-c
    Confirm every use of an identity.
@@ -52,6 +49,9 @@ Most of these options are simply passed through to **ssh-add**.
 \-V
    Show version.
 
+**-c**, **-q**, and **-t** are simply passed through to **ssh-add**.
+See **ssh-add**(1) for details about those options.
+
 
 WHERE TO STORE PASSPHRASES IN LASTPASS
 ======================================
@@ -61,19 +61,19 @@ You need to store the passphrase for each of your private SSH keys in the
 also need to include "ssh" in the name of that Secure Note or in the name
 of the folder that you place that note in.
 
-You can change which Secure Notes **lpassh-add** assumes to describe SSH
-keys by setting the environment variable ``LPASSH_ADD_PATH_REGEX``.
-``LPASSH_ADD_PATH_REGEX`` is a basic regular expression. If the path of
-a Secure Note matches this expression. **lpassh-add** assumes that it
-describes an SSH key. If you don't set ``LPASSH_ADD_PATH_REGEX``,
+You can change which Secure Notes **lpassh-add** should consider to describe
+SSH keys by setting the environment variable ``LPASSH_ADD_PATH_REGEX``.
+``LPASSH_ADD_PATH_REGEX`` is a basic regular expression. If the path of a
+Secure Note matches this expression. **lpassh-add** considers that Secure
+Note to describe an SSH key. If you don't set ``LPASSH_ADD_PATH_REGEX``,
 **lpassh-add** uses the regular expression "ssh".
 
-You can also make **lpassh-add** assume that *every* item in your LastPass
-database describes an SSH key, by setting ``LPASSH_ADD_PATH_REGEX`` to a
-regular expression that matches any string, the empty string (""), for
+You can also make **lpassh-add** consider *every* item in your LastPass
+database to describe an SSH key, namely, by setting ``LPASSH_ADD_PATH_REGEX``
+to a regular expression that matches any string, the empty string (""), for
 example. This is a *bad* idea. It's slow. It will likely pass passphrases
 to **ssh-add** that are none of its business. And it will likely generate
-a lot of warnings; these are harmless, however.
+a lot of warnings, even though those warnings are harmless.
 
 
 ENVIRONMENT
@@ -83,7 +83,7 @@ LPASSH_ADD_PATH_REGEX
    A basic regular expression. **lpassh-add** assumes that any item in your
    LastPass database the path of which matches this expression describes an
    SSH key. If you set this variable to a regular expression that matches any
-   string, for instance, the empty string (""), then **lpassh-add** will
+   string, the empty string (""), for instance, then **lpassh-add** will
    assume that *every* item in your LastPass database describes an SSH key.
    This is a *bad* idea. (Default if not set: "ssh".)
 
@@ -127,12 +127,12 @@ will still only ask you for your LastPass password once. However, it will
 store a copy of the LastPass master password in memory while it's running.
 (If you're using the LastPass agent, it won't.)
 
-If you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
-will read passphrases from the teletype device of your terminal.
-However, it does *not* have exclusive access to that device; any other
-process that you (or the superuser) runs can also read from that device.
-(This is true for *any* programme that reads data from a teletype
-device, including **ssh-add**.)
+If you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add** will
+read passphrases from the teletype device of your terminal. However, it does
+*not* have exclusive access to that device; any other process that runs under
+your (or the superuser's) user ID can also read from that device. (This is
+true for *any* programme that runs in a terminal and reads data from a
+teletype device, including **ssh-add**.)
 
 
 EXIT STATUS

@@ -18,19 +18,17 @@
 \f[B]lpassh-add\f[R] adds \f[I]KEY\f[R] to the SSH authentication agent,
 just as \f[B]ssh-add\f[R] would, but looks up the passphrase for
 \f[I]KEY\f[R] in LastPass.
-If it can\[aq]t find it there, it calls \f[B]ssh-add\f[R].
+If it can\[aq]t find it there, it passes the \f[I]KEY\f[R] to
+\f[B]ssh-add\f[R], which will ask you for it.
 .PP
-If you don\[aq]t give any \f[I]KEY\f[R], it tries to add
+If you don\[aq]t give any \f[I]KEY\f[R], it tries
 \f[C]\[ti]/.ssh/id_rsa\f[R], \f[C]\[ti]/.ssh/id_dsa\f[R],
-\f[C]\[ti]/.ssh/id_ecdsa\f[R], and \f[C]\[ti]/.ssh/id_ed25519\f[R],
-ignoring those that don\[aq]t exist.
+\f[C]\[ti]/.ssh/id_ecdsa\f[R], and \f[C]\[ti]/.ssh/id_ed25519\f[R].
 .PP
 If you\[aq]re not logged into LastPass and \f[C]LPASSH_ADD_USERNAME\f[R]
 is set, \f[B]lpassh-add\f[R] logs you into LastPass; it also logs you
 out again when it\[aq]s done.
 .SH OPTIONS
-.PP
-Most of these options are simply passed through to \f[B]ssh-add\f[R].
 .TP
 .B -c
 Confirm every use of an identity.
@@ -48,6 +46,10 @@ Automatically re-lock keys after \f[B]LIFETIME\f[R].
 .TP
 .B -V
 Show version.
+.PP
+\f[B]-c\f[R], \f[B]-q\f[R], and \f[B]-t\f[R] are simply passed through
+to \f[B]ssh-add\f[R].
+See \f[B]ssh-add\f[R](1) for details about those options.
 .SH WHERE TO STORE PASSPHRASES IN LASTPASS
 .PP
 You need to store the passphrase for each of your private SSH keys in
@@ -56,25 +58,25 @@ the \[dq]Passphrase\[dq] field of a so-called Secure Note of the type
 You also need to include \[dq]ssh\[dq] in the name of that Secure Note
 or in the name of the folder that you place that note in.
 .PP
-You can change which Secure Notes \f[B]lpassh-add\f[R] assumes to
-describe SSH keys by setting the environment variable
+You can change which Secure Notes \f[B]lpassh-add\f[R] should consider
+to describe SSH keys by setting the environment variable
 \f[C]LPASSH_ADD_PATH_REGEX\f[R].
 \f[C]LPASSH_ADD_PATH_REGEX\f[R] is a basic regular expression.
 If the path of a Secure Note matches this expression.
-\f[B]lpassh-add\f[R] assumes that it describes an SSH key.
+\f[B]lpassh-add\f[R] considers that Secure Note to describe an SSH key.
 If you don\[aq]t set \f[C]LPASSH_ADD_PATH_REGEX\f[R],
 \f[B]lpassh-add\f[R] uses the regular expression \[dq]ssh\[dq].
 .PP
-You can also make \f[B]lpassh-add\f[R] assume that \f[I]every\f[R] item
-in your LastPass database describes an SSH key, by setting
+You can also make \f[B]lpassh-add\f[R] consider \f[I]every\f[R] item in
+your LastPass database to describe an SSH key, namely, by setting
 \f[C]LPASSH_ADD_PATH_REGEX\f[R] to a regular expression that matches any
 string, the empty string (\[dq]\[dq]), for example.
 This is a \f[I]bad\f[R] idea.
 It\[aq]s slow.
 It will likely pass passphrases to \f[B]ssh-add\f[R] that are none of
 its business.
-And it will likely generate a lot of warnings; these are harmless,
-however.
+And it will likely generate a lot of warnings, even though those
+warnings are harmless.
 .SH ENVIRONMENT
 .TP
 .B LPASSH_ADD_PATH_REGEX
@@ -82,7 +84,7 @@ A basic regular expression.
 \f[B]lpassh-add\f[R] assumes that any item in your LastPass database the
 path of which matches this expression describes an SSH key.
 If you set this variable to a regular expression that matches any
-string, for instance, the empty string (\[dq]\[dq]), then
+string, the empty string (\[dq]\[dq]), for instance, then
 \f[B]lpassh-add\f[R] will assume that \f[I]every\f[R] item in your
 LastPass database describes an SSH key.
 This is a \f[I]bad\f[R] idea.
@@ -139,10 +141,10 @@ If you do \f[I]not\f[R] set \f[C]LPASS_ASKPASS\f[R] or
 \f[C]SSH_ASKPASS\f[R], \f[B]lpassh-add\f[R] will read passphrases from
 the teletype device of your terminal.
 However, it does \f[I]not\f[R] have exclusive access to that device; any
-other process that you (or the superuser) runs can also read from that
-device.
-(This is true for \f[I]any\f[R] programme that reads data from a
-teletype device, including \f[B]ssh-add\f[R].)
+other process that runs under your (or the superuser\[aq]s) user ID can
+also read from that device.
+(This is true for \f[I]any\f[R] programme that runs in a terminal and
+reads data from a teletype device, including \f[B]ssh-add\f[R].)
 .SH EXIT STATUS
 .TP
 .B 0

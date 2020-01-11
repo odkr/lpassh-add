@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.0 - Unlock SSH keys using LastPass.
+# lpass-ssh-add v1.1.1b - Unlock SSH keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -82,7 +82,7 @@ onexit() {
 #   trapsig FUNCTION SIGNO
 #
 # Description:
-#   Registers FUNCTIOn to handle SIGNO.
+#   Registers FUNCTION to handle SIGNO.
 #
 # Arguments:
 #   FUNCTION (string):
@@ -120,6 +120,7 @@ trapsig() {
 #   On some systems, printf is a utility, rather than a shell builtin.
 #   This wrapper ensures that the shell can only invoke a built-in printf.
 b_printf() (
+    [ $# -gt 0 ] || panic 70 'printf: missing arguments.'
     unset PATH
     # shellcheck disable=2059
     printf -- "$@"
@@ -201,7 +202,7 @@ panic() {
 # Returns:
 #   Whatever lpass returns.
 auth_lpass() {
-    [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
+    [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments.'
     b_printf '%s\n' "$LASTPASS_PASSWORD" |
     LPASS_DISABLE_PINENTRY=1 lpass "$@"
 }
@@ -273,29 +274,29 @@ do
             ;;
         -h)
             exec cat <<EOF
-lpassh-add v1.1.0 - Unlocks SSH keys using LastPass.
+lpassh-add v1.1.1b - Unlocks SSH keys using LastPass.
 
 Synopsis:
     lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
 
 Arguments:
-    KEY         The key to unlock. If no KEY is given, tries to unlock 
-                ~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa, and
-                ~/.ssh/id_ed25519.
+    KEY          The key to unlock. If no KEY is given, tries
+                 ~/.ssh/id_rsa, ~/.ssh/id_dsa, ~/.ssh/id_ecdsa,
+                 and ~/.ssh/id_ed25519.
 
 Options:
-    -c          Confirm every use of an identity.
-    -h          Show this help screen.
-    -q          Be quieter.
-    -t LIFETIME Automatically re-lock keys after LIFETIME.
-    -V          Show version.
+    -c           Confirm every use of an identity.
+    -h           Show this help screen.
+    -q           Be quieter.
+    -t LIFETIME  Automatically re-lock keys after LIFETIME.
+    -V           Show version.
 
 See the manual for details.
 EOF
             ;;
         -V)
             exec cat <<EOF
-lpassh-add v1.1.0
+lpassh-add v1.1.1b
 (c) 2018, 2019, 2020 Odin Kroeger
 Released under the MIT license.
 EOF
@@ -319,7 +320,7 @@ done
 # shellcheck disable=2121
 if [ $# -eq 0 ]; then
     SSH_HOME="$HOME/.ssh"
-    set -- "$SSH_HOME/id_rsa"   "$SSH_HOME/id_dsa" \
+    set -- "$SSH_HOME/id_rsa"   "$SSH_HOME/id_dsa"     \
            "$SSH_HOME/id_ecdsa" "$SSH_HOME/id_ed25519"
 else
     KEYS_GIVEN=x

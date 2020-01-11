@@ -42,12 +42,23 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 If you have [curl](https://curl.haxx.se/) or
             [wget](https://www.gnu.org/software/wget/),
-you can do all of the above by:
+you probably can do all of the above by:
 
 ```sh
-    # Download and unpack.
-    ( URL="https://github.com/odkr/lpassh-add/archive/v1.1.0.tar.gz"
-      curl -L "$URL"; [ "$?" -eq 127 ] && wget -q -O - "$URL"; ) | tar -xz
+    # Download the archive and the signature.
+    ( DL=curl DL_OPTS='-LsSo'
+      "$DL" 2>/dev/null
+      [ $? -eq 127 ] && DL=wget DL_OPTS='-qO'
+      "$DL" 2>/dev/null
+      [ $? -eq 127 ] && exit 127
+      BASE_URL=https://github.com/odkr/lpassh-add VERS=v1.1.0
+      AR="$VERS.tar.gz" SIG="$VERS.tar.gz.asc"
+      "$DL" $DL_OPTS "$AR" "$BASE_URL/archive/$AR"
+      "$DL" $DL_OPTS "$SIG" "$BASE_URL/releases/download/$VERS/$SIG" )
+    # Verify the archive.
+    gpg --verify v1.1.0.tar.gz.asc
+    # Unpack it.
+    tar -xzf v1.1.0.tar.gz
     # Check the source!
     more lpassh-add-1.1.0/lpassh-add
     # If you like what see, continue by:

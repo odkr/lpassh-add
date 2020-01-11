@@ -50,7 +50,7 @@ OPTIONS
    Show version.
 
 **-c**, **-q**, and **-t** are simply passed through to **ssh-add**.
-See **ssh-add**(1) for details about those options.
+See **ssh-add**\ (1) for details about those options.
 
 
 WHERE TO STORE PASSPHRASES IN LASTPASS

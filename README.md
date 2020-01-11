@@ -16,25 +16,28 @@ See the [manual](MANUAL.rst) and the [source](lpassh-add) for details.
 
 You use **lpassh-add** *at your own risk*. You have been warned.
 
+### System requirements
+
 You need:
 
 1. [OpenSSh](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
+3. A bourne-compatible shell that provides a `printf` *builtin* (modern shells do).
 
-Apart from OpenSSh and the LastPass command line client, **lpassh-add** is
-[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/)-compliant.
-So it should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
-OpenBSD, or macOS). **lpassh-add** also *aims* to be
-[System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/)-compatible.
-So it should also run on many older Unix systems. However, you may need to
-change the shebang line, so that it points to a POSIX-compliant shell
-(e.g., on Solaris).
+Apart from the above, **lpassh-add** complies with
+[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/) and *aims*
+to be compatible with [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
+It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD, OpenBSD,
+or macOS). You may need to change the shebang line on some systems (e.g., on Solaris),
+however, so that it points to a POSIX-compliant bourne shell.
 
-Download the repository from:
-<https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
+### Set-up
 
-Unpack the repository, copy **lpassh-add** to a directory in your `PATH`,
-and make it executable. You may want to install the manual page, too.
+1. Download the repository from:
+   <https://github.com/odkr/lpassh-add/archive/v1.0.5.tar.gz>
+2. Unpack the repository.
+3. Copy **lpassh-add** to a directory in your `PATH`.
+4. You may also want to install its manual page.
 
 If you have [curl](https://curl.haxx.se/) or
             [wget](https://www.gnu.org/software/wget/),

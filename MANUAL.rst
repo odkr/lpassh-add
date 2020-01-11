@@ -19,7 +19,7 @@ DESCRIPTION
 
 **lpassh-add** adds **KEY** to the SSH authentication agent, just as
 **ssh-add** would, but looks up the passphrase for **KEY** in LastPass.
-If it can't find it there, it asks you for it.
+If it can't find it there, it calls **ssh-add**.
 
 If you don't give any **KEY**, it tries to add ``~/.ssh/id_rsa``,
 ``~/.ssh/id_dsa``, ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``,
@@ -28,11 +28,6 @@ ignoring those that don't exist.
 If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
 **lpassh-add** logs you into LastPass; it also logs you out again when
 it's done.
-
-If you try to unlock multiple keys, **lpassh-add** always retries the last
-passphrase, regardless of whether it found that passphrase in LastPass or
-you've just entered it. So, if you use the same passphrase for all keys, it
-will stop quering LastPass or you once it has encountered that passphrase.
 
 
 OPTIONS
@@ -67,10 +62,10 @@ You also need to include "ssh" in the name of that Secure Note or in the
 name of the folder that you place that note in.
 
 You can change which Secure Notes and folders **lpassh-add** tries by
-setting the environment variable ``LPASSH_ADD_LPASS_PATH_REGEX``.
+setting the environment variable ``LPASSH_ADD_PATH_REGEX``.
 
 You can also make **lpassh-add** try *every* item in your LastPass database
-to describe an SSH key, by setting ``LPASSH_ADD_LPASS_PATH_REGEX`` to the
+to describe an SSH key, by setting ``LPASSH_ADD_PATH_REGEX`` to the
 empty string ("") or any other regular expression that matches any string.
 This is a *bad* idea. It's slow. It will likely pass passphrases to
 **ssh-add** that are none of its business. And it will likely generate a lot
@@ -80,11 +75,11 @@ of warnings; these are harmless, however.
 ENVIRONMENT
 ===========
 
-LPASSH_ADD_LPASS_PATH_REGEX
+LPASSH_ADD_PATH_REGEX
    A basic regular expression. **lpassh-add** assumes that any item in your
    LastPass database the path of which matches this expression describes an
-   SSH key. If you set this variable to a regular expression that matches any 
-   string, for instance, the empty string (""), then **lpassh-add** will 
+   SSH key. If you set this variable to a regular expression that matches any
+   string, for instance, the empty string (""), then **lpassh-add** will
    assume that *every* item in your LastPass database describes an SSH key.
    This is a *bad* idea. (Default if not set: "ssh".)
 
@@ -120,17 +115,17 @@ utilities it calls, etc.), OpenSSH, the LastPass command line client,
 whatever utility you have set in ``LPASS_ASKPASS`` or ``SSH_ASKPASS``,
 and your environment.
 
-**lpassh-add** stores the passphrases of all LastPass itemes that match
-the regular expression given in ``LPASSH_ADD_LPASS_PATH_REGEX`` in
-memory. It also may pass all of those passphrases to **ssh-add**.
+**lpassh-add**  may, and likely will, pass the passphrases of *all*
+LastPass itemes the path of which matches the regular expression given
+in ``LPASSH_ADD_PATH_REGEX`` to **ssh-add**.
 
-If you're using the LastPass agent, any programme you (or the superuser)
-run can get a copy of your password database by calling ``lpass export``
-while the agent is running. This conforms to LastPass' threat model, but
-it may make you feel uneasy. You can use **lpassh-add** *without* using
-the LastPass agent, by setting ``LPASSH_ADD_AGENT_DISABLE`` or
-``LPASS_AGENT_DISABLE`` to 1. **lpassh-add** will still only ask you for
-your LastPass password once. However, it will then store a copy of the
+If you're using the LastPass agent, any programme tbat you (or the
+superuser) run can get a copy of your password database by calling
+``lpass export`` while the agent is running. This conforms to LastPass'
+threat model, but it may make you feel uneasy. You can use **lpassh-add**
+*without* using the LastPass agent, by setting ``LPASSH_ADD_AGENT_DISABLE``
+or ``LPASS_AGENT_DISABLE`` to 1. **lpassh-add** will still only ask you
+for your LastPass password once. However, it will then store a copy of the
 LastPass master password in memory while it's running. (If you're using
 the LastPass agent, it won't.)
 
@@ -166,13 +161,6 @@ Other non-zero status
 **lpassh-add** may exit with other statuses on some systems or when run
 by some shells (e.g., **zsh**). However, you can safely assume that 0
 indicates success and non-zero failure.
-
-
-CAVEATS
-=======
-
-**lpassh-add** ignores your ``PATH`` and ``IFS`` as well as some of
-LastPass' environment variables.
 
 
 AUTHOR

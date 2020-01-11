@@ -24,12 +24,13 @@ You need:
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 3. A bourne-compatible shell that provides a `printf` *builtin* (modern shells do).
 
-Apart from the above, **lpassh-add** complies with
-[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/) and *aims*
+Otherwise, **lpassh-add** complies with
+[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/). It also *aims*
 to be compatible with [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
-It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD, OpenBSD,
-or macOS). You may need to change the shebang line on some systems (e.g., on Solaris),
-however, so that it points to a POSIX-compliant bourne shell.
+
+It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD, OpenBSD, and
+macOS). However, on some systems (e.g., Solaris) you may need to change the shebang
+line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 ### Set-up
 
@@ -60,7 +61,7 @@ or else **ssh-add** may *not* be able to find it.
 
 ## DOCUMENTATION
 
-See the [manual](MANUAL.md) and the [source](lpassh-add).
+See the [manual](MANUAL.rst) and the [source](lpassh-add).
 
 
 ## CONCTACT

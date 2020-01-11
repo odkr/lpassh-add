@@ -15,12 +15,12 @@
 \f[B]lpassh-add\f[R] \f[B]-V\f[R]
 .SH DESCRIPTION
 .PP
-\f[B]lpassh-add\f[R] adds \f[B]KEY\f[R] to the SSH authentication agent,
+\f[B]lpassh-add\f[R] adds \f[I]KEY\f[R] to the SSH authentication agent,
 just as \f[B]ssh-add\f[R] would, but looks up the passphrase for
-\f[B]KEY\f[R] in LastPass.
+\f[I]KEY\f[R] in LastPass.
 If it can\[aq]t find it there, it calls \f[B]ssh-add\f[R].
 .PP
-If you don\[aq]t give any \f[B]KEY\f[R], it tries to add
+If you don\[aq]t give any \f[I]KEY\f[R], it tries to add
 \f[C]\[ti]/.ssh/id_rsa\f[R], \f[C]\[ti]/.ssh/id_dsa\f[R],
 \f[C]\[ti]/.ssh/id_ecdsa\f[R], and \f[C]\[ti]/.ssh/id_ed25519\f[R],
 ignoring those that don\[aq]t exist.
@@ -56,13 +56,19 @@ the \[dq]Passphrase\[dq] field of a so-called Secure Note of the type
 You also need to include \[dq]ssh\[dq] in the name of that Secure Note
 or in the name of the folder that you place that note in.
 .PP
-You can change which Secure Notes and folders \f[B]lpassh-add\f[R] tries
-by setting the environment variable \f[C]LPASSH_ADD_PATH_REGEX\f[R].
+You can change which Secure Notes \f[B]lpassh-add\f[R] assumes to
+describe SSH keys by setting the environment variable
+\f[C]LPASSH_ADD_PATH_REGEX\f[R].
+\f[C]LPASSH_ADD_PATH_REGEX\f[R] is a basic regular expression.
+If the path of a Secure Note matches this expression.
+\f[B]lpassh-add\f[R] assumes that it describes an SSH key.
+If you don\[aq]t set \f[C]LPASSH_ADD_PATH_REGEX\f[R],
+\f[B]lpassh-add\f[R] uses the regular expression \[dq]ssh\[dq].
 .PP
-You can also make \f[B]lpassh-add\f[R] try \f[I]every\f[R] item in your
-LastPass database to describe an SSH key, by setting
-\f[C]LPASSH_ADD_PATH_REGEX\f[R] to the empty string (\[dq]\[dq]) or any
-other regular expression that matches any string.
+You can also make \f[B]lpassh-add\f[R] assume that \f[I]every\f[R] item
+in your LastPass database describes an SSH key, by setting
+\f[C]LPASSH_ADD_PATH_REGEX\f[R] to a regular expression that matches any
+string, the empty string (\[dq]\[dq]), for example.
 This is a \f[I]bad\f[R] idea.
 It\[aq]s slow.
 It will likely pass passphrases to \f[B]ssh-add\f[R] that are none of
@@ -107,22 +113,17 @@ Only used if \f[C]LPASS_ASKPASS\f[R] \f[I]isn\[aq]t\f[R] set.
 .PP
 \f[B]lpassh-add\f[R] is but a shell script.
 You should read the source code and assess the security risks yourself.
-Above all, since \f[B]lpassh-add\f[R] is a wrapper around OpenSSH and
-the LastPass command line client, their threat models apply.
+The threat models of OpenSSH and the LastPass command line client apply.
 .PP
-\f[B]lpassh-add\f[R] trusts your system (i.e., your terminal, your
-shell, the utilities it calls, etc.), OpenSSH, the LastPass command line
-client, whatever utility you have set in \f[C]LPASS_ASKPASS\f[R] or
-\f[C]SSH_ASKPASS\f[R], and your environment.
-.PP
-\f[B]lpassh-add\f[R] may, and likely will, pass the passphrases of
-\f[I]all\f[R] LastPass itemes the path of which matches the regular
+\f[B]lpassh-add\f[R] may, and often will, pass the passphrases of
+\f[I]all\f[R] LastPass items the path of which matches the regular
 expression given in \f[C]LPASSH_ADD_PATH_REGEX\f[R] to
 \f[B]ssh-add\f[R].
 .PP
-If you\[aq]re using the LastPass agent, any programme tbat you (or the
-superuser) run can get a copy of your password database by calling
-\f[C]lpass export\f[R] while the agent is running.
+If you\[aq]re using the LastPass agent, any programme that runs under
+your (or the superuser\[aq]s) user ID can get a copy of your password
+database by calling \f[C]lpass export\f[R] while you\[aq]re logged into
+LastPass and the agent is running.
 This conforms to LastPass\[aq] threat model, but it may make you feel
 uneasy.
 You can use \f[B]lpassh-add\f[R] \f[I]without\f[R] using the LastPass
@@ -130,8 +131,8 @@ agent, by setting \f[C]LPASSH_ADD_AGENT_DISABLE\f[R] or
 \f[C]LPASS_AGENT_DISABLE\f[R] to 1.
 \f[B]lpassh-add\f[R] will still only ask you for your LastPass password
 once.
-However, it will then store a copy of the LastPass master password in
-memory while it\[aq]s running.
+However, it will store a copy of the LastPass master password in memory
+while it\[aq]s running.
 (If you\[aq]re using the LastPass agent, it won\[aq]t.)
 .PP
 If you do \f[I]not\f[R] set \f[C]LPASS_ASKPASS\f[R] or

@@ -396,7 +396,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-        [ "${LASTPASS_PASSWORD-}" ] || panic 64 'No password given.'
+        [ "$LASTPASS_PASSWORD" ] || panic 64 'No password given.'
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LASTPASS-}" ] || [ "${LASTPASS-x}" = x ]; then

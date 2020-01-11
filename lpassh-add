@@ -28,8 +28,6 @@
 # ===========
 #
 # This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
-# This requires it to run on buggy shells, shells that are buggy. This, 
-# in turn, necessitates some *weird* constructs.
 #
 # See:
 # * <https://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Portable-Shell.html>
@@ -119,10 +117,8 @@ trapsig() {
 # b_printf - printf wrapper.
 #
 # Rationale:
-#   printf is a utility on some systems, rather than a shell builtin.
-#   This wrapper unsets PATH, making sure the shell can't call external utilities,
-#   that is, unless they are given with a an absolute path.
-#   This making sure that the shell either calls a builtin printf or errors.
+#   On some systems, printf is a utility, rather than a shell builtin.
+#   This wrapper ensures that the shell can only invoke a built-in printf.
 b_printf() (
     unset PATH
     # shellcheck disable=2059
@@ -153,8 +149,8 @@ warn() (
     shift
     # shellcheck disable=2059
     case $# in
-        0) b_printf 'lpassh-add: %s\n' "$string"  ;;
-        *) b_printf "lpassh-add: $string\\n" "$@" ;;
+        0) printf -- 'lpassh-add: %s\n' "$string"  ;;
+        *) printf -- "lpassh-add: $string\\n" "$@" ;;
     esac >&2
 )
 
@@ -231,7 +227,7 @@ askpass() (
         # shellcheck disable=2030
         EX='stty echo 2>/dev/null; echo >&2; exec 0<&- 2>&-'
         stty -echo
-        b_printf '%s ' "$1" >&2
+        printf -- '%s ' "$1" >&2
         read -r pass
         b_printf '%s\n' "$pass"
     else
@@ -292,9 +288,7 @@ esac
 PATH=/bin:/usr/bin:/usr/local/bin
 # shellcheck disable=2006
 PATH="`getconf PATH`:$PATH"
-# Make sure no fancy input field separator is set.
 unset IFS
-
 : "${HOME:?'Not set or empty.'}"
 
 # SERVE PASSWORD TO SSH-ADD

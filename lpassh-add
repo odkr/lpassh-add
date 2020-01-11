@@ -116,6 +116,19 @@ trapsig() {
     done
 }
 
+# b_printf - printf wrapper.
+#
+# Rationale:
+#   printf is a utility on some systems, rather than a shell builtin.
+#   This wrapper unsets PATH, making sure the shell can't call external utilities,
+#   that is, unless they are given with a an absolute path.
+#   This making sure that the shell either calls a builtin printf or errors.
+b_printf() (
+    unset PATH
+    # shellcheck disable=2059
+    printf -- "$@"
+)
+
 # warns - Prints a message to STDERR.
 #
 # Synopsis:
@@ -140,8 +153,8 @@ warn() (
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf -- 'lpassh-add: %s\n' "$string"  ;;
-        *) printf -- "lpassh-add: $string\\n" "$@" ;;
+        0) b_printf 'lpassh-add: %s\n' "$string"  ;;
+        *) b_printf "lpassh-add: $string\\n" "$@" ;;
     esac >&2
 )
 
@@ -218,13 +231,11 @@ askpass() (
         # shellcheck disable=2030
         EX='stty echo 2>/dev/null; echo >&2; exec 0<&- 2>&-'
         stty -echo
-        printf -- '%s ' "$1" >&2
+        b_printf '%s ' "$1" >&2
         read -r pass
-        cat <<EOF
-$pass
-EOF
+        b_printf '%s\n' "$pass"
     else
-        panic 69 'No TTY. Cannot ask for password.'
+        panic 69 "No teletype device. Can't ask for password."
     fi
 )
 
@@ -248,9 +259,8 @@ EOF
 #   Whatever lpass returns.
 auth_lpass() {
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments for lpass.'
-    LPASS_DISABLE_PINENTRY=1 lpass "$@" <<EOF
-$LASTPASS_PWD
-EOF
+    b_printf '%s\n' "$LASTPASS_PWD" |
+    LPASS_DISABLE_PINENTRY=1 lpass "$@"
 }
 
 
@@ -267,7 +277,7 @@ export BIN_SH CLICOLOR_FORCE POSIXLY_CORRECT
 set -Cefu
 umask 077
 
-: "${LPASSH_ADD_LPASS_PATH_REGEX=ssh}"
+: "${LPASSH_ADD_PATH_REGEX=ssh}"
 export LPASS_AUTO_SYNC_TIME=30
 
 case "${LPASSH_ADD_AGENT_DISABLE-}" in
@@ -285,6 +295,7 @@ PATH="`getconf PATH`:$PATH"
 # Make sure no fancy input field separator is set.
 unset IFS
 
+: "${HOME:?'Not set or empty.'}"
 
 # SERVE PASSWORD TO SSH-ADD
 # =========================
@@ -324,7 +335,7 @@ do
 lpassh-add v1.1.0b - Unlocks SSH keys using LastPass.
 
 Synopsis:
-    lpassh-add [-cq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
+    lpassh-add [-ckq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
 
 Arguments:
     KEY         The key to unlock. If no KEY is given, tries to unlock 
@@ -363,6 +374,16 @@ EOF
     esac
 done
 
+# Check if keys have been given.
+# shellcheck disable=2121
+if [ $# -eq 0 ]; then
+    SSH_HOME="$HOME/.ssh"
+    set -- "$SSH_HOME/id_rsa"   "$SSH_HOME/id_dsa" \
+           "$SSH_HOME/id_ecdsa" "$SSH_HOME/id_ed25519"
+else
+    KEYS_GIVEN=x
+fi
+
 # Make sure LPASS_ASKPASS and SSH_ASKPASS point to a system programme.
 for UTIL in "${LPASS_ASKPASS-}" "${SSH_ASKPASS-}"
 do
@@ -382,7 +403,7 @@ do
                 # shellcheck disable=2012,2121         
                 set -- `ls -d -l -n "${ACC:?}" | awk '{print $1, $3, $4}'`
                 [ $# -eq 3 ]      \
-                    || panic 69 '%s: Cannot parse stats.' "$ACC"
+                    || panic 69 "%s: Can't parse stats." "$ACC"
                 [ "$2" -eq 0 ]    \
                     || panic 69 '%s: Not owned by root.' "$ACC"
                 [ "$3" -lt 1000 ] \
@@ -402,7 +423,7 @@ export PATH IFS
 # Check what TTY to read passwords from.
 # shellcheck disable=2006
 TTY=`tty`  || :
-[ "$TTY" ] || panic 69 "Cannot determine the terminal's teletype device."
+[ "$TTY" ] || panic 69 "Can't determine the terminal's teletype device."
 
 # Prepare cleanup.
 trapsig onexit 0 2 15
@@ -436,65 +457,39 @@ readonly LASTPASS_PWD
 
 # Lookup IDs of all SSH keys.
 # shellcheck disable=2006
-IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_LPASS_PATH_REGEX"`
+IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_PATH_REGEX"`
 [ "$IDS" ] || \
-    panic 69 '%s: No item in LastPass matches.' "$LPASSH_ADD_LPASS_PATH_REGEX"
-
-# Check if keys have been given.
-# shellcheck disable=2121
-if [ $# -eq 0 ]; then
-    PF="$HOME/.ssh/id_"
-    set -- "${PF}rsa" "${PF}dsa" "${PF}ecdsa" "${PF}ed25519"
-else
-    KEYS_GIVEN=x
-fi
+    panic 69 '%s: No LastPass items match.' "$LPASSH_ADD_PATH_REGEX"
 
 # Unlock the keys.
-export SSH_ASKPASS="$0" DISPLAY=''
+NOT_FOUND=0
 for KEY
 do
-    # Skip if there's no such key.
-    if [ -e "$KEY" ]; then :; else
-        [ "${KEYS_GIVEN-}" ] && warn '%s: No such file.' "$KEY"
-        continue
+    if [ -e "$KEY" ]; then
+        for ID in $IDS
+        do
+            # shellcheck disable=2086
+            "$LPASS" show --field=Passphrase "$ID" |
+            SSH_ASKPASS="$0" DISPLAY='' ssh-add ${OPTS-} "$KEY" && continue 2
+        done
+        [ "${QUIET-}" ] || warn '%s: No matching passphrases in LastPass.' "$KEY"
+        NOT_FOUND=$((NOT_FOUND+1))
+        eval "KEY_$NOT_FOUND=\"\$KEY\""
+    elif [ "${KEYS_GIVEN-}" ]; then
+        warn '%s: No such file.' "$KEY"
     fi
-
-    # Try the last Passphrase.
-    # shellcheck disable=2086
-    [ "${PASS-}" ] && ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
-$PASS
-EOF
-
-    # Try every passphrase.
-    for ID in $IDS
-    do
-        case "$ID" in *[!0-9]*) continue; esac
-        eval "PASS=\"\${PASS_$ID-}\""
-        if [ -z "$PASS" ]; then
-            # shellcheck disable=2006
-            PASS=`"$LPASS" show --field=Passphrase "$ID"` || continue
-            eval "PASS_$ID=\"\$PASS\""
-        fi
-        # shellcheck disable=2086
-        ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
-$PASS
-EOF
-    done 
-    [ "${QUIET-}" ] || warn '%s: No passphrase from LastPass matches.' "$KEY"
-
-    ITER=0 MAX_RETRIES=2
-    while [ "$ITER" -lt "$MAX_RETRIES" ]
-    do
-        case $ITER in
-            0) PROMPT="Passphrase for $KEY:";;
-            1) PROMPT="Wrong passphrase for $KEY. Re-try:";;
-        esac
-        # shellcheck disable=2006
-        PASS=`askpass "$PROMPT" "$TTY" "${ASKPASS-}"` ITER=$((ITER+1))
-        # shellcheck disable=2086
-        ssh-add ${OPTS-} "$KEY" <<EOF && continue 2
-$PASS
-EOF
-    done
-    warn '%s: Could not unlock.' "$KEY"
 done
+[ "$NOT_FOUND" -eq 0 ] && exit
+
+shift $#
+set -- "$KEY_1"
+ITER=2
+while [ $ITER -le $NOT_FOUND ]
+do
+    eval "KEY=\"\$KEY_$ITER\""
+    set -- "$@" "$KEY"
+    ITER=$((ITER+1))
+done
+
+# shellcheck disable=2086
+ssh-add ${OPTS-} "$@"

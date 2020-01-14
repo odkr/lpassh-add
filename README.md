@@ -75,6 +75,21 @@ or else **ssh-add** may *not* be able to find it.
 See the [manual](MANUAL.rst) and the [source](lpassh-add).
 
 
+## COMPARABLE TOOLS
+
+* David Blewett's
+  [lp-ssh-add.sh](https://gist.github.com/davidblewett/53047c4c7757b663c11b)
+* Bob Copeland's
+  [lp-ssh-add.sh](https://gist.github.com/bcopeland/3cabf6ff3fe94fcbd566)
+* Knut Ahlers'
+  [lpass-ssh.sh](https://gist.github.com/Luzifer/2f188ed3adc0f1b166f7)
+* Wojciech Adam Koszek's
+  [lastpass-ssh](https://github.com/wkoszek/lastpass-ssh)
+
+**lp-ssh-add.sh**, both versions, downloads the SSH keys themselves
+from LastPass, too. That's a nice feature.
+
+
 ## CONCTACT
 
 If there's something wrong with **lpassh-add**,

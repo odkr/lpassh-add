@@ -403,7 +403,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             export LPASS_ASKPASS
         fi
     fi
-    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null \
+    "$LPASS" login --color=never "$LPASSH_ADD_USERNAME" 1>/dev/null 2>&1 \
         || panic 69 'Could not log into LastPass.'
     # shellcheck disable=2016
     EX="lpass logout --force >/dev/null"

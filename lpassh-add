@@ -240,6 +240,7 @@ PATH="`getconf PATH`:$PATH"
 unset IFS
 : "${HOME:?'Not set or empty.'}"
 
+
 # SERVE PASSWORD TO SSH-ADD
 # =========================
 

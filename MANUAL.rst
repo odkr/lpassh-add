@@ -113,13 +113,14 @@ SECURITY
 *a lot* on what shell you're running it with. **ksh**, for example, appears to
 use temporary files for captures (i.e., ```...``` expressions). So, if you do
 *not* use the LastPass agent *and* use an askpass utility, then **ksh** will
-write your LastPass master password to a temporary file.
+write your LastPass master password to a temporary file. Note, your **sh**
+may just be a symlink to **ksh**.
 
 You should read the source code and assess the security risks yourself.
 You may also want to trace what system calls your shell makes when it
 runs **lpassh-add**, particularly if you're using a non-modern shell.
 **bash** v5.0.11(1), **dash** v0.5.10.2, **yash** v2.49, and **zsh**
-v5.3 and v5.7.1 are fine.
+v5.7.1 are fine.
 
 **lpassh-add**  may, and often will, pass the passphrases of *all*
 LastPass items the path of which matches the regular expression given

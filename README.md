@@ -9,7 +9,8 @@ client](https://github.com/lastpass/lastpass-cli).
 **lpassh-add** is but a short-ish shell script.
 You can easily check that it doesn't do anything funky.
 
-See the [manual](MANUAL.rst) and the [source](lpassh-add) for details.
+See the [manual](MANUAL.rst), particulary the section "SECURITY",
+and the [source](lpassh-add) for details.
 
 
 ## INSTALLATION
@@ -36,15 +37,15 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 * bash v3.2.57(1), v5.0.11(1)
 * dash v0.5.10.2
-* ksh93[^KSH93]
+* ksh93 (but see below)
 * yash v2.49
 * zsh v5.3, v5.7.1
 
 Tests were run on macOS v10.14.6 only.
 
-[^KSH93]: ksh93 appears to use temporary files for captures (i.e., `\`...\``).
+**Note**: ksh93 appears to use temporary files for captures (i.e., ``...``).
 It may write your LastPass master password to a temporary file.
-See the [manual](MANUAL.rst#security) for details.
+See "SECURITY" in the [manual](MANUAL.rst#security) for details.
 
 ### Set-up
 
@@ -88,11 +89,6 @@ or else **ssh-add** may *not* be able to find it.
 
 See the [manual](MANUAL.rst) and the [source](lpassh-add).
 
-
-## SECURITY
-
-How secure a shell script is depends *a lot* on what shell you're running it with.
-See the [manual](MANUAL.rst#security) for details.
 
 
 ## COMPARABLE TOOLS

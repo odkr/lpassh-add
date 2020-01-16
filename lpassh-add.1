@@ -121,13 +121,14 @@ you\[aq]re running it with.
 So, if you do \f[I]not\f[R] use the LastPass agent \f[I]and\f[R] use an
 askpass utility, then \f[B]ksh\f[R] will write your LastPass master
 password to a temporary file.
+Note, your \f[B]sh\f[R] may just be a symlink to \f[B]ksh\f[R].
 .PP
 You should read the source code and assess the security risks yourself.
 You may also want to trace what system calls your shell makes when it
 runs \f[B]lpassh-add\f[R], particularly if you\[aq]re using a non-modern
 shell.
 \f[B]bash\f[R] v5.0.11(1), \f[B]dash\f[R] v0.5.10.2, \f[B]yash\f[R]
-v2.49, and \f[B]zsh\f[R] v5.3 and v5.7.1 are fine.
+v2.49, and \f[B]zsh\f[R] v5.7.1 are fine.
 .PP
 \f[B]lpassh-add\f[R] may, and often will, pass the passphrases of
 \f[I]all\f[R] LastPass items the path of which matches the regular

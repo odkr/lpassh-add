@@ -1,16 +1,31 @@
+# These are some tests I run.
+# You can, and should, ignore this file.
 
+# SETTINGS
+# ========
+
+# The shells to run tests with. These *must* be filenames.
+# Set PATH to use different versions of a shell.
 SHELLS		= sh dash ksh bash zsh yash
 
+# Where to store test scripts and dtruss logs.
 TEST_DIR	= test
 SCPT_DIR	= $(TEST_DIR)/scripts
 LOG_DIR		= $(TEST_DIR)/logs
 
+# Environment variables that some tests unset. 
 ASKPASS_ENV	= LPASS_ASKPASS SSH_ASKPASS
 LPASS_ENV	= $$(env | cut -d= -f1 | grep -E ^LPASS)
 
+# Runs all test scripts.
 RUN_ALL = for X in "$(SCPT_DIR)/"*; do echo "$$X" >&2; "$$X" || break; done
 
+# The tests.
 TESTS	= test-default test-login test-no-agent test-no-agent-prime
+
+
+# TARGETS
+# =======
 
 .POSIX:
 .PHONY: prepare logout scripts $(SHELLS) $(TESTS) dtruss

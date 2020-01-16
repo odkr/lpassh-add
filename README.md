@@ -43,7 +43,7 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 Tests were run on macOS v10.14.6 only.
 
-**Note**: ksh93 appears to use temporary files for captures (i.e., ``...``).
+**Note**: ksh93 appears to use temporary files for captures.
 It may write your LastPass master password to a temporary file.
 See "SECURITY" in the [manual](MANUAL.rst#security) for details.
 

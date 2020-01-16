@@ -70,9 +70,10 @@ onexit() {
         unset EX
     fi
     if [ "${1-0}" -gt 0 ]
-        then kill "-$1" "-$$"
-        else jobs -p | xargs kill
-    fi 2>/dev/null
+        then kill "-$1" "-$$" 2>/dev/null
+        else jobs -p    2>/dev/null |
+             xargs kill 2>/dev/null
+    fi
     exit "$__ONEXIT_STATUS"
 }
 
@@ -150,9 +151,9 @@ warn() (
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf -- 'lpassh-add: %s\n' "$string"  ;;
-        *) printf -- "lpassh-add: $string\\n" "$@" ;;
-    esac >&2
+        0) printf -- 'lpassh-add: %s\n' "$string"  >&2 ;;
+        *) printf -- "lpassh-add: $string\\n" "$@" >&2 ;;
+    esac
 )
 
 # panic - Exits the script with an error message.

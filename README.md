@@ -9,7 +9,7 @@ client](https://github.com/lastpass/lastpass-cli).
 **lpassh-add** is but a short-ish shell script.
 You can easily check that it doesn't do anything funky.
 
-See the [manual](MANUAL.rst), particulary the section "SECURITY",
+See the [manual](MANUAL.rst), particulary the "SECURITY" section,
 and the [source](lpassh-add) for details.
 
 
@@ -35,7 +35,7 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 ### Tested with
 
-* bash v3.2.57(1), v5.0.11(1)
+* bash v3.2.57(1)
 * dash v0.5.10.2
 * ksh93 (but see below)
 * yash v2.49
@@ -43,8 +43,8 @@ line on some systems, so that it points to a POSIX-compliant bourne shell.
 
 Tests were run on macOS v10.14.6 only.
 
-**Note**: ksh93 appears to use temporary files for captures.
-It may write your LastPass master password to a temporary file.
+**Note**: ksh93 may use temporary files for captures.
+If it does, it may write your LastPass master password to a temporary file.
 See "SECURITY" in the [manual](MANUAL.rst#security) for details.
 
 ### Set-up

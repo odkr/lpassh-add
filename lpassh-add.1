@@ -112,15 +112,16 @@ Utility to ask for passphrases.
 Only used if \f[C]LPASS_ASKPASS\f[R] \f[I]isn\[aq]t\f[R] set.
 (Default if not set: Ask on teletype device of your terminal.)
 .SH SECURITY
+.SS Basics
 .PP
 \f[B]lpassh-add\f[R] is but a shell script.
 And how secure a shell script is depends \f[I]a lot\f[R] on what shell
 you\[aq]re running it with.
-\f[B]ksh\f[R], for example, appears to use temporary files for captures
-(i.e., \f[C]\[ga]...\f[R]\[ga] expressions).
+\f[B]ksh\f[R], for example, may create a temporary file to handle
+captures (i.e., \f[C]\[ga]...\f[R]\[ga] expressions).
 So, if you do \f[I]not\f[R] use the LastPass agent \f[I]and\f[R] use an
-askpass utility, then \f[B]ksh\f[R] will write your LastPass master
-password to a temporary file.
+askpass utility, it may write your LastPass master password to a
+temporary file.
 Note, your \f[B]sh\f[R] may just be a symlink to \f[B]ksh\f[R].
 .PP
 You should read the source code and assess the security risks yourself.
@@ -130,10 +131,7 @@ shell.
 \f[B]bash\f[R] v5.0.11(1), \f[B]dash\f[R] v0.5.10.2, \f[B]yash\f[R]
 v2.49, and \f[B]zsh\f[R] v5.7.1 are fine.
 .PP
-\f[B]lpassh-add\f[R] may, and often will, pass the passphrases of
-\f[I]all\f[R] LastPass items the path of which matches the regular
-expression given in \f[C]LPASSH_ADD_PATH_REGEX\f[R] to
-\f[B]ssh-add\f[R].
+The threat models of OpenSSH and the LastPass command line client apply.
 .PP
 If you\[aq]re using the LastPass agent, any programme that runs under
 your (or the superuser\[aq]s) user ID can get a copy of your password
@@ -141,14 +139,20 @@ database by calling \f[C]lpass export\f[R] while you\[aq]re logged into
 LastPass and the agent is running.
 This conforms to LastPass\[aq] threat model, but it may make you feel
 uneasy.
+.SS Behaviour
+.PP
+\f[B]lpassh-add\f[R] may, and often will, pass the passphrases of
+\f[I]all\f[R] LastPass items the path of which matches the regular
+expression given in \f[C]LPASSH_ADD_PATH_REGEX\f[R] to
+\f[B]ssh-add\f[R].
 .PP
 You can use \f[B]lpassh-add\f[R] \f[I]without\f[R] using the LastPass
 agent, by setting \f[C]LPASSH_ADD_AGENT_DISABLE\f[R] or
 \f[C]LPASS_AGENT_DISABLE\f[R] to 1.
 \f[B]lpassh-add\f[R] will still only ask you for your LastPass password
 once.
-However, it may write your LastPass master password to a temporary file,
-depending on what shell you use to run it.
+However, it may then write your LastPass master password to a temporary
+file, depending on what shell you use to run it.
 It will also store a copy of the LastPass master password in memory
 while it\[aq]s running.
 (If you\[aq]re using the LastPass agent, it does \f[I]neither\f[R].)
@@ -161,8 +165,6 @@ other process that runs under your (or the superuser\[aq]s) user ID can
 also read from that device.
 (This is true for \f[I]any\f[R] programme that runs in a terminal and
 reads data from a teletype device, including \f[B]ssh-add\f[R].)
-.PP
-The threat models of OpenSSH and the LastPass command line client apply.
 .SH EXIT STATUS
 .TP
 .B 0

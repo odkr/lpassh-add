@@ -109,12 +109,15 @@ SSH_ASKPASS
 SECURITY
 ========
 
+Basics
+------
+
 **lpassh-add** is but a shell script. And how secure a shell script is depends
-*a lot* on what shell you're running it with. **ksh**, for example, appears to
-use temporary files for captures (i.e., ```...``` expressions). So, if you do
-*not* use the LastPass agent *and* use an askpass utility, then **ksh** will
-write your LastPass master password to a temporary file. Note, your **sh**
-may just be a symlink to **ksh**.
+*a lot* on what shell you're running it with. **ksh**, for example, may create
+a temporary file to handle captures (i.e., ```...``` expressions). So, if you
+do *not* use the LastPass agent *and* use an askpass utility, it may write
+your LastPass master password to a temporary file. Note, your **sh** may just
+be a symlink to **ksh**.
 
 You should read the source code and assess the security risks yourself.
 You may also want to trace what system calls your shell makes when it
@@ -122,18 +125,23 @@ runs **lpassh-add**, particularly if you're using a non-modern shell.
 **bash** v5.0.11(1), **dash** v0.5.10.2, **yash** v2.49, and **zsh**
 v5.7.1 are fine.
 
-**lpassh-add**  may, and often will, pass the passphrases of *all*
-LastPass items the path of which matches the regular expression given
-in ``LPASSH_ADD_PATH_REGEX`` to **ssh-add**.
+The threat models of OpenSSH and the LastPass command line client apply.
 
 If you're using the LastPass agent, any programme that runs under your (or
 the superuser's) user ID can get a copy of your password database by calling
 ``lpass export`` while you're logged into LastPass and the agent is running.
 This conforms to LastPass' threat model, but it may make you feel uneasy.
 
+Behaviour
+---------
+
+**lpassh-add**  may, and often will, pass the passphrases of *all*
+LastPass items the path of which matches the regular expression given
+in ``LPASSH_ADD_PATH_REGEX`` to **ssh-add**.
+
 You can use **lpassh-add** *without* using the LastPass agent, by setting
 ``LPASSH_ADD_AGENT_DISABLE`` or ``LPASS_AGENT_DISABLE`` to 1. **lpassh-add**
-will still only ask you for your LastPass password once. However, it may
+will still only ask you for your LastPass password once. However, it may then
 write your LastPass master password to a temporary file, depending on what
 shell you use to run it. It will also store a copy of the LastPass master
 password in memory while it's running. (If you're using the LastPass agent,
@@ -146,7 +154,6 @@ your (or the superuser's) user ID can also read from that device. (This is
 true for *any* programme that runs in a terminal and reads data from a
 teletype device, including **ssh-add**.)
 
-The threat models of OpenSSH and the LastPass command line client apply.
 
 
 EXIT STATUS

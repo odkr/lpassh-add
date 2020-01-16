@@ -45,7 +45,7 @@ scripts: $(SHELLS)
 logout:
 	lpass logout --force 2>/dev/null || :
 
-test-default: logout
+test-default:
 	lpass status >/dev/null 2>&1 || lpass login "${LPASSH_ADD_USERNAME}"
 	VARS=$(LPASS_ENV); export $$VARS; unset $$VARS; \
 	$(RUN_ALL)

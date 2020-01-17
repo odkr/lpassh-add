@@ -63,8 +63,8 @@ test-no-agent: logout
 
 test-no-agent-prime: logout
 	unset $(ASKPASS_ENV); \
-	export $(ASKPASS_ENV) LPASS_ASKPASS='' \
-	LPASS_AGENT_DISABLE=0 LPASSH_ADD_AGENT_DISABLE=1; \
+	export $(ASKPASS_ENV) LPASS_AGENT_DISABLE=0 \
+	LPASSH_ADD_AGENT_DISABLE=1; \
 	$(RUN_ALL)
 
 dtruss: logout

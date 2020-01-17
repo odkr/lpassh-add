@@ -28,7 +28,7 @@
 # ===========
 #
 # This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
-# If some passages in the code this script strike you as strange, that's why.
+# If some code in this script strike you as strange---that's why.
 #
 # See:
 # * <https://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Portable-Shell.html>

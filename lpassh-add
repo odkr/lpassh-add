@@ -28,6 +28,7 @@
 # ===========
 #
 # This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
+# If some passages in the code this script strike you as strange, that's why.
 #
 # See:
 # * <https://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Portable-Shell.html>
@@ -115,12 +116,12 @@ trapsig() {
     done
 }
 
-# b_printf - printf wrapper.
+# builtin_printf - printf wrapper.
 #
 # Rationale:
 #   On some systems, printf is a utility, rather than a shell builtin.
 #   This wrapper ensures that the shell can only invoke a built-in printf.
-b_printf() (
+builtin_printf() (
     [ $# -gt 0 ] || panic 70 'printf: missing arguments.'
     unset PATH
     # shellcheck disable=2059
@@ -191,7 +192,7 @@ panic() {
 #
 # Description:
 #   Calls lpass and passes on all of its arguments to it.
-#   Also prints the content of the global variable $LASTPASS_PASSWORD to its STDIN.
+#   Prints the content of the global variable $LASTPASS_PASSWORD to its STDIN.
 #
 # Arguments:
 #   Are passed on to lpass.
@@ -202,11 +203,11 @@ panic() {
 #
 # Returns:
 #   Whatever lpass returns.
-auth_lpass() {
+auth_lpass() ( 
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments.'
-    b_printf '%s\n' "$LASTPASS_PASSWORD" |
+    builtin_printf '%s\n' "$LASTPASS_PASSWORD" |
     LPASS_DISABLE_PINENTRY=1 lpass "$@"
-}
+)
 
 
 # SETTINGS
@@ -245,10 +246,10 @@ unset IFS
 # =========================
 
 # ssh-add reads passphrases from the terminal's teletype device by default.
-# So, to pass on passphrases to it, this script sets itself as SSH_ASKPASS
+# So, to pass passphrases to it, this script sets itself as SSH_ASKPASS
 # utility (see below) and then, when it's called by ssh-add, simply calls
-# cat to pass through STDIN to STDOUT. Thereby, it can pass on passphrases
-# to ssh-add by writing them to its STDIN.
+# cat to pass through STDIN to STDOUT. By doing so, the main script can
+# pass on passphrases to ssh-add by writing them to its STDIN.
 
 [ "${SSH_ASKPASS-}" = "$0" ] && exec cat
 
@@ -397,7 +398,10 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-        [ "$LASTPASS_PASSWORD" ] || panic 64 'No password given.'
+	# Makes sure that `[` is a built-in.
+	( unset PATH
+          [ "$LASTPASS_PASSWORD" ] || panic 64 'No password given.'
+        ) || exit
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LPASS_ASKPASS-}" ] || [ "${LPASS_ASKPASS-x}" = x ]; then

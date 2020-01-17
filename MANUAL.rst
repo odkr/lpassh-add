@@ -112,18 +112,23 @@ SECURITY
 Basics
 ------
 
-**lpassh-add** is but a shell script. And how secure a shell script is depends
-*a lot* on what shell you're running it with. **ksh**, for example, may create
-a temporary file to handle captures (i.e., ```...``` expressions). So, if you
-do *not* use the LastPass agent *and* use an askpass utility, it may write
-your LastPass master password to a temporary file. Note, your **sh** may just
-be a symlink to **ksh**.
+**lpassh-add** is but a shell script. 
 
-You should read the source code and assess the security risks yourself.
+How secure a shell script is depends *a lot* on what shell you're running 
+it with. **ksh**, for example, creates a temporary file to handle command
+substitutions (i.e., ```...``` expressions) unless the command is built
+in. As a consequence, if you do *not* use the LastPass agent *and* use an
+askpass utility, the **ksh** will write your LastPass master password to a
+temporary file. Keep in mind that your **sh** may be a symlink to **ksh**.
+This is just an example. There are a lot of shells out there. Use a
+reasonably modern and mainstream one, if possible. **bash** v5.0.11(1), 
+**dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, and **zsh** v5.7.1
+should all be fine.
+
+You should read **lpassh-add** and assess the security risks yourself.
+
 You may also want to trace what system calls your shell makes when it
-runs **lpassh-add**, particularly if you're using a non-modern shell.
-**bash** v5.0.11(1), **dash** v0.5.10.2, **yash** v2.49, and **zsh**
-v5.7.1 should be fine.
+runs **lpassh-add**, particularly if you're using an older shll.
 
 The threat models of OpenSSH and the LastPass command line client apply.
 
@@ -154,12 +159,10 @@ However:
 
 * It will also store a copy of that password in memory while it's running.
 
-* If you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
+* And if you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
   reads your LastPass master password from the teletype device of your
   terminal. It does *not* have exclusive access to that device.
   (No terminal programme has.)
-
-If you do use the LastPass agent, none of this applies.
 
 
 EXIT STATUS

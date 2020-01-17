@@ -40,7 +40,7 @@ change the shebang line, so that it points to a POSIX-compliant bourne shell.
 
 Works with:
 
-* bash v3.2.57(1)
+* bash v3.2.57(1), v5.0.11(1)
 * dash v0.5.10.2
 * ksh AJM 93u+ (but see below)
 * mksh R57

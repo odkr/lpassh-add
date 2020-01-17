@@ -24,7 +24,7 @@ You need:
 1. [OpenSSh](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 3. If you want to use **lpassh-add** without the LastPass agent,
-   a bourne-compatible shell that provides a `printf` *built-in*
+   you also need a shell that provides `[` and `printf` as *built-ins*
    (all shells I know that don't are ancient).
 
 Otherwise, **lpassh-add** complies with
@@ -34,8 +34,7 @@ It also *aims* to be compatible with
 
 It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
-change the shebang line on some systems, so that it points to a 
-POSIX-compliant bourne shell.
+change the shebang line, so that it points to a POSIX-compliant bourne shell.
 
 ### Tested with
 

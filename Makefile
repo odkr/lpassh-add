@@ -6,7 +6,7 @@
 
 # The shells to run tests with. These *must* be filenames.
 # Set PATH to use different versions of a shell.
-SHELLS		= sh dash ksh bash zsh yash
+SHELLS		= sh dash ksh mksh oksh bash zsh yash
 
 # Where to store test scripts and dtruss logs.
 TEST_DIR	= test
@@ -28,7 +28,7 @@ TESTS	= test-default test-login test-no-agent test-no-agent-prime
 # =======
 
 .POSIX:
-.PHONY: prepare logout scripts $(SHELLS) $(TESTS) dtruss
+.PHONY: prepare logout $(SHELLS) scripts $(TESTS) test dtruss
 
 test: $(TESTS)
 

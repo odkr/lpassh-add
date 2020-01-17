@@ -23,29 +23,41 @@ You need:
 
 1. [OpenSSh](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
-3. A bourne-compatible shell that provides a `printf` *builtin* (modern shells do).
+3. If you want to use **lpassh-add** without the LastPass agent,
+   a bourne-compatible shell that provides a `printf` *built-in*
+   (all shells I know that don't are ancient).
 
 Otherwise, **lpassh-add** complies with
-[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/). It also *aims*
-to be compatible with [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
+[POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/).
+It also *aims* to be compatible with
+[System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
 
-It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD, OpenBSD, and
-macOS). However, on some systems (e.g., Solaris) you may need to change the shebang
-line on some systems, so that it points to a POSIX-compliant bourne shell.
+It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
+OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
+change the shebang line on some systems, so that it points to a 
+POSIX-compliant bourne shell.
 
 ### Tested with
 
+Works with:
+
 * bash v3.2.57(1)
 * dash v0.5.10.2
-* ksh93 (but see below)
+* ksh93 AJM 93u+ (but see below)
+* mksh R57
+* oksh v5.2.14
 * yash v2.49
 * zsh v5.3, v5.7.1
 
+Doesn't work with:
+* posh 0.13.2
+
 Tests were run on macOS v10.14.6 only.
 
-**Note**: ksh93 may use temporary files for captures.
-If it does, it may write your LastPass master password to a temporary file.
-See "SECURITY" in the [manual](MANUAL.rst#security) for details.
+**Note**: ksh93 will write your LastPass master password to a temporary file
+if, and only if, you do *not* use the LastPass agent and *do* use an
+askpass utility. See "SECURITY" in the [manual](MANUAL.rst#security)
+for details.
 
 ### Set-up
 

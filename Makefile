@@ -80,3 +80,7 @@ manual:
     		-M title=lpassh-add \
 		-M date="$$(date '+%B %d, %Y')" \
 		-M section=1
+
+install:
+	sudo cp lpassh-add /usr/local/bin
+	sudo cp lpassh-add.1 /usr/local/share/man/man1

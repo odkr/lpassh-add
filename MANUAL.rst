@@ -112,23 +112,24 @@ SECURITY
 Basics
 ------
 
-**lpassh-add** is but a shell script. 
+**lpassh-add** is only a shell script.
 
-How secure a shell script is depends *a lot* on what shell you're running 
+How secure a shell script is depends *a lot* on what shell you're running
 it with. **ksh**, for example, creates a temporary file to handle command
 substitutions (i.e., ```...``` expressions) unless the command is built
-in. As a consequence, if you do *not* use the LastPass agent *and* use an
-askpass utility, the **ksh** will write your LastPass master password to a
-temporary file. Keep in mind that your **sh** may be a symlink to **ksh**.
+in. So, if you do *not* use the LastPass agent *and* use an askpass utility,
+**ksh** will write your LastPass master password to a temporary file as a
+consequence. Keep in mind that your **sh** may be a symlink to **ksh**.
 This is just an example. There are a lot of shells out there. Use a
-reasonably modern and mainstream one, if possible. **bash** v5.0.11(1), 
+reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, and **zsh** v5.7.1
 should all be fine.
 
 You should read **lpassh-add** and assess the security risks yourself.
 
 You may also want to trace what system calls your shell makes when it
-runs **lpassh-add**, particularly if you're using an older shll.
+runs **lpassh-add**, particularly if the shell you're running it with
+isn't reasonably modern and mainstream.
 
 The threat models of OpenSSH and the LastPass command line client apply.
 
@@ -156,12 +157,13 @@ However:
 
 * **lpassh-add** may then write your LastPass master password to a
   temporary file, depending on what shell you use to run it.
+  (See above.)
 
 * It will also store a copy of that password in memory while it's running.
 
 * And if you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
-  reads your LastPass master password from the teletype device of your
-  terminal. It does *not* have exclusive access to that device.
+  reads your LastPass master password from your terminal's teletype device.
+  It does *not* have exclusive access to that device.
   (No terminal programme has.)
 
 

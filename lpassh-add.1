@@ -114,16 +114,16 @@ Only used if \f[C]LPASS_ASKPASS\f[R] \f[I]isn\[aq]t\f[R] set.
 .SH SECURITY
 .SS Basics
 .PP
-\f[B]lpassh-add\f[R] is but a shell script.
+\f[B]lpassh-add\f[R] is only a shell script.
 .PP
 How secure a shell script is depends \f[I]a lot\f[R] on what shell
 you\[aq]re running it with.
 \f[B]ksh\f[R], for example, creates a temporary file to handle command
 substitutions (i.e., \f[C]\[ga]...\f[R]\[ga] expressions) unless the
 command is built in.
-As a consequence, if you do \f[I]not\f[R] use the LastPass agent
-\f[I]and\f[R] use an askpass utility, the \f[B]ksh\f[R] will write your
-LastPass master password to a temporary file.
+So, if you do \f[I]not\f[R] use the LastPass agent \f[I]and\f[R] use an
+askpass utility, \f[B]ksh\f[R] will write your LastPass master password
+to a temporary file as a consequence.
 Keep in mind that your \f[B]sh\f[R] may be a symlink to \f[B]ksh\f[R].
 This is just an example.
 There are a lot of shells out there.
@@ -135,8 +135,8 @@ You should read \f[B]lpassh-add\f[R] and assess the security risks
 yourself.
 .PP
 You may also want to trace what system calls your shell makes when it
-runs \f[B]lpassh-add\f[R], particularly if you\[aq]re using an older
-shll.
+runs \f[B]lpassh-add\f[R], particularly if the shell you\[aq]re running
+it with isn\[aq]t reasonably modern and mainstream.
 .PP
 The threat models of OpenSSH and the LastPass command line client apply.
 .SS Behaviour
@@ -165,13 +165,14 @@ However:
 .IP \[bu] 2
 \f[B]lpassh-add\f[R] may then write your LastPass master password to a
 temporary file, depending on what shell you use to run it.
+(See above.)
 .IP \[bu] 2
 It will also store a copy of that password in memory while it\[aq]s
 running.
 .IP \[bu] 2
 And if you do \f[I]not\f[R] set \f[C]LPASS_ASKPASS\f[R] or
 \f[C]SSH_ASKPASS\f[R], \f[B]lpassh-add\f[R] reads your LastPass master
-password from the teletype device of your terminal.
+password from your terminal\[aq]s teletype device.
 It does \f[I]not\f[R] have exclusive access to that device.
 (No terminal programme has.)
 .SH EXIT STATUS

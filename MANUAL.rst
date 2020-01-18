@@ -117,10 +117,10 @@ Basics
 How secure a shell script is depends *a lot* on what shell you're running
 it with. **ksh**, for example, creates a temporary file to handle command
 substitutions (i.e., ```...``` expressions) unless the command is built
-in. So, if you do *not* use the LastPass agent *and* use an askpass utility,
-**ksh** will write your LastPass master password to a temporary file as a
-consequence. Keep in mind that your **sh** may be a symlink to **ksh**.
-This is just an example. There are a lot of shells out there. Use a
+in. As a consequence, **ksh** will write your LastPass master password to
+a temporary file if you do *not* use the LastPass agent *and* use an askpass
+utility. Keep in mind that your **sh** may be a symlink to **ksh**. That
+said, this is just an example. There are a lot of shells out there. Use a
 reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.

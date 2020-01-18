@@ -12,6 +12,11 @@ You can easily check that it doesn't do anything funky.
 See the [manual](MANUAL.rst), particulary the "SECURITY" section,
 and the [source](lpassh-add) for details.
 
+If you're reading this on GitHub, keep in mind that it applies to
+the most recent *commit*, which may *not* be most recent *release*.
+Consult the README.md, [manual](MANUAL.rst), and [source](lpassh-add)
+of the release you download before using **lpassh-add**.
+
 
 ## INSTALLATION
 
@@ -64,36 +69,52 @@ for details.
    <https://github.com/odkr/lpassh-add/archive/v1.1.0.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
-4. You may also want to install its manual page.
-
-If you have [curl](https://curl.haxx.se/) or
-            [wget](https://www.gnu.org/software/wget/),
-you probably can do all of the above by:
-
-```sh
-    # Download the archive and the signature.
-    ( DL=curl DL_OPTS='-LsSo'
-      "$DL" 2>/dev/null
-      [ $? -eq 127 ] && DL=wget DL_OPTS='-qO'
-      "$DL" 2>/dev/null
-      [ $? -eq 127 ] && exit 127
-      BASE_URL=https://github.com/odkr/lpassh-add VERS=v1.1.0
-      AR="$VERS.tar.gz" SIG="$VERS.tar.gz.asc"
-      "$DL" $DL_OPTS "$AR" "$BASE_URL/archive/$AR"
-      "$DL" $DL_OPTS "$SIG" "$BASE_URL/releases/download/$VERS/$SIG" )
-    # Verify the archive.
-    gpg --verify v1.1.0.tar.gz.asc
-    # Unpack it.
-    tar -xzf v1.1.0.tar.gz
-    # Check the source!
-    more lpassh-add-1.1.0/lpassh-add
-    # If you like what see, continue by:
-    sudo cp lpassh-add-1.1.0/lpassh-add /usr/local/bin
-    sudo cp lpassh-add-1.1.0/lpassh-add.1 /usr/local/share/man/man1
-```
+4. You may also want to install its manual page (`lpassh-add.1`).
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** may *not* be able to find it.
+
+If you have [curl](https://curl.haxx.se/) or
+            [wget](https://www.gnu.org/software/wget/),
+you probably can download **lpassh-add** by:
+
+```sh
+    ( set -Cfu
+      NAME=lpassh-add VERS=v1.1.0
+      BASE_URL=https://github.com/odkr/$NAME
+      ARCHIVE="$VERS.tar.gz"
+      SIG="$ARCHIVE.asc"
+      # Download the archive and the signature.
+      for GET in 'curl -LsSo' 'wget -qO'; do
+        for FILE in "archive/$ARCHIVE" "releases/download/$VERS/$SIG"; do
+          $GET "$(basename "$FILE")" "$BASE_URL/$FILE"
+          case $? in 0) :;; 127) continue 2;; *) exit;; esac
+        done; break
+      done
+      # Verify the archive.
+      gpg --verify "$SIG" "$ARCHIVE" || exit
+      # Unpack it.
+      tar -xzf "$ARCHIVE"; )
+```
+
+You can simply copy-paste the code above into a POSIX-compliant shell.
+
+You can then install **lpassh-add** by:
+
+```sh
+    cd lpassh-add-1.1.0
+    # Check the source!
+    more lpassh-add
+    # If you like what see, continue by:
+    make install
+```
+
+`make install` tries to find a POSIX-compliant shell, a suitable installation
+directory, and a suitable directory for the manual. It calls `sudo`, which will
+prompt you for your login password. If `make install` fails, you'll have to
+install **lpassh-add** manually.
+
+You *cannot* copy-paste this code, because of the `more` command.
 
 
 ## DOCUMENTATION

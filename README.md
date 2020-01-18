@@ -21,6 +21,35 @@ of the release you download before using **lpassh-add**.
 
 You use **lpassh-add** *at your own risk*. You have been warned.
 
+### TL;DR
+
+If your operating system is POSIX-compliant enough
+(macOS, Linux, FreeBSD, NetBSD, and OpenBSD are) *and* you have
+[curl](https://curl.haxx.se/) or [wget](https://www.gnu.org/software/wget/),
+which you probably do, then you can install **lpassh-add** by:
+
+```sh
+    ( set -Cfu
+      NAME=lpassh-add VERS=1.1.1b
+      BASE_URL=https://github.com/odkr/$NAME
+      ARCHIVE="v$VERS.tar.gz"
+      SIG="$ARCHIVE.asc"
+      for GET in 'curl -LsSo' 'wget -qO'; do
+        for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do
+          $GET "$(basename "$FILE")" "$BASE_URL/$FILE"
+          case $? in 0) :;; 127) continue 2;; *) exit;; esac
+        done; break
+      done
+      set -e
+      gpg --verify "$SIG" "$ARCHIVE" || exit
+      tar -xzf "$ARCHIVE"
+      cd -P "$NAME-$VERS" || exit
+      make install; )
+```
+
+You can simply copy-paste this code as a whole into a terminal, as long as it's
+running a POSIX-compliant shell. (Don't overlook the brackets!)
+
 ### System requirements
 
 You need:
@@ -40,6 +69,8 @@ It also *aims* to be compatible with
 It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
 change the shebang line, so that it points to a POSIX-compliant bourne shell.
+
+
 
 ### Tested with
 
@@ -67,7 +98,7 @@ for details.
 ### Set-up
 
 1. Download the repository from:
-   <https://github.com/odkr/lpassh-add/archive/v1.1.0.tar.gz>
+   <https://github.com/odkr/lpassh-add/archive/v1.1.1b.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
 4. You may also want to install its manual page (`lpassh-add.1`).
@@ -81,13 +112,13 @@ you probably can download and unpack **lpassh-add** by:
 
 ```sh
     ( set -Cfu
-      NAME=lpassh-add VERS=v1.1.0
+      NAME=lpassh-add VERS=1.1.1b
       BASE_URL=https://github.com/odkr/$NAME
-      ARCHIVE="$VERS.tar.gz"
+      ARCHIVE="v$VERS.tar.gz"
       SIG="$ARCHIVE.asc"
       # Download the archive and the signature.
       for GET in 'curl -LsSo' 'wget -qO'; do
-        for FILE in "archive/$ARCHIVE" "releases/download/$VERS/$SIG"; do
+        for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do
           $GET "$(basename "$FILE")" "$BASE_URL/$FILE"
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
         done; break
@@ -104,7 +135,7 @@ You can simply copy-paste this code as a whole into a POSIX-compliant shell.
 You can then install **lpassh-add** by:
 
 ```sh
-    cd lpassh-add-1.1.0
+    cd lpassh-add-1.1.1b
     # Check the source!
     more lpassh-add
     # If you like what see, continue by:

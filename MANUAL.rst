@@ -120,7 +120,7 @@ substitutions (i.e., ```...``` expressions) unless the command is built
 in. As a consequence, **ksh** will write your LastPass master password to
 a temporary file if you do *not* use the LastPass agent *and* use an askpass
 utility. Keep in mind that your **sh** may be a symlink to **ksh**. That
-said, this is just an example. There are a lot of shells out there. Use a
+said, this is just an example. There are a lot of shells out there. Use ma
 reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.

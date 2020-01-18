@@ -29,8 +29,9 @@ You need:
 1. [OpenSSh](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 3. If you want to use **lpassh-add** *without* the LastPass agent,
+   which is part of the LastPass command line client,
    you also need a shell that provides `[` and `printf` as *built-ins*
-   (all shells I know that don't are ancient).
+   (every non-ancient shell should do so, however).
 
 Otherwise, **lpassh-add** complies with
 [POSIX.1-2017](http://pubs.opengroup.org/onlinepubs/9699919799/).

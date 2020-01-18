@@ -76,7 +76,7 @@ or else **ssh-add** may *not* be able to find it.
 
 If you have [curl](https://curl.haxx.se/) or
             [wget](https://www.gnu.org/software/wget/),
-you probably can download **lpassh-add** by:
+you probably can download and unpack **lpassh-add** by:
 
 ```sh
     ( set -Cfu

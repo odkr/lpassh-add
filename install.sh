@@ -141,9 +141,9 @@ warn() (
 panic() {
     set +eu
     __PANIC_STATUS="${1:-69}"
-    if [ $# -gt 0 ]; then
+    if [ $# -gt 1 ]; then
         shift
-        [ $# -gt 0 ] && warn "$@"
+        warn "$@"
     fi
     exit "$__PANIC_STATUS"
 }

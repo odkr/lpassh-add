@@ -32,7 +32,7 @@ which you probably do, then you can install **lpassh-add** by:
 ( set -Cfu; NAME=lpassh-add VERS=1.1.1b
   for GET in 'curl -LsS' 'wget -qO -'; do
     $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
-    case $? in 0) :;; 127) continue;; *) exit;; esac
+    [ $? -eq 127 ] || break
   done | tar -xz
   cd -P "$NAME-$VERS" && make install; )
 ```

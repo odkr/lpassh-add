@@ -64,17 +64,16 @@
 onexit() {
     __ONEXIT_STATUS=$?
     # shellcheck disable=2086
-    trap '' ${TRAPS-2 15} || :
+    trap '' 0 ${TRAPS-2 15} || :
     set +e
     if [ "${EX-}" ]; then
         eval "$EX"
         unset EX
     fi
-    if [ "${1-0}" -gt 0 ]
-        then kill "-$1" "-$$" 2>/dev/null
-        else jobs -p    2>/dev/null |
-             xargs kill 2>/dev/null
-    fi
+    if [ "${1-0}" -gt 0 ]; then
+		__ONEXIT_STATUS=$((128+$1))
+		kill "-$1" "-$$" 2>/dev/null
+	fi
     exit "$__ONEXIT_STATUS"
 }
 
@@ -152,7 +151,7 @@ warn() (
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf -- 'lpassh-add: %s\n' "$string"  >&2 ;;
+        0) printf -- "lpassh-add: $string\n" >&2 ;;
         *) printf -- "lpassh-add: $string\\n" "$@" >&2 ;;
     esac
 )

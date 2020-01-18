@@ -71,9 +71,9 @@ onexit() {
         unset EX
     fi
     if [ "${1-0}" -gt 0 ]; then
-		__ONEXIT_STATUS=$((128+$1))
-		kill "-$1" "-$$" 2>/dev/null
-	fi
+        __ONEXIT_STATUS=$((128+$1))
+        kill "-$1" "-$$" 2>/dev/null
+    fi
     exit "$__ONEXIT_STATUS"
 }
 

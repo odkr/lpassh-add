@@ -41,7 +41,6 @@ which you probably do, then you can install **lpassh-add** by:
         done; break
       done
       set -e
-      gpg --verify "$SIG" "$ARCHIVE" || exit
       tar -xzf "$ARCHIVE"
       cd -P "$NAME-$VERS" || exit
       make install; )

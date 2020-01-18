@@ -17,7 +17,6 @@ the most recent *commit*, which may *not* be most recent *release*.
 Consult the README.md, [manual](MANUAL.rst), and [source](lpassh-add)
 of the release you download before using **lpassh-add**.
 
-
 ## INSTALLATION
 
 You use **lpassh-add** *at your own risk*. You have been warned.
@@ -55,6 +54,7 @@ Works with:
 * zsh v5.3, v5.7.1
 
 Doesn't work with:
+
 * posh 0.13.2
 
 Tests were run on macOS v10.14.6 only.
@@ -110,6 +110,7 @@ You can then install **lpassh-add** by:
     # If you like what see, continue by:
     make install
 ```
+
 You *cannot* copy-paste this code as a whole, because of the `more` command.
 
 `make install` tries to find a POSIX-compliant shell, a suitable installation
@@ -118,12 +119,9 @@ prompt you for your login password. If `make install` fails, you'll have to
 install **lpassh-add** manually (i.e., follows steps 1--4 above); **lpassh-add**
 is more portable that its installation script.
 
-
 ## DOCUMENTATION
 
 See the [manual](MANUAL.rst) and the [source](lpassh-add).
-
-
 
 ## COMPARABLE TOOLS
 
@@ -139,12 +137,10 @@ See the [manual](MANUAL.rst) and the [source](lpassh-add).
 **lp-ssh-add.sh**, both versions, downloads the SSH keys themselves
 from LastPass, too. That's a nice feature.
 
-
 ## CONCTACT
 
 If there's something wrong with **lpassh-add**,
 [open an issue](https://github.com/odkr/lpassh-add/issues).
-
 
 ## LICENSE
 

@@ -108,7 +108,8 @@ you probably can download and unpack **lpassh-add** by:
         for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do
           $GET "$(basename "$FILE")" "https://github.com/odkr/$NAME/$FILE"
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
-        done; break
+        done
+        break
       done
       set -e
       # Download my GnuPG key.

@@ -117,7 +117,7 @@ You *cannot* copy-paste this code as a whole, because of the `more` command.
 directory, and a suitable directory for the manual. It calls `sudo`, which will
 prompt you for your login password. If `make install` fails, you'll have to
 install **lpassh-add** manually (i.e., follows steps 1--4 above); **lpassh-add**
-is more portable that its installation script.
+is more portable than its installation script.
 
 ## DOCUMENTATION
 

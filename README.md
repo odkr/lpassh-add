@@ -121,6 +121,7 @@ you probably can download and unpack **lpassh-add** by:
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
         done; break
       done
+      set -e
       # Download my GnuPG key.
       gpg --recv-keys 0x6B06A2E03BE31BE9
       # Verify the archive.

@@ -97,7 +97,8 @@ you probably can download **lpassh-add** by:
       tar -xzf "$ARCHIVE"; )
 ```
 
-You can simply copy-paste the code above into a POSIX-compliant shell.
+You can simply copy-paste this code as a whole into a POSIX-compliant shell.
+(Don't overlook the brackets!)
 
 You can then install **lpassh-add** by:
 
@@ -108,13 +109,12 @@ You can then install **lpassh-add** by:
     # If you like what see, continue by:
     make install
 ```
+You *cannot* copy-paste this code as a whole, because of the `more` command.
 
 `make install` tries to find a POSIX-compliant shell, a suitable installation
 directory, and a suitable directory for the manual. It calls `sudo`, which will
 prompt you for your login password. If `make install` fails, you'll have to
-install **lpassh-add** manually.
-
-You *cannot* copy-paste this code, because of the `more` command.
+install **lpassh-add** manually (i.e., follows steps 1--4 above).
 
 
 ## DOCUMENTATION

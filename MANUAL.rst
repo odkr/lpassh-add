@@ -1,7 +1,7 @@
 NAME
 ====
 
-**lpassh-add** - Unlocks SSH keys using LastPass
+**lpassh-add** - Unlocks OpenSSH keys using LastPass
 
 
 SYNOPSIS
@@ -35,7 +35,7 @@ OPTIONS
 \-c
    Confirm every use of an identity.
    Note, for this to work `SSH_ASKPASS` must be set when
-   the SSH authentication agent starts.
+   the OpenSSH authentication agent starts.
 
 \-h
    Show help.
@@ -122,8 +122,8 @@ in. So, if you do *not* use the LastPass agent *and* use an askpass utility,
 consequence. Keep in mind that your **sh** may be a symlink to **ksh**.
 This is just an example. There are a lot of shells out there. Use a
 reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
-**dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, and **zsh** v5.7.1
-should all be fine.
+**dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
+**zsh** v5.7.1 should all be fine.
 
 You should read **lpassh-add** and assess the security risks yourself.
 
@@ -131,7 +131,7 @@ You may also want to trace what system calls your shell makes when it
 runs **lpassh-add**, particularly if the shell you're running it with
 isn't reasonably modern and mainstream.
 
-The threat models of OpenSSH and the LastPass command line client apply.
+The threat models of **ssh-add** and **lpass** apply.
 
 Behaviour
 ---------
@@ -145,9 +145,7 @@ The LastPass agent
 
 If you're using the LastPass agent, any programme that runs under your (or
 the superuser's) user ID can get a copy of your password database by calling
-``lpass export`` while you're logged into LastPass.
-
-This conforms to LastPass' threat model, but it may make you feel uneasy.
+``lpass export`` while you're logged in.
 
 You can use **lpassh-add** *without* using the LastPass agent, by setting
 ``LPASSH_ADD_AGENT_DISABLE`` or ``LPASS_AGENT_DISABLE`` to 1. **lpassh-add**
@@ -155,16 +153,15 @@ will still only ask you for your LastPass password once.
 
 However:
 
-* **lpassh-add** may then write your LastPass master password to a
-  temporary file, depending on what shell you use to run it.
-  (See above.)
+* **lpassh-add** will store a copy of that password in memory.
 
-* It will also store a copy of that password in memory while it's running.
+* If you do set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
+  may write your LastPass master password to a temporary file,
+  depending on what shell you use to run it.
 
-* And if you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
+* If you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
   reads your LastPass master password from your terminal's teletype device.
   It does *not* have exclusive access to that device.
-  (No terminal programme has.)
 
 
 EXIT STATUS

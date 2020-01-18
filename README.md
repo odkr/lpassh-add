@@ -104,8 +104,8 @@ for details.
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** may *not* be able to find it.
 
-If you have [curl](https://curl.haxx.se/) or
-            [wget](https://www.gnu.org/software/wget/),
+If you have [GnuPG](https://gnupg.org/) as well as
+[curl](https://curl.haxx.se/) or [wget](https://www.gnu.org/software/wget/),
 you probably can download and unpack **lpassh-add** by:
 
 ```sh
@@ -121,6 +121,8 @@ you probably can download and unpack **lpassh-add** by:
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
         done; break
       done
+      # Download my GnuPG key.
+      gpg --recv-keys 0x6B06A2E03BE31BE9
       # Verify the archive.
       gpg --verify "$SIG" "$ARCHIVE" || exit
       # Unpack it.

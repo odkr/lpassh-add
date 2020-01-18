@@ -46,8 +46,7 @@ which you probably do, then you can install **lpassh-add** by:
       make install; )
 ```
 
-You can simply copy-paste this code as a whole into a terminal, as long as it's
-running a POSIX-compliant shell. (Don't overlook the brackets!)
+You can simply copy-paste this code as a whole into a terminal. (Don't overlook the brackets!)
 
 ### System requirements
 

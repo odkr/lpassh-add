@@ -1,12 +1,10 @@
-# These are some tests I run.
-# You can, and should, ignore this file.
-
 # SETTINGS
 # ========
 
-# The shells to run tests with. These *must* be filenames.
-# Set PATH to use different versions of a shell.
-SHELLS		= sh dash ksh mksh oksh bash zsh yash
+# The shells to try. Used for installation as well as testing.
+# Must be filenames. Order by preference, from best to worst.
+# Change PATH to use different versions of the same shell.
+SHELLS		= dash oksh mksh bash zsh yash ksh sh
 
 # Where to store test scripts and dtruss logs.
 TEST_DIR	= test
@@ -28,7 +26,7 @@ TESTS	= test-default test-login test-no-agent test-no-agent-prime
 # =======
 
 .POSIX:
-.PHONY: prepare logout $(SHELLS) scripts $(TESTS) test dtruss
+.PHONY: prepare logout $(SHELLS) scripts $(TESTS) test dtruss install
 
 test: $(TESTS)
 
@@ -57,14 +55,13 @@ test-login: logout
 
 test-no-agent: logout
 	unset $(ASKPASS_ENV); \
-	export $(ASKPASS_ENV) LPASS_ASKPASS=''
-	LPASS_AGENT_DISABLE=1; \
+	export $(ASKPASS_ENV) LPASS_ASKPASS='' LPASS_AGENT_DISABLE=1; \
 	$(RUN_ALL)
 
 test-no-agent-prime: logout
 	unset $(ASKPASS_ENV); \
 	export $(ASKPASS_ENV) LPASS_AGENT_DISABLE=0 \
-	LPASSH_ADD_AGENT_DISABLE=1; \
+		LPASSH_ADD_AGENT_DISABLE=1; \
 	$(RUN_ALL)
 
 dtruss: logout
@@ -82,5 +79,8 @@ manual:
 		-M section=1
 
 install:
-	sudo cp lpassh-add /usr/local/bin
-	sudo cp lpassh-add.1 /usr/local/share/man/man1
+	PATH="`getconf PATH`:$$PATH"; \
+	for SHELL in $(SHELLS); do \
+		"$$SHELL" </dev/null && break; \
+	done; \
+	"$$SHELL" install.sh

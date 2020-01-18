@@ -32,15 +32,13 @@ which you probably do, then you can install **lpassh-add** by:
     ( set -Cfu
       NAME=lpassh-add VERS=1.1.1b
       BASE_URL=https://github.com/odkr/$NAME
-      ARCHIVE="v$VERS.tar.gz"
-      SIG="$ARCHIVE.asc"
+      ARCHIVE="v$VERS.tar.gz"; SIG="$ARCHIVE.asc"
       for GET in 'curl -LsSo' 'wget -qO'; do
         for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do
           $GET "$(basename "$FILE")" "$BASE_URL/$FILE"
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
         done; break
       done
-      set -e
       tar -xzf "$ARCHIVE"
       cd -P "$NAME-$VERS" || exit
       make install; )
@@ -112,8 +110,7 @@ you probably can download and unpack **lpassh-add** by:
     ( set -Cfu
       NAME=lpassh-add VERS=1.1.1b
       BASE_URL=https://github.com/odkr/$NAME
-      ARCHIVE="v$VERS.tar.gz"
-      SIG="$ARCHIVE.asc"
+      ARCHIVE="v$VERS.tar.gz"; SIG="$ARCHIVE.asc"
       # Download the archive and the signature.
       for GET in 'curl -LsSo' 'wget -qO'; do
         for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do

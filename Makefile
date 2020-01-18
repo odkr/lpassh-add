@@ -67,8 +67,8 @@ test-no-agent-prime: logout
 dtruss: logout
 	mkdir -p "$(LOG_DIR)"
 	for X in "$(SCPT_DIR)/"*; do \
-		LOGFILE="$$(basename "$$X")-dtruss.log"; \
 		case $$X in *.sh) continue; esac; \
+		LOGFILE="$$(basename "$$X")-dtruss.log"; \
 		sudo -E dtruss "$$X" >"$(LOG_DIR)/$$LOGFILE" 2>&1 || :; \
 	done
 

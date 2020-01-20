@@ -21,7 +21,7 @@ DESCRIPTION
 would, but looks up the passphrase for *KEY* in LastPass. If it can't find it
 there, it passes the *KEY* to **ssh-add**, which will ask you for it.
 
-If you don't give any *KEY*, it tries ``~/.ssh/id_rsa``, ``~/.ssh/id_dsa``,
+If you don't give a *KEY*, it tries ``~/.ssh/id_rsa``, ``~/.ssh/id_dsa``,
 ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``.
 
 If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
@@ -33,7 +33,7 @@ OPTIONS
 =======
 
 \-c
-   Confirm every use of an identity.
+   Confirm every use of a key.
    Note, for this to work `SSH_ASKPASS` must be set when
    the OpenSSH authentication agent starts.
 
@@ -61,10 +61,10 @@ You need to store the passphrase for each of your private SSH keys in the
 also need to include "ssh" in the name of that Secure Note or in the name
 of the folder that you place that note in.
 
-You can change which Secure Notes **lpassh-add** should consider to describe
+You can change which Secure Notes **lpassh-add** considers to describe
 SSH keys by setting the environment variable ``LPASSH_ADD_PATH_REGEX``.
 ``LPASSH_ADD_PATH_REGEX`` is a basic regular expression. If the path of a
-Secure Note matches this expression. **lpassh-add** considers that Secure
+Secure Note matches this expression, **lpassh-add** considers that Secure
 Note to describe an SSH key. If you don't set ``LPASSH_ADD_PATH_REGEX``,
 **lpassh-add** uses the regular expression "ssh".
 
@@ -120,7 +120,7 @@ substitutions (i.e., ```...``` expressions) unless the command is built
 in. As a consequence, **ksh** will write your LastPass master password to
 a temporary file if you do *not* use the LastPass agent *and* use an askpass
 utility. Keep in mind that your **sh** may be a symlink to **ksh**. That
-said, this is just an example. There are a lot of shells out there. Use ma
+said, this is just an example. There are a lot of shells out there. Use a
 reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.

@@ -23,10 +23,14 @@ You use **lpassh-add** *at your own risk*. You have been warned.
 
 ### TL;DR
 
-If your operating system is POSIX-compliant enough
-(macOS, Linux, FreeBSD, NetBSD, and OpenBSD are) *and* you have
-[curl](https://curl.haxx.se/) or [wget](https://www.gnu.org/software/wget/),
-which you probably do, then you can install **lpassh-add** by:
+**lpassh-add** aims to be more portable than is reasonable.
+It should "just work".
+
+If your operating system is POSIX-compliant enough (macOS, Linux, and
+the \*BSDs all should be), you have [curl](https://curl.haxx.se/) or
+[wget](https://www.gnu.org/software/wget/), and you use a modern
+bourne-compatible shell (bash, dash, ksh, mksh, oksh, and yash
+all should work), then you can install **lpassh-add** by:
 
 ```sh
 ( set -Cfu; NAME=lpassh-add VERS=1.1.1b
@@ -34,10 +38,11 @@ which you probably do, then you can install **lpassh-add** by:
     $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
     [ $? -eq 127 ] || break
   done | tar -xz
-  cd -P "$NAME-$VERS" && make install; )
+  cd "$NAME-$VERS" && make install; )
 ```
 
-You can simply copy-paste this code as a whole into a terminal. (Don't overlook the brackets!)
+You can simply copy-paste this code as a whole into a terminal.
+(Don't overlook the brackets!)
 
 ### System requirements
 
@@ -59,9 +64,7 @@ It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
 change the shebang line, so that it points to a POSIX-compliant bourne shell.
 
-
-
-### Tested with
+### Tested shells
 
 Works with:
 

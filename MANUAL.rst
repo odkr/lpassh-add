@@ -34,7 +34,7 @@ OPTIONS
 
 \-c
    Confirm every use of a key.
-   Note, for this to work `SSH_ASKPASS` must be set when
+   Note, for this to work ``SSH_ASKPASS`` must be set when
    the OpenSSH authentication agent starts.
 
 \-h

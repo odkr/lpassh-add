@@ -25,6 +25,7 @@ You use **lpassh-add** *at your own risk*. You have been warned.
 
 **lpassh-add** aims to be more portable than is reasonable.
 It should "just work".
+You need OpenSSh and the LastPass command line client, of course.
 
 If your operating system is POSIX-compliant enough (macOS, Linux, and
 the \*BSDs all should be), you have [curl](https://curl.haxx.se/) or
@@ -135,7 +136,7 @@ Then unpack **lpassh-add** by:
 tar -xzf v1.1.1b.tar.gz
 ```
 
-You mant to read the source:
+You may want to read the source:
 
 ```sh
 "${EDITOR:-more}" lpassh-add-1.1.1b/lpassh-add

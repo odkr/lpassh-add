@@ -12,10 +12,10 @@ You can easily check that it doesn't do anything funky.
 See the [manual](MANUAL.rst), particulary the "SECURITY" section,
 and the [source](lpassh-add) for details.
 
-If you're reading this on GitHub, keep in mind that it applies to
-the most recent *commit*, which may *not* be most recent *release*.
-Consult the README.md, [manual](MANUAL.rst), and [source](lpassh-add)
-of the release you download before using **lpassh-add**.
+If you're reading this on GitHub, keep in mind that it applies to the
+most recent *commit*, which may *not* be most recent *release*. Consult
+the README.md, [MANUAL.rst](MANUAL.rst), and [source](lpassh-add)
+of the release that you've downloaded.
 
 ## INSTALLATION
 
@@ -35,8 +35,8 @@ all should work), then you can install **lpassh-add** by:
 ```sh
 ( set -Cfu; NAME=lpassh-add VERS=1.1.1b
   for GET in 'curl -LsS' 'wget -qO -'; do
-    $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
-    [ $? -eq 127 ] || break
+      $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
+      [ $? -eq 127 ] || break
   done | tar -xz
   cd "$NAME-$VERS" && make install; )
 ```
@@ -98,45 +98,55 @@ for details.
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** may *not* be able to find it.
 
-If you have [GnuPG](https://gnupg.org/) as well as
-[curl](https://curl.haxx.se/) or [wget](https://www.gnu.org/software/wget/),
-you probably can download and unpack **lpassh-add** by:
+If you have [curl](https://curl.haxx.se/) or
+            [wget](https://www.gnu.org/software/wget/),
+you probably can download **lpassh-add** by:
 
 ```sh
-    ( set -Cfu
-      NAME=lpassh-add VERS=1.1.1b
-      ARCHIVE="v$VERS.tar.gz"; SIG="$ARCHIVE.asc"
-      # Download the archive and the signature.
-      for GET in 'curl -LsSo' 'wget -qO'; do
-        for FILE in "archive/$ARCHIVE" "releases/download/v$VERS/$SIG"; do
+( set -Cfu
+  NAME=lpassh-add VERS=1.1.1b
+  AR="v$VERS.tar.gz"
+  # Download the archive and the signature.
+  for GET in 'curl -LsSo' 'wget -qO'; do
+      for FILE in "archive/$AR" "releases/download/v$VERS/$AR.asc"; do
           $GET "$(basename "$FILE")" "https://github.com/odkr/$NAME/$FILE"
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
-        done
-        break
       done
-      set -e
-      # Download my GnuPG key.
-      gpg --recv-keys 0x6B06A2E03BE31BE9
-      # Verify the archive.
-      gpg --verify "$SIG" "$ARCHIVE" || exit
-      # Unpack it.
-      tar -xzf "$ARCHIVE"; )
+      break
+  done; )
 ```
 
-You can simply copy-paste this code as a whole into a POSIX-compliant shell.
+You can simply copy-paste this code as a whole into a terminal.
 (Don't overlook the brackets!)
 
-You can then install **lpassh-add** by:
+If you have [GnuPG](https://gnupg.org/), you can check whether
+the archive that you've just downloaded has been tempered with:
 
 ```sh
-    cd lpassh-add-1.1.1b
-    # Check the source!
-    more lpassh-add
-    # If you like what see, continue by:
-    make install
+# Download my GnuPG key.
+gpg --recv-keys 0x6B06A2E03BE31BE9
+# Verify the archive.
+gpg --verify v1.1.1b.tar.gz v1.1.1b.tar.gz
 ```
 
-You *cannot* copy-paste this code as a whole, because of the `more` command.
+Then unpack **lpassh-add** by:
+
+```sh
+tar -xzf v1.1.1b.tar.gz
+```
+
+You mant to read the source:
+
+```sh
+"${EDITOR:-more}" lpassh-add-1.1.1b/lpassh-add
+```
+
+Finally, install **lpassh-add**:
+
+```sh
+cd lpassh-add-1.1.1b
+make install
+```
 
 `make install` tries to find a POSIX-compliant shell, a suitable installation
 directory, and a suitable directory for the manual. It calls `sudo`, which will

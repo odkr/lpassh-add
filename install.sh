@@ -1,14 +1,19 @@
 #!/bin/sh
 #
+# Installs lpassh-add.
+#
 # You should run this scripts via `make install`.
 # This makes it more likely that you run it with a POSIX-compliant shell.
 
 # SETTINGS
 # ========
 
+# Safe and sufficiently POSIX compliant shells.
+# Space-seperated list. Must be filenames. Searched in PATH.
 SHELLS='dash oksh mksh bash yash zsh'
-MAN_CONFIG_PATH='/etc:/private/etc'
-MAN_CONFIG_FILES='man.config:man.conf'
+
+# Where to install lpassh-add to.
+INSTALL_DIR=/opt/lpassh-add
 
 
 # FUNCTIONS
@@ -39,6 +44,7 @@ MAN_CONFIG_FILES='man.config:man.conf'
 #   The value of $? at the time it was called.
 onexit() {
     __ONEXIT_STATUS=$?
+	unset IFS
     # shellcheck disable=2086
     trap '' 0 ${TRAPS-2 15} || :
     set +e
@@ -110,15 +116,17 @@ trapsig() {
 # Returns:
 #   0:
 #       Always.
-warn() (
-    string="${1:?'warn: missing MESSAGE.'}"
+warn() {
+	# shellcheck disable=2006
+	: "${__WARN_SCRIPT:=`expr "//$0" : '.*/\(.*\)'`}"
+    __WARN_MESSAGE="${1:?'warn: missing MESSAGE.'}"
     shift
     # shellcheck disable=2059
     case $# in
-        0) printf -- "$0: $string\n" >&2 ;;
-        *) printf -- "$0: $string\\n" "$@" >&2 ;;
+        0) printf -- "$__WARN_SCRIPT: $__WARN_MESSAGE\n" >&2 ;;
+        *) printf -- "$__WARN_SCRIPT: $__WARN_MESSAGE\\n" "$@" >&2 ;;
     esac
-)
+}
 
 # panic - Exits the script with an error message.
 #
@@ -161,30 +169,14 @@ export BIN_SH POSIXLY_CORRECT
 
 set -Cefu
 
+: "${INSTALL_DIR:?}"
+umask 022
+export INSTALL_DIR TMP_FILE
 
-# MAIN
-# ====
 
-# Try to find a suitable directory to copy lpassh-add to.
-IFS=:
-for DIR in $PATH; do
-	IFS=/
-	for ELEM in $DIR
-	do
-		if [ "$ELEM" = local ]; then
-			INSTALL_DIR="$DIR"
-			break 2
-		fi
-	done
-done
-unset IFS
+# FIND A SHELL
+# ============
 
-if ! [ "${INSTALL_DIR-}" ] || ! [ -x "$INSTALL_DIR" ]; then
-	panic 69 'Cannot guess a suitable installion directory.'
-fi
-
-# Try to find a POSIX-compliant shell.
-IFS=' '
 for SHELL in $SHELLS
 do
 	# shellcheck disable=2006
@@ -200,82 +192,65 @@ done
 unset IFS
 
 if ! [ "${SHELL_PATH-}" ] || ! [ -x "$SHELL_PATH" ]; then
-	panic 69 'Cannot find a safe shell.'
+	panic 69 'Cannot find a safe, POSIX-compliant shell.'
 fi
 
-# Try to find a directory to copy the manual to.
-IFS=:
-for MAN_CONFIG_DIR in $MAN_CONFIG_PATH
-do
-	for MAN_CONFIG_FILE in $MAN_CONFIG_FILES
-	do
-		CFG="$MAN_CONFIG_DIR/$MAN_CONFIG_FILE"
-		if [ -e "$CFG" ]; then
-			# shellcheck disable=2006
-			DIRS=`awk '/^MANPATH[[:space:]]/ && /\/local\// {print $2}' "$CFG"`
-			for DIR in $DIRS
-			do
-				MANPATH="${MANPATH-}:$DIR"
-			done
-		fi
-	done
-done
 
-IFS=:
-for DIR in ${MANPATH-}
-do
-	[ -d "$DIR" ] || continue
-	IFS=/
-	for ELEM in $DIR
-	do
-		if [ "$ELEM" = local ]; then
-			MAN_DIR="$DIR/man1"
-			break 2
-		fi
-	done
-done
-unset IFS
+# ASK FOR CONFIRMATION
+# ====================
 
-# Let the user confirm what we've found.
 B="" R=""
 if [ "${CLICOLOR-}" ] || [ "${COLORTERM-}" ]; then
-	B='\033[1m'
-	R='\033[0m'
+	B='\033[1m' R='\033[0m'
 fi
 
-warn '=================================================='
-warn "Using $B$SHELL_PATH$R as interpreter."
-warn "lpassh-add   -> $B$INSTALL_DIR$R"
-[ "${MAN_DIR-}" ] && warn "lpassh-add.1 -> $B$MAN_DIR$R"
 warn '--------------------------------------------------'
+warn "Using  $B$SHELL_PATH$R  as interpreter."
+warn "lpassh-add    ->  $B$INSTALL_DIR/bin$R"
+warn "lpassh-add.1  ->  $B$INSTALL_DIR/man/man1$R"
+warn ' '
 warn "Press $B<Return>$R to confirm or $B<Ctrl>$R-$B<C>$R to cancel."
-warn '=================================================='
+warn 'I will likely have to ask you for your password.'
+warn '--------------------------------------------------'
 
 # shellcheck disable=2034,2162
 read DUMMY
 
+
+# MAIN
+# ====
+
+# shellcheck disable=2006
+DIRNAME="`expr "$0" : "\(.*\)/"`" || :
+if [ "$DIRNAME" ]; then
+	cd "$DIRNAME" || exit
+fi
+
 # Create and copy the files.
 trapsig onexit 0 2 15
-TMPFILE="lpassh-add.${SHELL:?}"
-readonly TMPFILE
-[ -e "$TMPFILE" ] && panic "%s: exists." "$TMPFILE"
+TMP_FILE="lpassh-add.${SHELL:?}"
+readonly TMP_FILE
+[ -e "$TMP_FILE" ] && panic "%s: exists." "$TMP_FILE"
 # shellcheck disable=2016
-EX='rm -rf "$TMPFILE"'
+EX='rm -rf "$TMP_FILE"'
 
-(	set -x
-	umask 022
-	printf '#!%s\n' "$SHELL_PATH" >"$TMPFILE"
-  	sed -n '1n; p' lpassh-add >>"$TMPFILE"
-	chmod ugo=rx "$TMPFILE"
-	sudo chown 0 "$TMPFILE"
-	sudo chgrp 0 "$TMPFILE"
-	sudo mv "$TMPFILE" "$INSTALL_DIR/lpassh-add";	)
+printf '#!%s\n' "$SHELL_PATH" >"$TMP_FILE"
+sed -n '1n; p' lpassh-add    >>"$TMP_FILE"
+chmod ugo=rx                   "$TMP_FILE"
 
-if [ "${MAN_DIR-}" ]; then
-	(	set -x
-		[ -e "$MAN_DIR" ] || sudo mkdir "$MAN_DIR"
-		sudo cp lpassh-add.1 "$MAN_DIR"
-		sudo chown 0 "$MAN_DIR/lpassh-add.1"
-		sudo chgrp 0 "$MAN_DIR/lpassh-add.1"
-		sudo chmod ugo=r "$MAN_DIR/lpassh-add.1";	)
-fi
+# shellcheck disable=1004
+sudo -E sh -c 'chown 0 "$TMP_FILE"
+               chgrp 0 "$TMP_FILE"
+               
+               set -Cefux
+               mkdir -p        "$INSTALL_DIR/bin" \
+                               "$INSTALL_DIR/man/man1"
+               mv "$TMP_FILE"  "$INSTALL_DIR/bin/lpassh-add"
+               cp lpassh-add.1 "$INSTALL_DIR/man/man1"' || exit
+
+[ -e ~/.bash_profile ]                             || exit 0
+grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0
+
+( set -Cefux
+  # shellcheck disable=2016
+  printf '\nexport PATH="$PATH:%s/bin"\n' "$INSTALL_DIR" >> ~/.bash_profile; )

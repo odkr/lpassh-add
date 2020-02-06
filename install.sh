@@ -204,14 +204,14 @@ if [ "${CLICOLOR-}" ] || [ "${COLORTERM-}" ]; then
 	B='\033[1m' R='\033[0m'
 fi
 
-warn '--------------------------------------------------'
+warn '------------------------------------------------------'
 warn "Using  $B$SHELL_PATH$R  as interpreter."
 warn "lpassh-add    ->  $B$INSTALL_DIR/bin$R"
 warn "lpassh-add.1  ->  $B$INSTALL_DIR/man/man1$R"
 warn ' '
 warn "Press $B<Return>$R to confirm or $B<Ctrl>$R-$B<C>$R to cancel."
-warn 'I will likely have to ask you for your password.'
-warn '--------------------------------------------------'
+warn 'I will likely have to ask you for your login password.'
+warn '------------------------------------------------------'
 
 # shellcheck disable=2034,2162
 read DUMMY

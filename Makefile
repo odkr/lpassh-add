@@ -73,13 +73,14 @@ dtruss: logout
 	done
 
 manual:
-	pandoc -o lpassh-add.1 -t man -s MANUAL.rst \
-    		-M title=lpassh-add \
+	pandoc -o main/lpassh-add.1 -t man -s \
+		-M title=lpassh-add  \
 		-M date="$$(date '+%B %d, %Y')" \
-		-M section=1
+		-M section=1 \
+		MANUAL.rst
 
 install:
-	PATH="`getconf PATH`:$$PATH"; \
+	@PATH="`getconf PATH`:$$PATH"; \
 	for SHELL in $(SHELLS); do \
 		"$$SHELL" </dev/null && break; \
 	done; \

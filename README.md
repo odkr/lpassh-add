@@ -1,6 +1,6 @@
 # lpassh-add
 
-**lpassh-add** works just like [OpenSSh](https://www.openssh.com)'s
+**lpassh-add** works just like [OpenSSH](https://www.openssh.com)'s
 **ssh-add**, that is, it unlocks your SSh private keys, but it retrieves
 the passphrases for those keys from LastPass, if possible. It is a
 *dumb* wrapper around **ssh-add** and the [LastPass command line
@@ -25,11 +25,11 @@ You use **lpassh-add** *at your own risk*. You have been warned.
 
 **lpassh-add** aims to be more portable than is reasonable.
 It should "just work".
-You need OpenSSh and the LastPass command line client, of course.
+You need OpenSSH and the LastPass command line client, of course.
 
-If your operating system is POSIX-compliant enough (macOS, Linux, and
-the \*BSDs all should be), you have [curl](https://curl.haxx.se/) or
-[wget](https://www.gnu.org/software/wget/), and you use a modern
+If (1) your operating system is POSIX-compliant enough (macOS, Linux, and
+the \*BSDs all should be), (2) you have [curl](https://curl.haxx.se/) or
+[wget](https://www.gnu.org/software/wget/), and (3) are using a modern
 bourne-compatible shell (bash, dash, ksh, mksh, oksh, and yash
 all should work), then you can install **lpassh-add** by:
 
@@ -42,17 +42,17 @@ all should work), then you can install **lpassh-add** by:
   cd "$NAME-$VERS" && make install; )
 ```
 
-You can simply copy-paste this code as a whole into a terminal.
+You can simply copy-paste the above code as a whole into a terminal.
 (Don't overlook the brackets!)
 
 ### System requirements
 
 You need:
 
-1. [OpenSSh](https://www.openssh.com)
+1. [OpenSSH](https://www.openssh.com)
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 3. If you want to use **lpassh-add** *without* the LastPass agent,
-   which is part of the LastPass command line client,
+   which ships with the LastPass command line client,
    you also need a shell that provides `[` and `printf` as *built-ins*
    (every non-ancient shell should do so, however).
 
@@ -63,7 +63,8 @@ It also *aims* to be compatible with
 
 It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
 OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
-change the shebang line, so that it points to a POSIX-compliant bourne shell.
+change the shebang line, so that it points to a POSIX-compliant bourne shell
+(`make install` should do that for you, however).
 
 ### Tested shells
 
@@ -116,7 +117,7 @@ you probably can download **lpassh-add** by:
   done; )
 ```
 
-You can simply copy-paste this code as a whole into a terminal.
+You can simply copy-paste the above code as a whole into a terminal.
 (Don't overlook the brackets!)
 
 If you have [GnuPG](https://gnupg.org/), you can check whether
@@ -142,10 +143,10 @@ make install
 ```
 
 `make install` tries to find a POSIX-compliant shell to run **lpassh-add** with
-and copies **lpassh-add** itself and its manual to `/opt/lpassh-add/`. It calls
-`sudo`, which will prompt you for your login password. It outputs (some of) the
-commands it runs to install **lpassh-add** and its manual, so you can see what
-it's doing.
+and copies **lpassh-add** itself and its manual to `/opt/lpassh-add`. It outputs
+(some of) the commands it runs to install **lpassh-add** and its manual, so
+you can see what it's doing. Note, it calls `sudo`, so it will prompt you for
+your login password.
 
 If `make install` fails, you'll have to install **lpassh-add** manually
 (i.e., follows steps 1-4 above); **lpassh-add** is more portable than

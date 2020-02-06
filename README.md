@@ -94,7 +94,7 @@ for details.
    <https://github.com/odkr/lpassh-add/archive/v1.1.1b.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
-4. You may also want to install its manual page (`lpassh-add.1`).
+4. Copy its manual page (`lpassh-add.1`) ito a directory in your `MANPATH`.
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** may *not* be able to find it.
@@ -105,8 +105,7 @@ you probably can download **lpassh-add** by:
 
 ```sh
 ( set -Cfu
-  NAME=lpassh-add VERS=1.1.1b
-  AR="v$VERS.tar.gz"
+  NAME=lpassh-add VERS=1.1.1b; AR="v$VERS.tar.gz"
   # Download the archive and the signature.
   for GET in 'curl -LsSo' 'wget -qO'; do
       for FILE in "archive/$AR" "releases/download/v$VERS/$AR.asc"; do
@@ -126,7 +125,6 @@ the archive that you've just downloaded has been tempered with:
 ```sh
 # Download my GnuPG key.
 gpg --recv-keys 0x6B06A2E03BE31BE9
-# Verify the archive.
 gpg --verify v1.1.1b.tar.gz v1.1.1b.tar.gz
 ```
 
@@ -136,12 +134,6 @@ Then unpack **lpassh-add** by:
 tar -xzf v1.1.1b.tar.gz
 ```
 
-You may want to read the source:
-
-```sh
-"${EDITOR:-more}" lpassh-add-1.1.1b/lpassh-add
-```
-
 Finally, install **lpassh-add**:
 
 ```sh
@@ -149,10 +141,11 @@ cd lpassh-add-1.1.1b
 make install
 ```
 
-`make install` tries to find a POSIX-compliant shell, a suitable installation
-directory, and a suitable directory for the manual. It calls `sudo`, which will
-prompt you for your login password. It outputs the commands it runs to install
-**lpassh-add** and its manual; so you can see what it's doing.
+`make install` tries to find a POSIX-compliant shell to run **lpassh-add** with
+and copies **lpassh-add** itself and its manual to `/opt/lpassh-add/`. It calls
+`sudo`, which will prompt you for your login password. It outputs (some of) the
+commands it runs to install **lpassh-add** and its manual, so you can see what
+it's doing.
 
 If `make install` fails, you'll have to install **lpassh-add** manually
 (i.e., follows steps 1-4 above); **lpassh-add** is more portable than
@@ -173,8 +166,6 @@ See the [manual](MANUAL.rst) and the [source](lpassh-add).
 * Wojciech Adam Koszek's
   [lastpass-ssh](https://github.com/wkoszek/lastpass-ssh)
 
-**lp-ssh-add.sh**, both versions, downloads the SSH keys themselves
-from LastPass, too. That's a nice feature.
 
 ## CONCTACT
 

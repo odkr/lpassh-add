@@ -169,9 +169,12 @@ export BIN_SH POSIXLY_CORRECT
 
 set -Cefu
 
+PATH=/bin:/usr/bin
+# shellcheck disable=2006
+PATH="`getconf PATH`:$PATH"
+export PATH
+
 : "${INSTALL_DIR:?}"
-umask 022
-export INSTALL_DIR TMP_FILE
 
 
 # FIND A SHELL
@@ -179,19 +182,18 @@ export INSTALL_DIR TMP_FILE
 
 for SHELL in $SHELLS
 do
-	# shellcheck disable=2006
-	IFS=: PATH=`getconf PATH`
+	IFS=:
 	for DIR in $PATH
 	do
 		if [ -e "$DIR/$SHELL" ]; then
-			SHELL_PATH="$DIR/$SHELL"
+			POSIX_SH="$DIR/$SHELL"
 			break 2
 		fi
 	done
 done
 unset IFS
 
-if ! [ "${SHELL_PATH-}" ] || ! [ -x "$SHELL_PATH" ]; then
+if ! [ "${POSIX_SH-}" ] || ! [ -x "$POSIX_SH" ]; then
 	panic 69 'Cannot find a safe, POSIX-compliant shell.'
 fi
 
@@ -205,7 +207,7 @@ if [ "${CLICOLOR-}" ] || [ "${COLORTERM-}" ]; then
 fi
 
 warn '------------------------------------------------------'
-warn "Using  $B$SHELL_PATH$R  as interpreter."
+warn "Using  $B$POSIX_SH$R  as interpreter."
 warn "lpassh-add    ->  $B$INSTALL_DIR/bin$R"
 warn "lpassh-add.1  ->  $B$INSTALL_DIR/man/man1$R"
 warn ' '
@@ -221,32 +223,37 @@ read DUMMY
 # ====
 
 # shellcheck disable=2006
-DIRNAME="`expr "$0" : "\(.*\)/"`" || :
+DIRNAME=`expr "$0" : "\(.*\)/"` || :
 if [ "$DIRNAME" ]; then
 	cd "$DIRNAME" || exit
 fi
 
 # Create and copy the files.
 trapsig onexit 0 2 15
-TMP_FILE="lpassh-add.${SHELL:?}"
+# shellcheck disable=2006
+POSIX_SH_NAME=`expr "//$POSIX_SH" : '.*/\(.*\)'` || exit
+TMP_FILE="lpassh-add.${POSIX_SH_NAME:?}"
 readonly TMP_FILE
 [ -e "$TMP_FILE" ] && panic "%s: exists." "$TMP_FILE"
 # shellcheck disable=2016
 EX='rm -rf "$TMP_FILE"'
 
-printf '#!%s\n' "$SHELL_PATH" >"$TMP_FILE"
+umask 022
+printf '#!%s\n' "$POSIX_SH"   >"$TMP_FILE"
 sed -n '1n; p' lpassh-add    >>"$TMP_FILE"
 chmod ugo=rx                   "$TMP_FILE"
 
+export INSTALL_DIR TMP_FILE
 # shellcheck disable=1004
-sudo -E sh -c 'chown 0 "$TMP_FILE"
-               chgrp 0 "$TMP_FILE"
-               
-               set -Cefux
+sudo -E sh -c 'set -Cefux
                mkdir -p        "$INSTALL_DIR/bin" \
                                "$INSTALL_DIR/man/man1"
                mv "$TMP_FILE"  "$INSTALL_DIR/bin/lpassh-add"
-               cp lpassh-add.1 "$INSTALL_DIR/man/man1"' || exit
+               chown 0         "$INSTALL_DIR/bin/lpassh-add"
+               chgrp 0         "$INSTALL_DIR/bin/lpassh-add"
+               cp lpassh-add.1 "$INSTALL_DIR/man/man1"' \
+    || panic 69 'Installation failed. You may want to delete %s.' \
+                "$INSTALL_DIR"
 
 [ -e ~/.bash_profile ]                             || exit 0
 grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0

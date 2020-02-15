@@ -29,9 +29,9 @@ You need OpenSSH and the LastPass command line client, of course.
 
 If (1) your operating system is POSIX-compliant enough (macOS, Linux, and
 the \*BSDs all should be), (2) you have [curl](https://curl.haxx.se/) or
-[wget](https://www.gnu.org/software/wget/), and (3) are using a modern
-bourne-compatible shell (bash, dash, ksh, mksh, oksh, and yash
-all should work), then you can install **lpassh-add** by:
+[wget](https://www.gnu.org/software/wget/) (you probably do), and (3)
+are using a modern-ish bourne-compatible shell (bash, dash, ksh, mksh, oksh,
+and yash all should do), then you can install **lpassh-add** by:
 
 ```sh
 ( set -Cfu; NAME=lpassh-add VERS=1.1.1b
@@ -44,6 +44,9 @@ all should work), then you can install **lpassh-add** by:
 
 You can simply copy-paste the above code as a whole into a terminal.
 (Don't overlook the brackets!)
+
+If you want to verify the sources using [GnuPG](https://gnupg.org/),
+then read on.
 
 ### System requirements
 
@@ -86,8 +89,8 @@ Tests were run on macOS v10.14.6 only.
 
 **Note**: ksh93 will write your LastPass master password to a temporary file
 if, and only if, you do *not* use the LastPass agent and *do* use an
-askpass utility. See "SECURITY" in the [manual](MANUAL.rst#security)
-for details.
+askpass utility. *Neither* is the default behaviour. See "SECURITY"
+in the [manual](MANUAL.rst#security) for details.
 
 ### Set-up
 
@@ -126,27 +129,28 @@ the archive that you've just downloaded has been tempered with:
 ```sh
 # Download my GnuPG key.
 gpg --recv-keys 0x6B06A2E03BE31BE9
-gpg --verify v1.1.1b.tar.gz v1.1.1b.tar.gz
+gpg --verify v1.1.1b.tar.gz.asc v1.1.1b.tar.gz
 ```
 
-Then unpack **lpassh-add** by:
+Then unpack the archive:
 
 ```sh
 tar -xzf v1.1.1b.tar.gz
 ```
 
-Finally, install **lpassh-add**:
+Finally, install **lpassh-add** ands its manual:
 
 ```sh
 cd lpassh-add-1.1.1b
 make install
 ```
 
-`make install` tries to find a POSIX-compliant shell to run **lpassh-add** with
-and copies **lpassh-add** itself and its manual to `/opt/lpassh-add`. It outputs
-(some of) the commands it runs to install **lpassh-add** and its manual, so
-you can see what it's doing. Note, it calls `sudo`, so it will prompt you for
-your login password.
+`make install` tries to find a POSIX-compliant shell to run **lpassh-add** with,
+copies **lpassh-add** itself and its manual to `/opt/lpassh-add`, and changes
+your `~/.bash_profile`, if it exists, to add `/opt/lpassh-add/bin` to your
+`PATH`. It outputs (some of) the commands it runs, so you can see what it's
+doing. Note, it calls `sudo`, so it will likely prompt you for your login
+password.
 
 If `make install` fails, you'll have to install **lpassh-add** manually
 (i.e., follows steps 1-4 above); **lpassh-add** is more portable than
@@ -167,6 +171,20 @@ See the [manual](MANUAL.rst) and the [source](lpassh-add).
 * Wojciech Adam Koszek's
   [lastpass-ssh](https://github.com/wkoszek/lastpass-ssh)
 
+**lpassh-add** is more complex than the tools above, save for Koszek's
+**lastpass-ssh**. But it's also more similar in usage to **ssh-add**,
+offers more features, and doesn't require you to store the passphrases
+for your SSH keys in a particular directory in LastPass; all it requires
+is that the name of the item that describes your SSH key or the name of
+the directory that you've put that item into contains "ssh".
+
+## ASKPASS FOR MACOS
+
+I couldn't find a simple macOS implementation of the
+[SSH askpass protocol](https://man.openbsd.org/ssh-add).
+
+So, I wrote [mac-ssh-askpass](https://github.com/odkr/mac-ssh-askpass).
+It works well with **lpassh-add**.
 
 ## CONCTACT
 

@@ -18,8 +18,8 @@ DESCRIPTION
 ===========
 
 **lpassh-add** adds *KEY* to the SSH authentication agent, just as **ssh-add**
-would, but looks up the passphrase for *KEY* in LastPass. If it can't find it
-there, **ssh-add** will ask you for it instead.
+would, but looks up the passphrase for *KEY* in LastPass. If it can't find the
+passphrase there, **ssh-add** will ask you for the passphrase instead.
 
 If you don't give a *KEY*, it tries to add ``~/.ssh/id_rsa``,
 ``~/.ssh/id_dsa``, ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``.

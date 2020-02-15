@@ -249,9 +249,9 @@ sudo -E sh -c 'set -Cefux
                mkdir -p        "$INSTALL_DIR/bin" \
                                "$INSTALL_DIR/man/man1"
                mv "$TMP_FILE"  "$INSTALL_DIR/bin/lpassh-add"
-               chown 0         "$INSTALL_DIR/bin/lpassh-add"
-               chgrp 0         "$INSTALL_DIR/bin/lpassh-add"
-               cp lpassh-add.1 "$INSTALL_DIR/man/man1"' \
+               cp lpassh-add.1 "$INSTALL_DIR/man/man1"
+               chown -R 0      "$INSTALL_DIR"
+               chgrp -R 0      "$INSTALL_DIR"' \
     || panic 69 'Installation failed. You may want to delete %s.' \
                 "$INSTALL_DIR"
 

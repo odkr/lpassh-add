@@ -18,10 +18,10 @@
 \f[B]lpassh-add\f[R] adds \f[I]KEY\f[R] to the SSH authentication agent,
 just as \f[B]ssh-add\f[R] would, but looks up the passphrase for
 \f[I]KEY\f[R] in LastPass.
-If it can\[aq]t find it there, it passes the \f[I]KEY\f[R] to
-\f[B]ssh-add\f[R], which will ask you for it.
+If it can\[aq]t find it there, \f[B]ssh-add\f[R] will ask you for the
+key instead.
 .PP
-If you don\[aq]t give a \f[I]KEY\f[R], it tries
+If you don\[aq]t give a \f[I]KEY\f[R], it tries to add
 \f[C]\[ti]/.ssh/id_rsa\f[R], \f[C]\[ti]/.ssh/id_dsa\f[R],
 \f[C]\[ti]/.ssh/id_ecdsa\f[R], and \f[C]\[ti]/.ssh/id_ed25519\f[R].
 .PP
@@ -75,8 +75,8 @@ This is a \f[I]bad\f[R] idea.
 It\[aq]s slow.
 It will likely pass passphrases to \f[B]ssh-add\f[R] that are none of
 its business.
-And it will likely generate a lot of warnings, even though those
-warnings are harmless.
+And it will likely generate a lot of warnings (those warnings are
+harmless, however).
 .SH ENVIRONMENT
 .TP
 .B LPASSH_ADD_PATH_REGEX
@@ -132,7 +132,7 @@ Use a reasonably modern and mainstream one, if possible.
 \f[B]oksh\f[R] v5.2.14, \f[B]yash\f[R] v2.49, and \f[B]zsh\f[R] v5.7.1
 should all be fine.
 .PP
-You should read \f[B]lpassh-add\f[R] and assess the security risks
+You may want to read \f[B]lpassh-add\f[R] and assess the security risks
 yourself.
 .PP
 You may also want to trace what system calls your shell makes when it
@@ -175,8 +175,8 @@ It does \f[I]not\f[R] have exclusive access to that device.
 Of course, every process that can invoke \f[C]lpass export\f[R] can also
 change your environment, so that \f[B]lpassh-add\f[R] and
 \f[B]lpass\f[R] use the LastPass agent.
-So, disabling the LastPass agent only makes sense in the context of an
-encompassing, and highly complex, security policy.
+So, disabling the LastPass agent only makes sense as part of a more
+encompassing, and highly complex, policy.
 .SH EXIT STATUS
 .TP
 .B 0

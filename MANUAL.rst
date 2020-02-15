@@ -19,10 +19,10 @@ DESCRIPTION
 
 **lpassh-add** adds *KEY* to the SSH authentication agent, just as **ssh-add**
 would, but looks up the passphrase for *KEY* in LastPass. If it can't find it
-there, it passes the *KEY* to **ssh-add**, which will ask you for it.
+there, **ssh-add** will ask you for the key instead.
 
-If you don't give a *KEY*, it tries ``~/.ssh/id_rsa``, ``~/.ssh/id_dsa``,
-``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``.
+If you don't give a *KEY*, it tries to add ``~/.ssh/id_rsa``,
+``~/.ssh/id_dsa``, ``~/.ssh/id_ecdsa``, and ``~/.ssh/id_ed25519``.
 
 If you're not logged into LastPass and ``LPASSH_ADD_USERNAME`` is set,
 **lpassh-add** logs you into LastPass; it also logs you out again when
@@ -73,7 +73,7 @@ database to describe an SSH key, namely, by setting ``LPASSH_ADD_PATH_REGEX``
 to a regular expression that matches any string, the empty string (""), for
 example. This is a *bad* idea. It's slow. It will likely pass passphrases
 to **ssh-add** that are none of its business. And it will likely generate
-a lot of warnings, even though those warnings are harmless.
+a lot of warnings (those warnings are harmless, however).
 
 
 ENVIRONMENT
@@ -125,11 +125,11 @@ Use a reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.
 
-You should read **lpassh-add** and assess the security risks yourself.
+You may want to read **lpassh-add** and assess the security risks yourself.
 
-You may also want to trace what system calls your shell makes when it
-runs **lpassh-add**, particularly if the shell you're running it with
-isn't reasonably modern or mainstream.
+You may also want to trace what system calls your shell makes when it runs
+**lpassh-add**, particularly if the shell you're running it with isn't
+reasonably modern or mainstream.
 
 The threat models of **ssh-add** and **lpass** apply.
 
@@ -166,8 +166,8 @@ However:
 
 Of course, every process that can invoke ``lpass export`` can also change
 your environment, so that **lpassh-add** and **lpass** use the LastPass
-agent. So, disabling the LastPass agent only makes sense in the context
-of an encompassing, and highly complex, security policy.
+agent. So, disabling the LastPass agent only makes sense as part of a
+more encompassing, and highly complex, policy.
 
 
 EXIT STATUS

@@ -27,7 +27,8 @@
 # PORTABILITY
 # ===========
 #
-# This script complies with POSIX.1-2017 and aims to be compatible to SVR4.2.
+# This script complies with POSIX.1-2017 and 
+# aims to be compatible with SVR4.2.
 # If some code in this script strike you as strange---that's why.
 #
 # See:

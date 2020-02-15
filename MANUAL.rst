@@ -116,12 +116,12 @@ Basics
 
 How secure a shell script is depends *a lot* on what shell you're running
 it with. **ksh**, for example, creates a temporary file to handle command
-substitutions (i.e., ```...``` expressions) unless the command is built
-in. As a consequence, **ksh** will write your LastPass master password to
-a temporary file if you do *not* use the LastPass agent *and* use an askpass
-utility. Keep in mind that your **sh** may be a symlink to **ksh**. That
-said, this is just an example. There are a lot of shells out there. Use a
-reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
+substitutions (i.e., ```...``` expressions) unless the command is built into
+**ksh**. As a consequence, **ksh** will write your LastPass master password
+to a temporary file if you do *not* use the LastPass agent *and* use an
+askpass utility. Keep in mind that your **sh** may be a symlink to **ksh**.
+That said, this is just an example. There are a lot of shells out there.
+Use a reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.
 
@@ -129,7 +129,7 @@ You should read **lpassh-add** and assess the security risks yourself.
 
 You may also want to trace what system calls your shell makes when it
 runs **lpassh-add**, particularly if the shell you're running it with
-isn't reasonably modern and mainstream.
+isn't reasonably modern or mainstream.
 
 The threat models of **ssh-add** and **lpass** apply.
 
@@ -161,7 +161,13 @@ However:
 
 * If you do *not* set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
   reads your LastPass master password from your terminal's teletype device.
-  It does *not* have exclusive access to that device.
+  It does *not* have exclusive access to that device. (Neither do the
+  LastPass agent or **ssh-add** for that matter.)
+
+Of course, every process that can invoke ``lpass export`` can also change
+your environment, so that **lpassh-add** and **lpass** use the LastPass
+agent. So, disabling the LastPass agent only makes sense in the context
+of an encompassing, and highly complex, security policy.
 
 
 EXIT STATUS

@@ -138,7 +138,7 @@ Then unpack the archive:
 tar -xzf v1.1.1.tar.gz
 ```
 
-Finally, install **lpassh-add** ands its manual:
+Finally, install **lpassh-add** and its manual:
 
 ```sh
 cd lpassh-add-1.1.1
@@ -180,8 +180,7 @@ the directory that you've put that item into contains "ssh".
 
 ## ASKPASS FOR MACOS
 
-I couldn't find a simple macOS implementation of the
-[SSH askpass protocol](https://man.openbsd.org/ssh-add).
+I couldn't find an askpass utility for macOS that is *simple*.
 
 So, I wrote [mac-ssh-askpass](https://github.com/odkr/mac-ssh-askpass).
 It works well with **lpassh-add**.

@@ -1,7 +1,7 @@
 # lpassh-add
 
 **lpassh-add** works just like [OpenSSH](https://www.openssh.com)'s
-**ssh-add**, that is, it unlocks your SSh private keys, but it retrieves
+**ssh-add**, that is, it unlocks your SSH private keys, but it retrieves
 the passphrases for those keys from LastPass, if possible. It is a
 *dumb* wrapper around **ssh-add** and the [LastPass command line
 client](https://github.com/lastpass/lastpass-cli).

@@ -61,7 +61,7 @@
 #       Signal numbers traps have been registered for (read-only).
 # 
 # Exits with:
-#   The value of $? at the time it was called.
+#   The value of $? at the time of invocation.
 onexit() {
     __ONEXIT_STATUS=$?
     # shellcheck disable=2086
@@ -125,7 +125,7 @@ trapsig() {
 #
 # Rationale:
 #   On some systems, printf is a utility, rather than a shell builtin.
-#   This wrapper ensures that the shell can only invoke a built-in printf.
+#   This wrapper ensures that the shell invokes its built-in printf.
 builtin_printf() (
     [ $# -gt 0 ] || panic 70 'printf: missing arguments.'
     unset PATH
@@ -210,7 +210,7 @@ panic() {
 #   Whatever lpass returns.
 auth_lpass() ( 
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments.'
-    builtin_printf '%s\n' "$LASTPASS_PASSWORD" |
+    builtin_printf '%s\n' "${LASTPASS_PASSWORD?}" |
     LPASS_DISABLE_PINENTRY=1 lpass "$@"
 )
 
@@ -244,7 +244,7 @@ PATH=/bin:/usr/bin:/usr/local/bin
 # shellcheck disable=2006
 PATH="`getconf PATH`:$PATH"
 unset IFS
-: "${HOME:?'Not set or empty.'}"
+: "${HOME:?}"
 
 
 # SERVE PASSWORD TO SSH-ADD
@@ -256,7 +256,7 @@ unset IFS
 # cat to pass through STDIN to STDOUT. By doing so, the main script can
 # pass on passphrases to ssh-add by writing them to its STDIN.
 
-[ "${SSH_ASKPASS-}" = "$0" ] && exec cat
+[ "$0" = "${SSH_ASKPASS-}" ] && exec cat
 
 
 # INITIALISATION

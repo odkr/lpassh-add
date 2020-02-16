@@ -74,6 +74,11 @@ onexit() {
     if [ "${1-0}" -gt 0 ]; then
         __ONEXIT_STATUS=$((128+$1))
         kill "-$1" "-$$" 2>/dev/null
+    else
+        # shellcheck disable=2006
+        __ONEXIT_JOBS=`jobs -p`
+        # shellcheck disable=2086
+        [ "$__ONEXIT_JOBS" ] && kill $__ONEXIT_JOBS
     fi
     exit "$__ONEXIT_STATUS"
 }

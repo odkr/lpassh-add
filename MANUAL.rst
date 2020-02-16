@@ -115,7 +115,7 @@ Basics
 **lpassh-add** is only a shell script.
 
 How secure a shell script is depends *a lot* on what shell you're running
-it with. **ksh**, for example, creates a temporary file to handle command
+it with. **ksh**, for example, creates temporary files to handle command
 substitutions (i.e., ```...``` expressions) unless the command is built into
 **ksh**. As a consequence, **ksh** will write your LastPass master password
 to a temporary file if you do *not* use the LastPass agent *and* use an

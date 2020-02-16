@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.2 - Unlock SSH keys using LastPass.
+# lpass-ssh-add v1.1.3 - Unlock SSH keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -282,7 +282,7 @@ do
             ;;
         -h)
             exec cat <<EOF
-lpassh-add v1.1.2 - Unlocks SSH keys using LastPass.
+lpassh-add v1.1.3 - Unlocks SSH keys using LastPass.
 
 Synopsis:
     lpassh-add [-cq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
@@ -304,7 +304,7 @@ EOF
             ;;
         -V)
             exec cat <<EOF
-lpassh-add v1.1.2
+lpassh-add v1.1.3
 (c) 2018, 2019, 2020 Odin Kroeger
 Released under the MIT license.
 EOF

@@ -165,9 +165,9 @@ However:
   LastPass agent or **ssh-add** for that matter.)
 
 Of course, every process that can invoke ``lpass export`` can also change
-your environment, so that **lpassh-add** and **lpass** use the LastPass
-agent. So, disabling the LastPass agent only makes sense as part of a
-more encompassing, and highly complex, policy.
+your environment so that **lpassh-add** and **lpass** use the LastPass
+agent. Disabling the LastPass agent, therefore, only improves your security
+if it's a part of a more encompassing, and highly complex, policy.
 
 
 EXIT STATUS

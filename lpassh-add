@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# See <https://github.com/okroeger/lpassh-add/> for more information.
+# See <https://github.com/odkr/lpassh-add/> for more information.
 #
 #
 # PORTABILITY
@@ -130,7 +130,7 @@ builtin_printf() (
     [ $# -gt 0 ] || panic 70 'printf: missing arguments.'
     unset PATH
     # shellcheck disable=2059
-    printf -- "$@"
+    printf "$@"
 )
 
 # warns - Prints a message to STDERR.
@@ -208,11 +208,11 @@ panic() {
 #
 # Returns:
 #   Whatever lpass returns.
-auth_lpass() ( 
+auth_lpass() {
     [ $# -gt 0 ] || panic 70 'auth_lpass: missing arguments.'
-    builtin_printf '%s\n' "${LASTPASS_PASSWORD?}" |
+    builtin_printf -- '%s\n' "${LASTPASS_PASSWORD?}" |
     LPASS_DISABLE_PINENTRY=1 lpass "$@"
-)
+}
 
 
 # SETTINGS
@@ -403,8 +403,8 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-	# Makes sure that `[` is a built-in.
-	( unset PATH
+        # Makes sure that `[` is a built-in.
+        ( unset PATH
           [ "$LASTPASS_PASSWORD" ] || panic 64 'No password given.'
         ) || exit
         LPASS=auth_lpass

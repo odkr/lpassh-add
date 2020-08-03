@@ -28,7 +28,7 @@ TESTS	= test-default test-login test-no-agent test-no-agent-prime
 .POSIX:
 .PHONY: prepare logout $(SHELLS) scripts $(TESTS) test dtruss install
 
-test: $(TESTS)
+test: scripts $(TESTS)
 
 prepare:
 	mkdir -p $(SCPT_DIR) 

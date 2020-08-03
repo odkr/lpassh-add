@@ -10,6 +10,7 @@
 
 # Safe and sufficiently POSIX compliant shells.
 # Space-seperated list. Must be filenames. Searched in PATH.
+# Order by preference.
 SHELLS='dash oksh mksh bash yash zsh'
 
 # Where to install lpassh-add to.
@@ -53,11 +54,12 @@ onexit() {
         unset EX
     fi
     if [ "${1-0}" -gt 0 ]; then
-		__ONEXIT_STATUS=$((128+$1))
-		kill "-$1" "-$$" 2>/dev/null
-	fi
+        __ONEXIT_STATUS=$((128+$1))
+        kill "-$1" "-$$" 2>/dev/null
+    fi
     exit "$__ONEXIT_STATUS"
 }
+
 
 # trapsig - Register functions to trap signals.
 #
@@ -97,7 +99,8 @@ trapsig() {
     done
 }
 
-# warns - Prints a message to STDERR.
+
+# warn - Prints a message to STDERR.
 #
 # Synopsis:
 #   warn MESSAGE [ARG [ARG [...]]]
@@ -116,17 +119,14 @@ trapsig() {
 # Returns:
 #   0:
 #       Always.
-warn() {
-	# shellcheck disable=2006
-	: "${__WARN_SCRIPT:=`expr "//$0" : '.*/\(.*\)'`}"
-    __WARN_MESSAGE="${1:?'warn: missing MESSAGE.'}"
-    shift
-    # shellcheck disable=2059
-    case $# in
-        0) printf -- "$__WARN_SCRIPT: $__WARN_MESSAGE\n" >&2 ;;
-        *) printf -- "$__WARN_SCRIPT: $__WARN_MESSAGE\\n" "$@" >&2 ;;
-    esac
-}
+warn() (
+    : "${1:?'warn: missing MESSAGE.'}"
+    exec >&2
+    printf '%s: ' "`basename "$0"`"
+    printf -- "$@"
+    printf '\n'
+)
+
 
 # panic - Exits the script with an error message.
 #
@@ -134,7 +134,7 @@ warn() {
 #   panic [STATUS [MESSAGE [ARG [ARG [...]]]]]
 #
 # Description:
-#   * Prints MESSAGE to STDERR, as warn would.
+#   * If a MESSAGE is given, prints it as warn would.
 #   * Exits the programme with STATUS.
 #
 # Arguments:

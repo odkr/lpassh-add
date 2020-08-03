@@ -71,9 +71,9 @@ Note to describe an SSH key. If you don't set ``LPASSH_ADD_PATH_REGEX``,
 You can also make **lpassh-add** consider *every* item in your LastPass
 database to describe an SSH key, namely, by setting ``LPASSH_ADD_PATH_REGEX``
 to a regular expression that matches any string, the empty string (""), for
-example. This is a *bad* idea. It's slow. It will likely pass passphrases
-to **ssh-add** that are none of its business. And it will likely generate
-a lot of warnings (those warnings are harmless, however).
+example. This is a *bad* idea. It's slow. It will pass passphrases
+to **ssh-add** that are none of its business. And it will generate
+a lot of warnings (those are harmless, however).
 
 
 ENVIRONMENT
@@ -118,9 +118,10 @@ How secure a shell script is depends *a lot* on what shell you're running
 it with. **ksh**, for example, creates temporary files to handle command
 substitutions (i.e., ```...``` expressions) unless the command is built into
 **ksh**. As a consequence, **ksh** will write your LastPass master password
-to a temporary file if you do *not* use the LastPass agent *and* use an
-askpass utility. Keep in mind that your **sh** may be a symlink to **ksh**.
-That said, this is just an example. There are a lot of shells out there.
+to a temporary file if you disable the LastPass agent *and* use an
+askpass utility (the default is to use the LastPass agent and to *not* use
+an askpass utility). Keep in mind that your **sh** may be a symlink to **ksh**.
+This is just an example, however. There are a lot of shells out there.
 Use a reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
 **dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
 **zsh** v5.7.1 should all be fine.
@@ -136,9 +137,9 @@ The threat models of **ssh-add** and **lpass** apply.
 Behaviour
 ---------
 
-**lpassh-add**  may, and often will, pass the passphrases of *all*
-LastPass items the path of which matches the regular expression given
-in ``LPASSH_ADD_PATH_REGEX`` to **ssh-add**.
+**lpassh-add** may pass the passphrases of *all* LastPass items the path of
+which matches the regular expression given in ``LPASSH_ADD_PATH_REGEX`` to
+**ssh-add**.
 
 The LastPass agent
 ------------------
@@ -151,9 +152,9 @@ You can use **lpassh-add** *without* using the LastPass agent, by setting
 ``LPASSH_ADD_AGENT_DISABLE`` or ``LPASS_AGENT_DISABLE`` to 1. **lpassh-add**
 will still only ask you for your LastPass password once.
 
-However:
+That said, only do so if you know what you are doing. Because:
 
-* **lpassh-add** will store a copy of that password in memory.
+* **lpassh-add** will then store a copy of that password in memory.
 
 * If you do set ``LPASS_ASKPASS`` or ``SSH_ASKPASS``, **lpassh-add**
   may write your LastPass master password to a temporary file,

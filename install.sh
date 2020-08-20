@@ -211,7 +211,7 @@ warn "Using  $B$POSIX_SH$R  as interpreter."
 warn "lpassh-add    ->  $B$INSTALL_DIR/bin$R"
 warn "lpassh-add.1  ->  $B$INSTALL_DIR/man/man1$R"
 warn ' '
-warn "Press $B<Return>$R to confirm or $B<Ctrl>$R-$B<C>$R to cancel."
+warn "Press $B<Return>$R to confirm or $B<Ctrl>$R-$B<c>$R to cancel."
 warn 'I will likely have to ask you for your login password.'
 warn '------------------------------------------------------'
 

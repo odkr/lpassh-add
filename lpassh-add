@@ -139,6 +139,7 @@ warn() (
     : "${1:?'warn: missing MESSAGE.'}"
     exec >&2
     printf 'lpassh-add: '
+    # shellcheck disable=2059
     printf -- "$@"
     printf '\n'
 )
@@ -376,6 +377,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
     if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
         PROMPT='LastPass master password:'
         if [ "${ASKPASS-}" ]; then
+            # shellcheck disable=2006
             warn 'ID of process calling %s: %d.' "`basename "$ASKPASS"`" "$$"
             # shellcheck disable=2006
             LASTPASS_PASSWORD=`$ASKPASS "$PROMPT"`

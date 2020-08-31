@@ -122,7 +122,9 @@ trapsig() {
 warn() (
     : "${1:?'warn: missing MESSAGE.'}"
     exec >&2
+    # shellcheck disable=2006
     printf '%s: ' "`basename "$0"`"
+    # shellcheck disable=2059
     printf -- "$@"
     printf '\n'
 )
@@ -259,7 +261,7 @@ sudo -E sh -c 'set -Cefux
 grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0
 
 # shellcheck disable=2016
-warn 'Appending "export PATH=$PATH:%s/bin" to ~/.bash_profile.' "$INSTALL_DIR"
+warn "Appending 'export PATH=\"\$PATH:%s/bin\"' to ~/.bash_profile." "$INSTALL_DIR"
 
 ( set -Cefu
   # shellcheck disable=2016

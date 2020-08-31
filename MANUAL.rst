@@ -144,7 +144,7 @@ which matches the regular expression given in ``LPASSH_ADD_PATH_REGEX`` to
 The LastPass agent
 ------------------
 
-If you're using the LastPass agent, any programme that runs under your (or
+If you are using the LastPass agent, any programme that runs under your (or
 the superuser's) user ID can get a copy of your password database by calling
 ``lpass export`` while you're logged in.
 

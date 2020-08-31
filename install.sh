@@ -26,9 +26,9 @@ INSTALL_DIR=/opt/lpassh-add
 #   onexit SIGNO
 #
 # Description:
-#   * Runs the shell code in the global variable $EX.
+#   * Evaluates the content of the global variable $EX as shell code.
 #   * If SIGNO is greater than 0, propagates that signal to the process group.
-#   * If SIGNO isn't given or 0, terminates all children.
+#   * If no SIGNO is given or SIGNO equals 0, terminates all children.
 #   * Exits the script.
 #
 # Arguments:
@@ -42,7 +42,8 @@ INSTALL_DIR=/opt/lpassh-add
 #       Signal numbers traps have been registered for (read-only).
 # 
 # Exits with:
-#   The value of $? at the time it was called.
+#   * If a SIGNO other than 0 was given, exits with SIGNO + 128.
+#   * Otherwise, exits with the value of $? at the time of invocation.
 onexit() {
     __ONEXIT_STATUS=$?
 	unset IFS
@@ -79,10 +80,6 @@ onexit() {
 #   TRAPS (space-separated list of integers):
 #       Signal numbers traps have been registered for. 
 #       Adds every SIGNO to TRAPS.
-#
-# Returns:
-#   0:
-#       Always.
 trapsig() {
     __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
     shift
@@ -115,10 +112,6 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
-#
-# Returns:
-#   0:
-#       Always.
 warn() (
     : "${1:?'warn: missing MESSAGE.'}"
     exec >&2
@@ -147,13 +140,9 @@ warn() (
 #   STATUS
 # shellcheck disable=2059
 panic() {
-    set +eu
-    __PANIC_STATUS="${1:-69}"
-    if [ $# -gt 1 ]; then
-        shift
-        warn "$@"
-    fi
-    exit "$__PANIC_STATUS"
+    set +e
+    [ $# -gt 1 ] && ( shift; warn "$@"; )
+    exit "${1:-69}"
 }
 
 
@@ -194,7 +183,7 @@ done
 unset IFS
 
 if ! [ "${POSIX_SH-}" ] || ! [ -x "$POSIX_SH" ]; then
-	panic 69 'Cannot find a safe, POSIX-compliant shell.'
+	panic 69 'Could not find a safe POSIX-compliant shell.'
 fi
 
 
@@ -257,6 +246,9 @@ sudo -E sh -c 'set -Cefux
 
 [ -e ~/.bash_profile ]                             || exit 0
 grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0
+
+# shellcheck disable=2016
+warn 'Appending "export PATH=$PATH:%s/bin" to ~/.bash_profile.' "$INSTALL_DIR"
 
 ( set -Cefux
   # shellcheck disable=2016

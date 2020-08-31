@@ -118,13 +118,12 @@ How secure a shell script is depends *a lot* on what shell you're running
 it with. **ksh**, for example, creates temporary files to handle command
 substitutions (i.e., ```...``` expressions) unless the command is built into
 **ksh**. As a consequence, **ksh** will write your LastPass master password
-to a temporary file if you disable the LastPass agent *and* use an
-askpass utility (the default is to use the LastPass agent and to *not* use
-an askpass utility). Keep in mind that your **sh** may be a symlink to **ksh**.
-This is just an example, however. There are a lot of shells out there.
-Use a reasonably modern and mainstream one, if possible. **bash** v5.0.11(1),
-**dash** v0.5.10.2, **mksh** R57, **oksh** v5.2.14, **yash** v2.49, and
-**zsh** v5.7.1 should all be fine.
+to a temporary file if you disable the LastPass agent *and* use an askpass
+utility (the default is to use the LastPass agent and to *not* use an askpass
+utility). Keep in mind that your **sh** may be a symlink to **ksh**. This
+is just an example, however. There are a lot of shells out there. Use a
+reasonably modern and mainstream one, if possible. Recent versions of **bash**,
+**dash**, **mksh**, **oksh**, **yash**, and **zsh** should all be fine.
 
 You may want to read **lpassh-add** and assess the security risks yourself.
 

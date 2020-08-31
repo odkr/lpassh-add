@@ -44,9 +44,8 @@
 #   onexit SIGNO
 #
 # Description:
-#   * Evaluates the content of the global variable $EX as shell code.
+#   * Runs the shell code in the global variable $EX.
 #   * If SIGNO is greater than 0, propagates that signal to the process group.
-#   * If no SIGNO is given or SIGNO equals 0, terminates all children.
 #   * Exits the script.
 #
 # Arguments:

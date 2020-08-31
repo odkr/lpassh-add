@@ -26,9 +26,9 @@ INSTALL_DIR=/opt/lpassh-add
 #   onexit SIGNO
 #
 # Description:
-#   * Evaluates the content of the global variable $EX as shell code.
+#   * Runs the shell code in the global variable $EX.
 #   * If SIGNO is greater than 0, propagates that signal to the process group.
-#   * If no SIGNO is given or SIGNO equals 0, terminates all children.
+#   * If SIGNO isn't given or 0, terminates all children.
 #   * Exits the script.
 #
 # Arguments:
@@ -42,8 +42,7 @@ INSTALL_DIR=/opt/lpassh-add
 #       Signal numbers traps have been registered for (read-only).
 # 
 # Exits with:
-#   * If a SIGNO other than 0 was given, exits with SIGNO + 128.
-#   * Otherwise, exits with the value of $? at the time of invocation.
+#   The value of $? at the time it was called.
 onexit() {
     __ONEXIT_STATUS=$?
 	unset IFS
@@ -80,6 +79,10 @@ onexit() {
 #   TRAPS (space-separated list of integers):
 #       Signal numbers traps have been registered for. 
 #       Adds every SIGNO to TRAPS.
+#
+# Returns:
+#   0:
+#       Always.
 trapsig() {
     __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
     shift
@@ -112,6 +115,10 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
+#
+# Returns:
+#   0:
+#       Always.
 warn() (
     : "${1:?'warn: missing MESSAGE.'}"
     exec >&2
@@ -140,9 +147,13 @@ warn() (
 #   STATUS
 # shellcheck disable=2059
 panic() {
-    set +e
-    [ $# -gt 1 ] && ( shift; warn "$@"; )
-    exit "${1:-69}"
+    set +eu
+    __PANIC_STATUS="${1:-69}"
+    if [ $# -gt 1 ]; then
+        shift
+        warn "$@"
+    fi
+    exit "$__PANIC_STATUS"
 }
 
 
@@ -183,7 +194,7 @@ done
 unset IFS
 
 if ! [ "${POSIX_SH-}" ] || ! [ -x "$POSIX_SH" ]; then
-	panic 69 'Could not find a safe POSIX-compliant shell.'
+	panic 69 'Cannot find a safe, POSIX-compliant shell.'
 fi
 
 

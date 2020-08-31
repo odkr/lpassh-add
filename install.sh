@@ -261,6 +261,6 @@ grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0
 # shellcheck disable=2016
 warn 'Appending "export PATH=$PATH:%s/bin" to ~/.bash_profile.' "$INSTALL_DIR"
 
-( set -Cefux
+( set -Cefu
   # shellcheck disable=2016
   printf '\nexport PATH="$PATH:%s/bin"\n' "$INSTALL_DIR" >> ~/.bash_profile; )

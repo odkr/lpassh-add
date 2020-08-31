@@ -27,7 +27,7 @@ You use **lpassh-add** *at your own risk*. You have been warned.
 It should "just work".
 You need OpenSSH and the LastPass command line client, of course.
 
-If 
+If
 
 1. your operating system is POSIX-compliant enough
    (macOS, Linux, and the \*BSDs are)
@@ -36,7 +36,7 @@ If
    [wget](https://www.gnu.org/software/wget/)
    (you probably do), and
 3. are using a modern-ish bourne-compatible shell
-   (bash, dash, ksh, mksh, oksh, and yash all should do), 
+   (bash, dash, ksh, mksh, oksh, and yash all should do),
 
 then you can install **lpassh-add** by:
 

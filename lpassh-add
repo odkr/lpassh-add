@@ -155,11 +155,10 @@ trapsig() {
 #       Arguments for MESSAGE (think printf).
 warn() {
     : "${1:?'warn: missing MESSAGE.'}"
-    exec >&2
-    printf 'lpassh-add: '
+    printf 'lpassh-add: ' >&2
     # shellcheck disable=2059
-    printf -- "$@"
-    printf '\n'
+    printf -- "$@" >&2
+    printf '\n' >&2
 }
 
 

@@ -134,12 +134,11 @@ trapsig() {
 #       Arguments for MESSAGE (think printf).
 warn() {
     : "${1:?'warn: missing MESSAGE'}"
-    exec >&2
     # shellcheck disable=2006
-    printf '%s: ' "`basename "$0"`"
+    printf '%s: ' "`basename "$0"`" >&2
     # shellcheck disable=2059
-    printf -- "$@"
-    printf '\n'
+    printf -- "$@" >&2
+    printf '\n' >&2
 }
 
 

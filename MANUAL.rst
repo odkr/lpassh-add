@@ -94,7 +94,7 @@ LPASSH_ADD_USERNAME
 
 LPASSH_ADD_AGENT_DISABLE
    0 (for false) or 1 (for true). Whether **lpassh-add** should use the
-   LastPass agent. Any value other than 0 or 1 will be ignored.
+   LastPass agent. Any value other than 0 or 1 will be silently ignored.
    (Default if not set: Respect ``LPASS_AGENT_DISABLE``.)
 
 LPASS_ASKPASS

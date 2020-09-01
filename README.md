@@ -111,7 +111,7 @@ do *not* provide `printf` as a built-in.
 * **posh** v0.13.2
 
 **posh** appears to have issues on macOS.
-It may well work under Debian GNU/Linux.
+It may pass under Debian GNU/Linux.
 
 ### Set-up
 

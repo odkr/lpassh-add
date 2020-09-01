@@ -4,7 +4,7 @@
 # The shells to try. Used for installation as well as testing.
 # Must be filenames. Order by preference, from best to worst.
 # Change PATH to use different versions of the same shell.
-SHELLS		= dash oksh mksh bash zsh yash ksh sh
+SHELLS		= dash oksh bash yash zsh mksh ksh sh
 
 # Where to store test scripts and dtruss logs.
 TEST_DIR	= test

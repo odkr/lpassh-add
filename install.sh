@@ -11,7 +11,7 @@
 # Safe and sufficiently POSIX compliant shells.
 # Space-seperated list. Must be filenames. Searched in PATH.
 # Order by preference.
-SHELLS='dash oksh mksh bash yash zsh'
+SHELLS='dash oksh bash yash zsh'
 
 # Where to install lpassh-add to.
 INSTALL_DIR=/opt/lpassh-add

@@ -29,14 +29,14 @@ You need OpenSSH and the LastPass command line client, of course.
 
 If
 
-1. your operating system is POSIX-compliant enough
-   (macOS, Linux, and the \*BSDs are)
+1. your operating system complies with POSIX
+   (FreeBSD, Linux, macOS, OpenBSD, and NetBSD should)
 2. you have
    [curl](https://curl.haxx.se/) or
-   [wget](https://www.gnu.org/software/wget/)
+   [wget](https://www.gnu.org/software/wget/),
    (you probably do), and
-3. are using a modern-ish bourne-compatible shell
-   (bash, dash, ksh, mksh, oksh, and yash all should do),
+3. are running a modern-ish bourne-compatible shell
+   (e.g., bash, dash, ksh, yash, or zsh),
 
 then you can install **lpassh-add** by:
 
@@ -62,7 +62,7 @@ You need:
 2. The [LastPass command line client](https://github.com/lastpass/lastpass-cli)
 3. If you want to use **lpassh-add** *without* the LastPass agent,
    which ships with the LastPass command line client,
-   you also need a shell that provides `[` and `printf` as *built-ins*
+   you also need a shell that provides `printf` as a *built-in*
    (every non-ancient shell should do so, however).
 
 Otherwise, **lpassh-add** complies with
@@ -77,26 +77,35 @@ change the shebang line, so that it points to a POSIX-compliant bourne shell
 
 ### Tested shells
 
-Works with:
-
-* bash v3.2.57(1), v5.0.11(1)
-* dash v0.5.10.2
-* ksh AJM 93u+ (but see below)
-* mksh R57
-* oksh v5.2.14
-* yash v2.49
-* zsh v5.3, v5.7.1
-
-Doesn't work with:
-
-* posh 0.13.2
-
 Tests were run on macOS v10.14.6 only.
 
-**Note**: ksh93 will write your LastPass master password to a temporary file
+Works with:
+
+* **bash** v3.2.57(1), v5.0.11(1), 5.0.17(1)
+* **dash** v0.5.10.2
+* **oksh** v5.2.14
+* **yash** v2.49
+* **zsh** v5.3, v5.7.1
+
+Mostly works with:
+
+* **ksh** AJM 93u+
+* **mksh** (depending on version and compile options)
+
+ksh93 will write your LastPass master password to a temporary file
 if, and only if, you do *not* use the LastPass agent and *do* use an
 askpass utility. *Neither* is the default behaviour. See "SECURITY"
 in the [manual](MANUAL.rst#security) for details.
+
+[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
+provide `printf` as a built-in. So, you have to use the LastPass agent.
+
+Doesn't work with:
+
+* **posh** v0.13.2
+
+**posh** on macOS doesn't accept any `umask` as valid.
+On Debian GNU/Linux it may well work.
 
 ### Set-up
 

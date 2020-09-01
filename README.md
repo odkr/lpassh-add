@@ -70,42 +70,53 @@ Otherwise, **lpassh-add** complies with
 It also *aims* to be compatible with
 [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
 
-It should run on any modern-ish Unix system (e.g., Linux, FreeBSD, NetBSD,
+It should run on any modern-ish Unix system (e.g., FreeBSD, GNU/Linux, NetBSD,
 OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
 change the shebang line, so that it points to a POSIX-compliant bourne shell
 (`make install` should do that for you, however).
 
 ### Tested shells
 
-Tests were run on macOS v10.14.6 only.
+**lpassh-add** should work with *any* POSIX-compliant bourne shell. However,
+I ran tests and did some research on the following shells. Tests were run
+on macOS v10.14.6 only.
 
-Works with:
+#### Passing shells
 
 * **bash** v3.2.57(1), v5.0.11(1), 5.0.17(1)
 * **dash** v0.5.10.2
 * **oksh** v5.2.14
 * **yash** v2.49
-* **zsh** v5.3, v5.7.1
 
-Mostly works with:
+#### Mostly passing
 
-* **ksh** AJM 93u+
-* **mksh** (depending on version and compile options)
+* **zsh**
+* **mksh** (depending on your version and compile options)
+
+Some versions of **zsh** may *not* always exit **lpassh-add** with the correct
+exit status (though zero still signifies success and non-zero failure).
+
+[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
+provide `printf` as a built-in. So, you have to use the LastPass agent.
+
+#### Passing with security caveats
+
+* **ksh**
 
 ksh93 will write your LastPass master password to a temporary file
 if, and only if, you do *not* use the LastPass agent and *do* use an
 askpass utility. *Neither* is the default behaviour. See "SECURITY"
 in the [manual](MANUAL.rst#security) for details.
 
-[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
-provide `printf` as a built-in. So, you have to use the LastPass agent.
+Note, I have only tested ksh93. I do *not* know how older versions
+of **ksh** behave. I do *not* imply that they are safe.
 
-Doesn't work with:
+#### Failures
 
 * **posh** v0.13.2
 
-**posh** on macOS doesn't accept any `umask` as valid.
-On Debian GNU/Linux it may well work.
+**posh** doesn't accept any `umask` as valid on macOS.
+It may well work on Debian GNU/Linux.
 
 ### Set-up
 

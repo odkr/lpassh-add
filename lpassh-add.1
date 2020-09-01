@@ -64,14 +64,14 @@ describe SSH keys by setting the environment variable
 \f[C]LPASSH_ADD_PATH_REGEX\f[R] is a basic regular expression.
 If the path of a Secure Note matches this expression,
 \f[B]lpassh-add\f[R] considers that Secure Note to describe an SSH key.
-If you don\[aq]t set \f[C]LPASSH_ADD_PATH_REGEX\f[R],
-\f[B]lpassh-add\f[R] uses the regular expression \[dq]ssh\[dq].
+If you don\[aq]t set \f[C]LPASSH_ADD_PATH_REGEX\f[R] or set it to the
+empty string (\[dq]\[dq]), then \f[B]lpassh-add\f[R] uses the regular
+expression \[dq]ssh\[dq].
 .PP
 You can also make \f[B]lpassh-add\f[R] consider \f[I]every\f[R] item in
 your LastPass database to describe an SSH key, namely, by setting
 \f[C]LPASSH_ADD_PATH_REGEX\f[R] to a regular expression that matches any
-string, the empty string (\[dq]\[dq]), for example.
-This is a \f[I]bad\f[R] idea.
+string, \[dq].\f[I]\[dq], for example. This is a\f[R]bad* idea.
 It\[aq]s slow.
 It will pass passphrases to \f[B]ssh-add\f[R] that are none of its
 business.
@@ -83,9 +83,9 @@ A basic regular expression.
 \f[B]lpassh-add\f[R] assumes that any item in your LastPass database the
 path of which matches this expression describes an SSH key.
 If you set this variable to a regular expression that matches any
-string, the empty string (\[dq]\[dq]), for instance, then
-\f[B]lpassh-add\f[R] will assume that \f[I]every\f[R] item in your
-LastPass database describes an SSH key.
+string, \[dq].\f[I]\[dq], for example, thenlpassh-add\f[R]* will assume
+that \f[I]every\f[R] item in your LastPass database describes an SSH
+key.
 This is a \f[I]bad\f[R] idea.
 (Default if not set: \[dq]ssh\[dq].)
 .TP

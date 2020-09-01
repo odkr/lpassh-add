@@ -123,7 +123,7 @@ utility (the default is to use the LastPass agent and to *not* use an askpass
 utility). Keep in mind that your **sh** may be a symlink to **ksh**. This
 is just an example, however. There are a lot of shells out there. Use a
 reasonably modern and mainstream one, if possible. Recent versions of **bash**,
-**dash**, **mksh**, **oksh**, **yash**, and **zsh** should all be fine.
+**dash**, **oksh**, and **yash** should all be fine.
 
 You may want to read **lpassh-add** and assess the security risks yourself.
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.4 - Unlock SSH keys using LastPass.
+# lpass-ssh-add v1.1.5b - Unlock SSH keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -30,9 +30,12 @@
 # This script complies with POSIX.1-2017 and aims to be compatible with SVR4.2.
 # If some of the code strikes you as weird---that's why.
 #
-# See:
-# * <https://www.gnu.org/software/autoconf/manual/autoconf-2.69/html_node/Portable-Shell.html>
-# * <https://www.in-ulm.de/~mascheck/bourne/>
+# The POSIX.1-2017 specification of the Shell Command Language:
+# <https://pubs.opengroup.org/onlinepubs/9699919799/xrat/V4_xcu_chap02.html>
+# autoconf's manual on portable shell scripting:
+# <https://www.gnu.org/software/autoconf/manual/html_node/Portable-Shell.html>
+# The history of the Bourne shell:
+# <https://www.in-ulm.de/~mascheck/bourne/>
 
 
 # FUNCTIONS
@@ -131,7 +134,7 @@ trapsig() {
         # shellcheck disable=2064
         trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNAME"
         # shellcheck disable=2086
-        for __TRAPSIG_TRAPPED in 0 ${TRAPS-}
+        for __TRAPSIG_TRAPPED in EXIT ${TRAPS-}
         do
             [ "$__TRAPSIG_SIGNAME" = "$__TRAPSIG_TRAPPED" ] && continue 2
         done

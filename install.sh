@@ -113,7 +113,7 @@ trapsig() {
         # shellcheck disable=2064
         trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNAME"
         # shellcheck disable=2086
-        for __TRAPSIG_TRAPPED in 0 ${TRAPS-}
+        for __TRAPSIG_TRAPPED in EXIT ${TRAPS-}
         do
             [ "$__TRAPSIG_SIGNAME" = "$__TRAPSIG_TRAPPED" ] && continue 2
         done

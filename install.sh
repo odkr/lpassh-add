@@ -100,10 +100,6 @@ signame() (
 #   TRAPS (space-separated list of signal names):
 #       Signals that traps have been registered for. 
 #       Adds the name of every given SIGNO to TRAPS.
-#
-# Returns:
-#   0:
-#       Always.
 trapsig() {
     __TRAPSIG_FUNC="${1:?'missing FUNCTION'}"
     shift
@@ -136,10 +132,6 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
-#
-# Returns:
-#   0:
-#       Always.
 warn() (
     : "${1:?'warn: missing MESSAGE'}"
     exec >&2

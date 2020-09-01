@@ -97,7 +97,7 @@ Some versions of **zsh** may *not* always exit **lpassh-add** with the correct
 exit status (though zero still signifies success and non-zero failure).
 
 [Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
-provide `printf` as a built-in. So, you have to use the LastPass agent.
+provide `printf` as a built-in. So you cannot disable the LastPass agent.
 
 #### Passing with security caveats
 

@@ -92,7 +92,7 @@ onexit() {
 #   SIGNO (integer):
 #       A signal number or 0 for "on programme exit".
 signame() (
-    : "${1:?'missing SIGNO'}"
+    : "${1:?'missing SIGNO.'}"
     if [ "$1" -eq 0 ]
         then printf 'TERM\n'
         else kill -l "$1"
@@ -123,7 +123,7 @@ signame() (
 #   0:
 #       Always.
 trapsig() {
-    __TRAPSIG_FUNC="${1:?'missing FUNCTION'}"
+    __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
     shift
     for __TRAPSIG_SIGNO
     do
@@ -424,7 +424,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-	    : "${LASTPASS_PASSWORD:?'Not set or empty.'}"
+	    : "${LASTPASS_PASSWORD:?}"
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LPASS_ASKPASS-}" ] || [ "${LPASS_ASKPASS-x}" = x ]; then

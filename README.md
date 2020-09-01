@@ -69,18 +69,18 @@ Otherwise, **lpassh-add** complies with
 It also *aims* to be compatible with
 [System V Release 4.2](https://www.in-ulm.de/~mascheck/bourne/).
 
-It should run on any modern-ish Unix system (e.g., FreeBSD, GNU/Linux, NetBSD,
-OpenBSD, and macOS). However, on some systems (e.g., Solaris) you may need to
+It should run on any modern-ish Unix system (e.g., FreeBSD, GNU/Linux, macOS,
+NetBSD, or OpenBSD). However, on some systems (e.g., Solaris) you may need to
 change the shebang line, so that it points to a POSIX-compliant bourne shell
 (`make install` should do that for you, however).
 
 ### Tested shells
 
-**lpassh-add** should work with *any* POSIX-compliant bourne shell. However,
-I ran tests and did some research on the following shells. Tests were run
-on macOS v10.14.6 only.
+**lpassh-add** should work with *any* POSIX-compliant bourne shell.
+However, I ran tests and did some research on the following.
+Tests were run on macOS v10.14.6 only.
 
-#### Passing shells
+#### Passing
 
 * **bash** v3.2.57(1), v5.0.11(1), 5.0.17(1)
 * **dash** v0.5.10.2
@@ -103,15 +103,15 @@ in the [manual](MANUAL.rst#security) for details. Note, I have only
 tested ksh93. I do *not* know how older versions of **ksh** behave.
 And I do *not* imply that they are safe.
 
-[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
-provide `printf` as a built-in. So you cannot disable the LastPass agent.
+[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh**
+do *not* provide `printf` as a built-in.
 
-#### Failures
+#### Failing
 
 * **posh** v0.13.2
 
-**posh** doesn't accept any `umask` as valid on macOS.
-It may well work on Debian GNU/Linux.
+**posh** appears to have issues on macOS.
+It may well work under Debian GNU/Linux.
 
 ### Set-up
 

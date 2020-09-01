@@ -107,8 +107,7 @@ signame() (
 trapsig() {
     __TRAPSIG_FUNC="${1:?'missing FUNCTION'}"
     shift
-    for __TRAPSIG_SIGNO
-    do
+    for __TRAPSIG_SIGNO do
         __TRAPSIG_SIGNAME="$(signame "$__TRAPSIG_SIGNO")"
         # shellcheck disable=2064
         trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNAME"

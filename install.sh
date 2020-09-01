@@ -132,7 +132,7 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
-warn() (
+warn() {
     : "${1:?'warn: missing MESSAGE'}"
     exec >&2
     # shellcheck disable=2006
@@ -140,7 +140,7 @@ warn() (
     # shellcheck disable=2059
     printf -- "$@"
     printf '\n'
-)
+}
 
 
 # panic - Exits the script with an error message.

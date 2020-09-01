@@ -87,29 +87,25 @@ on macOS v10.14.6 only.
 * **dash** v0.5.10.2
 * **oksh** v5.2.14
 * **yash** v2.49
-
-#### Mostly passing
-
-* **zsh**
-* **mksh** (depending on your version and compile options)
+* **zsh** (but see below)
 
 Some versions of **zsh** may *not* always exit **lpassh-add** with the correct
 exit status (though zero still signifies success and non-zero failure).
 
-[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
-provide `printf` as a built-in. So you cannot disable the LastPass agent.
-
 #### Passing with security caveats
 
 * **ksh**
+* **mksh** (depending on your version and compile options)
 
 ksh93 will write your LastPass master password to a temporary file
 if, and only if, you do *not* use the LastPass agent and *do* use an
 askpass utility. *Neither* is the default behaviour. See "SECURITY"
-in the [manual](MANUAL.rst#security) for details.
+in the [manual](MANUAL.rst#security) for details. Note, I have only
+tested ksh93. I do *not* know how older versions of **ksh** behave.
+And I do *not* imply that they are safe.
 
-Note, I have only tested ksh93. I do *not* know how older versions
-of **ksh** behave. I do *not* imply that they are safe.
+[Some versions](https://www.mirbsd.org/mksh.htm) of **mksh** do *not*
+provide `printf` as a built-in. So you cannot disable the LastPass agent.
 
 #### Failures
 

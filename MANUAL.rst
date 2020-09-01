@@ -71,7 +71,7 @@ expression "ssh".
 
 You can also make **lpassh-add** consider *every* item in your LastPass
 database to describe an SSH key, namely, by setting ``LPASSH_ADD_PATH_REGEX``
-to a regular expression that matches any string, ".*", for example. This is
+to a regular expression that matches any string, ".\*", for example. This is
 a *bad* idea. It's slow. It will pass passphrases to **ssh-add** that are
 none of its business. And it will generate a lot of warnings (those are
 harmless, however).
@@ -84,7 +84,7 @@ LPASSH_ADD_PATH_REGEX
    A basic regular expression. **lpassh-add** assumes that any item in your
    LastPass database the path of which matches this expression describes an
    SSH key. If you set this variable to a regular expression that matches any
-   string, ".*", for example, then **lpassh-add** will assume that *every*
+   string, ".\*", for example, then **lpassh-add** will assume that *every*
    item in your LastPass database describes an SSH key. This is a *bad* idea.
    (Default if not set: "ssh".)
 

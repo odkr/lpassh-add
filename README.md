@@ -30,7 +30,7 @@ You need OpenSSH and the LastPass command line client, of course.
 If
 
 1. your operating system complies with POSIX
-   (FreeBSD, Linux, macOS, OpenBSD, and NetBSD should)
+   (FreeBSD, GNU/Linux, macOS, NetBSD, and OpenBSD should do)
 2. you have
    [curl](https://curl.haxx.se/) or
    [wget](https://www.gnu.org/software/wget/),

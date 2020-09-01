@@ -442,8 +442,7 @@ IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_PATH_REGEX"`
 
 # Unlock the keys.
 NOT_FOUND=0
-for KEY
-do
+for KEY do
     if [ -e "$KEY" ]; then
         for ID in $IDS
         do

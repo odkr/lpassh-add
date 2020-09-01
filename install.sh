@@ -33,13 +33,13 @@ INSTALL_DIR=/opt/lpassh-add
 #
 # Arguments:
 #   SIGNO (integer):
-#       A signal number.
+#       A signal number or 0 for "on programme exit".
 #
 # Global variables:
 #   EX (string): 
 #       Code to be run. Unset thereafter.
-#   TRAPS (space-separated list of integers):
-#       Signal numbers traps have been registered for (read-only).
+#   TRAPS (space-separated list of signal names):
+#       Signals that traps have been registered for (read-only). 
 # 
 # Exits with:
 #   The value of $? at the time it was called.
@@ -47,7 +47,7 @@ onexit() {
     __ONEXIT_STATUS=$?
 	unset IFS
     # shellcheck disable=2086
-    trap '' 0 ${TRAPS-2 15} || :
+    trap '' EXIT ${TRAPS-INT TERM} || :
     set +e
     if [ "${EX-}" ]; then
         eval "$EX"
@@ -59,6 +59,27 @@ onexit() {
     fi
     exit "$__ONEXIT_STATUS"
 }
+
+
+# signame - Get a signal's name by its number.
+#
+# Synopsis:
+#   signame SIGNO
+#
+# Description:
+#   Prints the name of the name of the signal with the number SIGNO.
+#   If SIGNO is 0, prints "EXIT".
+#
+# Arguments:
+#   SIGNO (integer):
+#       A signal number or 0 for "on programme exit".
+signame() (
+    : "${1:?'missing SIGNO'}"
+    if [ "$1" -eq 0 ]
+        then printf 'TERM\n'
+        else kill -l "$1"
+    fi
+)
 
 
 # trapsig - Register functions to trap signals.
@@ -76,26 +97,27 @@ onexit() {
 #       A signal number or 0 for "on programme exit".
 #
 # Global variables:
-#   TRAPS (space-separated list of integers):
-#       Signal numbers traps have been registered for. 
-#       Adds every SIGNO to TRAPS.
+#   TRAPS (space-separated list of signal names):
+#       Signals that traps have been registered for. 
+#       Adds the name of every given SIGNO to TRAPS.
 #
 # Returns:
 #   0:
 #       Always.
 trapsig() {
-    __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
+    __TRAPSIG_FUNC="${1:?'missing FUNCTION'}"
     shift
     for __TRAPSIG_SIGNO
     do
+        __TRAPSIG_SIGNAME="$(signame "$__TRAPSIG_SIGNO")"
         # shellcheck disable=2064
-        trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNO"
+        trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNAME"
         # shellcheck disable=2086
         for __TRAPSIG_TRAPPED in 0 ${TRAPS-}
         do
-            [ "$__TRAPSIG_SIGNO" -eq "$__TRAPSIG_TRAPPED" ] && continue 2
+            [ "$__TRAPSIG_SIGNAME" = "$__TRAPSIG_TRAPPED" ] && continue 2
         done
-        TRAPS="${TRAPS-} $__TRAPSIG_SIGNO"
+        TRAPS="${TRAPS-} $__TRAPSIG_SIGNAME"
     done
 }
 
@@ -120,7 +142,7 @@ trapsig() {
 #   0:
 #       Always.
 warn() (
-    : "${1:?'warn: missing MESSAGE.'}"
+    : "${1:?'warn: missing MESSAGE'}"
     exec >&2
     # shellcheck disable=2006
     printf '%s: ' "`basename "$0"`"

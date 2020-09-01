@@ -202,6 +202,9 @@ panic() {
 builtin_printf() (
     [ $# -gt 0 ] || panic 70 'printf: missing arguments.'
     unset PATH
+    # This should be superfluous. But better be safe than sorry.
+    [ "$(command -v printf)" = printf ] || \
+        panic 69 'printf: Not a shell built-in.'
     # shellcheck disable=2059
     printf "$@"
 )
@@ -421,7 +424,7 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-	: "${LASTPASS_PASSWORD:?'Not set or empty.'}"
+	    : "${LASTPASS_PASSWORD:?'Not set or empty.'}"
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LPASS_ASKPASS-}" ] || [ "${LPASS_ASKPASS-x}" = x ]; then

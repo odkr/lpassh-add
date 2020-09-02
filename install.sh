@@ -132,14 +132,15 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
-warn() {
+warn() ( 
     : "${1:?'warn: missing MESSAGE'}"
+    exec >&2
     # shellcheck disable=2006
-    printf '%s: ' "`basename "$0"`" >&2
+    printf '%s: ' "`basename "$0"`"
     # shellcheck disable=2059
-    printf -- "$@" >&2
-    printf '\n' >&2
-}
+    printf -- "$@"
+    printf '\n'
+)
 
 
 # panic - Exits the script with an error message.
@@ -161,13 +162,9 @@ warn() {
 #   STATUS
 # shellcheck disable=2059
 panic() {
-    set +eu
-    __PANIC_STATUS="${1:-69}"
-    if [ $# -gt 1 ]; then
-        shift
-        warn "$@"
-    fi
-    exit "$__PANIC_STATUS"
+    set +e
+    [ $# -gt 1 ] && ( shift; warn "$@"; )
+    exit "${1:-69}"
 }
 
 

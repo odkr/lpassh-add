@@ -153,13 +153,14 @@ trapsig() {
 #       The message.
 #   ARG (any):
 #       Arguments for MESSAGE (think printf).
-warn() {
+warn() (
     : "${1:?'warn: missing MESSAGE.'}"
-    printf 'lpassh-add: ' >&2
+    exec >&2
+    printf 'lpassh-add: '
     # shellcheck disable=2059
-    printf -- "$@" >&2
-    printf '\n' >&2
-}
+    printf -- "$@"
+    printf '\n'
+)
 
 
 # panic - Exits the script with an error message.

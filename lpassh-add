@@ -245,9 +245,13 @@ umask 077
 : "${LPASSH_ADD_PATH_REGEX:=ssh}"
 export LPASS_AUTO_SYNC_TIME=30
 
-case "${LPASSH_ADD_AGENT_DISABLE-}" in
-    0|1) export LPASS_AGENT_DISABLE="$LPASSH_ADD_AGENT_DISABLE";;
-esac
+if [ "${LPASSH_ADD_AGENT_DISABLE-}" ]; then
+    case "$LPASSH_ADD_AGENT_DISABLE" in
+        0|1) export LPASS_AGENT_DISABLE="$LPASSH_ADD_AGENT_DISABLE" ;;
+          *) panic 64 'LPASSH_ADD_AGENT_DISABLE: %s: Not a boolean value.' \
+                      $LPASSH_ADD_AGENT_DISABLE
+    esac
+fi
 
 
 # SANITISE ENVIRONMENT

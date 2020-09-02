@@ -418,11 +418,11 @@ if [ "$LASTPASS_STATUS" -ne 0 ]; then
             stty -echo <"$TTY"
             printf -- '%s ' "$PROMPT" >"$TTY"
             read -r LASTPASS_PASSWORD <"$TTY"
-            stty echo  <"$TTY"
+            stty echo <"$TTY"
             echo >"$TTY"
             EX="$OLD_EX"
         fi
-	    : "${LASTPASS_PASSWORD:?}"
+        : "${LASTPASS_PASSWORD:?}"
         LPASS=auth_lpass
         # Make sure lpass reads from STDIN.
         if [ "${LPASS_ASKPASS-}" ] || [ "${LPASS_ASKPASS-x}" = x ]; then

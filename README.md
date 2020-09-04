@@ -40,7 +40,7 @@ If you
 then you can install **lpassh-add** by:
 
 ```sh
-( set -Cfu; NAME=lpassh-add VERS=1.1.4
+( set -Cfu; NAME=lpassh-add VERS=1.1.5
   for GET in 'curl -LsS' 'wget -qO -'; do
       $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
       [ $? -eq 127 ] || break
@@ -116,7 +116,7 @@ It may pass under Debian GNU/Linux.
 ### Set-up
 
 1. Download the repository from:
-   <https://github.com/odkr/lpassh-add/archive/v1.1.4.tar.gz>
+   <https://github.com/odkr/lpassh-add/archive/v1.1.5.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
 4. Copy its manual page (`lpassh-add.1`) ito a directory in your `MANPATH`.
@@ -130,7 +130,7 @@ you probably can download **lpassh-add** by:
 
 ```sh
 ( set -Cfu
-  NAME=lpassh-add VERS=1.1.4; AR="v$VERS.tar.gz"
+  NAME=lpassh-add VERS=1.1.5; AR="v$VERS.tar.gz"
   # Download the archive and the signature.
   for GET in 'curl -LsSo' 'wget -qO'; do
       for FILE in "archive/$AR" "releases/download/v$VERS/$AR.asc"; do
@@ -150,19 +150,19 @@ the archive that you've just downloaded has been tempered with:
 ```sh
 # Download my GnuPG key.
 gpg --recv-keys 0x6B06A2E03BE31BE9
-gpg --verify v1.1.4.tar.gz.asc v1.1.4.tar.gz
+gpg --verify v1.1.5.tar.gz.asc v1.1.5.tar.gz
 ```
 
 Then unpack the archive:
 
 ```sh
-tar -xzf v1.1.4.tar.gz
+tar -xzf v1.1.5.tar.gz
 ```
 
 Finally, install **lpassh-add** and its manual:
 
 ```sh
-cd lpassh-add-1.1.4
+cd lpassh-add-1.1.5
 make install
 ```
 

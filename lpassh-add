@@ -1,5 +1,5 @@
 #!/bin/sh
-# lpass-ssh-add v1.1.5b - Unlock SSH keys using LastPass.
+# lpass-ssh-add v1.1.5 - Unlock SSH keys using LastPass.
 #
 # Copyright 2018, 2019, 2020 Odin Kroeger
 #
@@ -249,7 +249,7 @@ if [ "${LPASSH_ADD_AGENT_DISABLE-}" ]; then
     case "$LPASSH_ADD_AGENT_DISABLE" in
         0|1) export LPASS_AGENT_DISABLE="$LPASSH_ADD_AGENT_DISABLE" ;;
           *) panic 64 'LPASSH_ADD_AGENT_DISABLE: %s: Not a boolean value.' \
-                      $LPASSH_ADD_AGENT_DISABLE
+                      "$LPASSH_ADD_AGENT_DISABLE"
     esac
 fi
 
@@ -300,7 +300,7 @@ do
             ;;
         -h)
             exec cat <<EOF
-lpassh-add v1.1.4 - Unlocks SSH keys using LastPass.
+lpassh-add v1.1.5 - Unlocks SSH keys using LastPass.
 
 Synopsis:
     lpassh-add [-cq] [-t LIFETIME] [*KEY* [*KEY* [...]]]
@@ -322,7 +322,7 @@ EOF
             ;;
         -V)
             exec cat <<EOF
-lpassh-add v1.1.4
+lpassh-add v1.1.5
 (c) 2018, 2019, 2020 Odin Kroeger
 Released under the MIT license.
 EOF

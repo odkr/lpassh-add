@@ -73,13 +73,13 @@ onexit() {
 # Arguments:
 #   SIGNO (integer):
 #       A signal number or 0 for "on programme exit".
-signame() (
+signame() {
     : "${1:?'missing SIGNO'}"
     if [ "$1" -eq 0 ]
         then printf 'TERM\n'
         else kill -l "$1"
     fi
-)
+}
 
 
 # trapsig - Register functions to trap signals.

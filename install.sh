@@ -76,7 +76,7 @@ onexit() {
 signame() {
     : "${1:?'missing SIGNO'}"
     if [ "$1" -eq 0 ]
-        then printf 'TERM\n'
+        then printf 'EXIT\n'
         else kill -l "$1"
     fi
 }

@@ -124,7 +124,8 @@ signame() {
 trapsig() {
     __TRAPSIG_FUNC="${1:?'missing FUNCTION.'}"
     shift
-    for __TRAPSIG_SIGNO do
+    for __TRAPSIG_SIGNO
+    do
         __TRAPSIG_SIGNAME="$(signame "$__TRAPSIG_SIGNO")"
         # shellcheck disable=2064
         trap "$__TRAPSIG_FUNC $__TRAPSIG_SIGNO" "$__TRAPSIG_SIGNAME"
@@ -443,7 +444,8 @@ IDS=`"$LPASS" show --id -x -G "$LPASSH_ADD_PATH_REGEX"`
 
 # Unlock the keys.
 NOT_FOUND=0
-for KEY do
+for KEY
+do
     if [ -e "$KEY" ]; then
         for ID in $IDS
         do

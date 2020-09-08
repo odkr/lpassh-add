@@ -86,7 +86,7 @@ Tests were run on macOS v10.14.6 only.
 * **dash** v0.5.10.2
 * **oksh** v5.2.14
 * **yash** v2.49
-* **zsh** (but see below)
+* **zsh** v5.3 (but see below)
 
 Some versions of **zsh** may *not* always exit **lpassh-add** with the correct
 exit status (though zero still signifies success and non-zero failure).

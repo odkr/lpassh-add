@@ -88,7 +88,7 @@ onexit() {
 #   signame SIGNO
 #
 # Description:
-#   Prints the name of the name of the signal with the number SIGNO.
+#   Prints the name of the signal with the number SIGNO.
 #   If SIGNO is 0, prints "EXIT".
 #
 # Arguments:

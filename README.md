@@ -40,7 +40,7 @@ If you
 then you can install **lpassh-add** by:
 
 ```sh
-( set -Cfu; NAME=lpassh-add VERS=1.1.6
+( set -Cfu; NAME=lpassh-add VERS=1.1.7
   for GET in 'curl -LsS' 'wget -qO -'; do
       eval $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
       [ $? -eq 127 ] || break
@@ -116,7 +116,7 @@ It may pass under Debian GNU/Linux.
 ### Set-up
 
 1. Download the repository from:
-   <https://github.com/odkr/lpassh-add/archive/v1.1.6.tar.gz>
+   <https://github.com/odkr/lpassh-add/archive/v1.1.7.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.
 4. Copy its manual page (`lpassh-add.1`) ito a directory in your `MANPATH`.
@@ -130,7 +130,7 @@ you probably can download **lpassh-add** by:
 
 ```sh
 ( set -Cfu
-  NAME=lpassh-add VERS=1.1.6; AR="v$VERS.tar.gz"
+  NAME=lpassh-add VERS=1.1.7; AR="v$VERS.tar.gz"
   for GET in 'curl -LsSo' 'wget -qO'; do
       for FILE in "archive/$AR" "releases/download/v$VERS/$AR.asc"; do
           eval $GET "${FILE##*/}" "https://github.com/odkr/$NAME/$FILE"
@@ -149,19 +149,19 @@ the archive that you've just downloaded has been tempered with:
 ```sh
 # Download my GnuPG key.
 gpg --recv-keys 0x6B06A2E03BE31BE9
-gpg --verify v1.1.6.tar.gz.asc v1.1.6.tar.gz
+gpg --verify v1.1.7.tar.gz.asc v1.1.7.tar.gz
 ```
 
 Then unpack the archive:
 
 ```sh
-tar -xzf v1.1.6.tar.gz
+tar -xzf v1.1.7.tar.gz
 ```
 
 Finally, install **lpassh-add** and its manual:
 
 ```sh
-cd lpassh-add-1.1.6
+cd lpassh-add-1.1.7
 make install
 ```
 
@@ -187,7 +187,7 @@ See the [manual](MANUAL.rst) and the [source](lpassh-add).
 * Bob Copeland's
   [lp-ssh-add.sh](https://gist.github.com/bcopeland/3cabf6ff3fe94fcbd566)
 * Knut Ahlers'
-  [lpass-ssh.sh](https://gist.github.com/Luzifer/2f188ed3adc0f1b166f7)
+  [lpass-ssh.sh](https://gist.github.com/Luzifer/2f188ed3adc0f1.1.7f7)
 * Wojciech Adam Koszek's
   [lastpass-ssh](https://github.com/wkoszek/lastpass-ssh)
 

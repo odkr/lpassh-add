@@ -45,7 +45,7 @@ INSTALL_DIR=/opt/lpassh-add
 #   The value of $? at the time it was called.
 onexit() {
     __ONEXIT_STATUS=$?
-	unset IFS
+    unset IFS
     # shellcheck disable=2086
     trap '' EXIT ${TRAPS-INT TERM} || :
     set +e
@@ -193,19 +193,19 @@ export PATH
 
 for SHELL in $SHELLS
 do
-	IFS=:
-	for DIR in $PATH
-	do
-		if [ -e "$DIR/$SHELL" ]; then
-			POSIX_SH="$DIR/$SHELL"
-			break 2
-		fi
-	done
+    IFS=:
+    for DIR in $PATH
+    do
+        if [ -e "$DIR/$SHELL" ]; then
+            POSIX_SH="$DIR/$SHELL"
+            break 2
+        fi
+    done
 done
 unset IFS
 
 if ! [ "${POSIX_SH-}" ] || ! [ -x "$POSIX_SH" ]; then
-	panic 69 'Cannot find a safe, POSIX-compliant shell.'
+    panic 69 'Cannot find a safe, POSIX-compliant shell.'
 fi
 
 
@@ -214,7 +214,7 @@ fi
 
 B="" R=""
 if [ "${CLICOLOR-}" ] || [ "${COLORTERM-}" ]; then
-	B='\033[1m' R='\033[0m'
+    B='\033[1m' R='\033[0m'
 fi
 
 warn '------------------------------------------------------'
@@ -236,7 +236,7 @@ read DUMMY
 # shellcheck disable=2006
 DIRNAME=`expr "$0" : "\(.*\)/"` || :
 if [ "$DIRNAME" ]; then
-	cd "$DIRNAME" || exit
+    cd "$DIRNAME" || exit
 fi
 
 # Create and copy the files.
@@ -266,12 +266,17 @@ sudo -E sh -c 'set -Cefux
     || panic 69 'Installation failed. You may want to delete %s.' \
                 "$INSTALL_DIR"
 
-[ -e ~/.bash_profile ]                             || exit 0
-grep -q "PATH=.*:$INSTALL_DIR/bin" ~/.bash_profile && exit 0
+for RC in "$HOME/.bash_profile" "$HOME/.zshrc"; do
+    [ -e "$RC" ] || continue
+    grep -q "PATH=.*:$INSTALL_DIR/bin" "$RC" && continue
 
-# shellcheck disable=2016
-warn "Appending 'export PATH=\"\$PATH:%s/bin\"' to ~/.bash_profile." "$INSTALL_DIR"
+        # shellcheck disable=2016
+        warn "Appending 'export PATH=\"\$PATH:%s/bin\"' to %s." \
+            "$INSTALL_DIR" "$RC"
 
-( set -Cefu
-  # shellcheck disable=2016
-  printf '\nexport PATH="$PATH:%s/bin"\n' "$INSTALL_DIR" >> ~/.bash_profile; )
+    (
+        set -Cefu
+        # shellcheck disable=2016
+        printf '\nexport PATH="$PATH:%s/bin"\n' "$INSTALL_DIR" >> "$RC"
+    ) || exit
+done

@@ -42,9 +42,9 @@ then you can install **lpassh-add** by:
 ```sh
 ( set -Cfu; NAME=lpassh-add VERS=1.1.6
   for GET in 'curl -LsS' 'wget -qO -'; do
-      $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
+      eval $GET "https://github.com/odkr/$NAME/archive/v$VERS.tar.gz"
       [ $? -eq 127 ] || break
-  done | tar -xz
+  done | tar -xz || exit
   cd "$NAME-$VERS" && make install; )
 ```
 
@@ -131,10 +131,9 @@ you probably can download **lpassh-add** by:
 ```sh
 ( set -Cfu
   NAME=lpassh-add VERS=1.1.6; AR="v$VERS.tar.gz"
-  # Download the archive and the signature.
   for GET in 'curl -LsSo' 'wget -qO'; do
       for FILE in "archive/$AR" "releases/download/v$VERS/$AR.asc"; do
-          $GET "$(basename "$FILE")" "https://github.com/odkr/$NAME/$FILE"
+          eval $GET "${FILE##*/}" "https://github.com/odkr/$NAME/$FILE"
           case $? in 0) :;; 127) continue 2;; *) exit;; esac
       done
       break

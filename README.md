@@ -166,11 +166,11 @@ make install
 ```
 
 `make install` tries to find a POSIX-compliant shell to run **lpassh-add** with,
-copies **lpassh-add** itself and its manual to `/opt/lpassh-add`, and changes
-your `~/.bash_profile`, if it exists, to add `/opt/lpassh-add/bin` to your
-`PATH`. It outputs (some of) the commands it runs, so you can see what it's
-doing. Note, it calls `sudo`, so it will likely prompt you for your login
-password.
+copies **lpassh-add** itself and its manual to `/opt/lpassh-add`, and adds 
+`/opt/lpassh-add/bin` to your `PATH` in your `~/.bash_profile` and your
+`~/.zshrc` -- if they exist. It outputs (some of) the commands it runs,
+so you can see what it's doing. Note, it calls `sudo`, so it will likely
+prompt you for your login password.
 
 If `make install` fails, you'll have to install **lpassh-add** manually
 (i.e., follows steps 1-4 above); **lpassh-add** is more portable than

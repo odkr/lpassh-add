@@ -399,7 +399,10 @@ trapsig onexit 0 1 2 3 15
 LPASS=lpass LASTPASS_STATUS=0 LASTPASS_PASSWORD=
 lpass status --quiet || LASTPASS_STATUS=$?
 if [ "$LASTPASS_STATUS" -ne 0 ]; then
-    [ "${LPASSH_ADD_USERNAME-}" ] || panic 64 'Not logged into LastPass.'
+    [ "$LASTPASS_STATUS" -eq 127 ] && \
+        panic 69 'Cannot find LastPass command line client.'
+    [ "${LPASSH_ADD_USERNAME-}" ] || \
+        panic 64 'Not logged into LastPass.'
     if [ "${LPASS_AGENT_DISABLE-0}" -eq 1 ]; then
         PROMPT='LastPass master password:'
         if [ "${ASKPASS-}" ]; then

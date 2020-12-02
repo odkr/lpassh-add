@@ -101,8 +101,8 @@ ksh93 will write your LastPass master password to a temporary file
 if, and only if, you do *not* use the LastPass agent and *do* use an
 askpass utility. *Neither* is the default behaviour. See "SECURITY"
 in the [manual](MANUAL.rst#security) for details. Note, I have only
-tested ksh93. I do *not* know how older versions of **ksh** behave.
-And I do *not* imply that they are safe.
+tested ksh93. I do *not* know how older versions of **ksh** behave;
+I do *not* imply that they are safe.
 
 [Some versions](https://www.mirbsd.org/mksh.htm) of **mksh**
 do *not* provide `printf` as a built-in.
@@ -116,7 +116,7 @@ It may pass under Debian GNU/Linux.
 
 ### Set-up
 
-1. Download the repository from:
+1. Download the reposintory from:
    <https://github.com/odkr/lpassh-add/archive/v1.1.7.tar.gz>
 2. Unpack the repository.
 3. Copy **lpassh-add** to a directory in your `PATH`.

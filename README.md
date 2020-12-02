@@ -118,16 +118,16 @@ It may pass under Debian GNU/Linux.
 
 1. Download the reposintory from:
    <https://github.com/odkr/lpassh-add/archive/v1.1.7.tar.gz>
-2. Unpack the repository.
-3. Copy **lpassh-add** to a directory in your `PATH`.
-4. Copy its manual page (`lpassh-add.1`) ito a directory in your `MANPATH`.
+2. Unpack it.
+3. Copy **lpassh-add** into a directory in your `PATH`.
+4. Copy its manual page (`lpassh-add.1`) into a directory in your `MANPATH`.
 
 *Note:* **lpassh-add** *must* reside in a directory that's in your `PATH`,
 or else **ssh-add** may *not* be able to find it.
 
 If you have [curl](https://curl.haxx.se/) or
             [wget](https://www.gnu.org/software/wget/),
-you probably can download **lpassh-add** by:
+you can download **lpassh-add** by:
 
 ```sh
 ( set -Cfu
@@ -151,6 +151,7 @@ the archive that you've just downloaded has been tempered with:
 ```sh
 # Download my GnuPG key.
 gpg --recv-keys 0x6B06A2E03BE31BE9
+# Verify the archive.
 gpg --verify v1.1.7.tar.gz.asc v1.1.7.tar.gz
 ```
 
